@@ -2210,7 +2210,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 28/09 17:33', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 28/09 17:43', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -6469,6 +6469,268 @@ function reclampPanels(){
   resize();
 }
 
+</script>
+
+<style id="mobCss">
+/* ===== 📱 DIEN THOAI (html.mob do JS gan — xem MOB_JS) ===== */
+#mobBar,#mobShade,#mobCam{display:none}
+html.mob,html.mob body{height:100%;overflow:hidden;overscroll-behavior:none}
+html.mob #app{position:fixed;left:0;right:0;top:0;bottom:calc(58px + env(safe-area-inset-bottom));height:auto;display:flex}
+html.mob #center{flex:1 1 auto;width:100%;min-width:0}
+html.mob #lgrip,html.mob #rgrip,html.mob #mini3d,html.mob #objTip{display:none!important}
+html.mob #left,html.mob #right{position:fixed;top:0;bottom:calc(58px + env(safe-area-inset-bottom));z-index:60;
+  width:min(86vw,340px)!important;min-width:0!important;max-width:none!important;
+  transition:transform .22s ease;box-shadow:0 0 24px #000a;-webkit-overflow-scrolling:touch}
+html.mob #left{left:0;transform:translateX(-105%)}
+html.mob #right{right:0;left:auto;transform:translateX(105%)}
+html.mob.mobL #left,html.mob.mobR #right{transform:none}
+html.mob #mobShade{display:block;position:fixed;inset:0;background:#0008;z-index:55;opacity:0;pointer-events:none;transition:opacity .2s}
+html.mob.mobL #mobShade,html.mob.mobR #mobShade{opacity:1;pointer-events:auto}
+/* 2 thanh cong cu: VUOT NGANG thay vi nen/giau (tren may tinh van giu luat khong xuong dong + tu nen) */
+html.mob #topbar,html.mob #topbar2{overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+html.mob #topbar::-webkit-scrollbar,html.mob #topbar2::-webkit-scrollbar{display:none}
+html.mob #topbar>*,html.mob #topbar2>*{flex-shrink:0}
+html.mob #cv,html.mob #cv3d{touch-action:none}
+html.mob button,html.mob label,html.mob select,html.mob input{touch-action:manipulation}
+html.mob #camHud{transform:scale(.8);transform-origin:right bottom}
+html.mob #mobBar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:70;
+  height:calc(58px + env(safe-area-inset-bottom));padding:4px 4px env(safe-area-inset-bottom);gap:3px;
+  background:var(--panel);border-top:1px solid var(--line)}
+#mobBar button{flex:1 1 0;min-width:0;border:1px solid var(--line);background:var(--panel2);color:var(--txt);
+  border-radius:9px;font-size:19px;line-height:1;padding:3px 0 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#mobBar button small{font-size:9.5px;font-weight:700;color:var(--dim);white-space:nowrap}
+#mobBar button.on{background:var(--accent);border-color:var(--accent)}
+#mobBar button.on small{color:#0b0d17}
+#mobBar button:active{filter:brightness(1.3)}
+html.mob #mobCam{position:absolute;left:10px;bottom:12px;z-index:6;border:1px solid var(--line);background:#000b;color:var(--txt);
+  border-radius:10px;padding:8px 11px;font-size:14px;font-weight:700}
+html.mob.show3d #mobCam{display:block}
+#mobCam.on{background:var(--accent);color:#0b0d17;border-color:var(--accent)}
+/* ---- GAP / MO tung muc (user 28/09: "gap lai nhung phan khong hay dung") — CHI tren dien thoai ---- */
+#mobT2,.mobDrawBar{display:none}
+html.mob #mobT2{display:inline-flex;align-items:center;gap:3px;flex-shrink:0;border:1px solid var(--line);background:var(--panel2);
+  color:var(--txt);border-radius:8px;padding:6px 9px;font-size:13px;font-weight:700}
+html.mob.mobT2 #mobT2{background:var(--accent2);color:#04202b;border-color:var(--accent2)}
+html.mob:not(.mobT2) #topbar2{display:none}
+html.mob .mobHead{cursor:pointer;user-select:none;-webkit-user-select:none;position:relative;padding-right:26px!important}
+html.mob .mobHead::after{content:'▾';position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--accent2)}
+html.mob .mobCol>.mobHead::after{content:'▸'}
+html.mob .mobCol>:not(.mobHead){display:none!important}
+html.mob .mobCol{margin-bottom:6px}
+html.mob .mobDrawBar{display:flex;gap:6px;position:sticky;top:0;z-index:3;background:var(--panel);padding:6px 0 8px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+/* O CHON KHOI: tren dien thoai chi can ICON (user 28/09 "nhin icon la du biet khoi gi, bo ten cung duoc").
+   Chu an bang font-size:0; ten van con trong title + hint khi cham. Inline style cua artIconsApply
+   (backgroundSize/Position) phai de bang !important. */
+html.mob #left .swatches{grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:5px}
+html.mob #left .sw.has-ico{font-size:0!important;min-height:54px!important;padding:0!important;
+  background-size:auto 84%!important;background-position:center!important}
+.mobDrawBar button{flex:1;border:1px solid var(--line);background:var(--panel2);color:var(--txt);border-radius:8px;padding:7px 4px;font-size:12px;font-weight:700}
+</style>
+
+<div id="mobShade"></div>
+<div id="mobBar">
+  <button data-m="left" title="Bảng khối"><span>🧱</span><small>Khối</small></button>
+  <button data-m="tPaint"><span>🖌️</span><small>Vẽ</small></button>
+  <button data-m="tErase"><span>🧽</span><small>Xoá</small></button>
+  <button data-m="tMove"><span>✋</span><small>Chọn</small></button>
+  <button data-m="undo"><span>↶</span><small>Hoàn</small></button>
+  <button data-m="redo"><span>↷</span><small>Làm lại</small></button>
+  <button data-m="del"><span>🗑</span><small>Xoá chọn</small></button>
+  <button data-m="t3d"><span>🧊</span><small>3D</small></button>
+  <button data-m="right" title="Thông số bàn / bom / hòm…"><span>⚙️</span><small>Bảng</small></button>
+</div>
+
+<script>
+/* ===== 📱 LOP DIEN THOAI — xem obs_mobile_layer.py ===== */
+(function(){
+  const $m = id => document.getElementById(id);
+  const MQ = window.matchMedia('(max-width: 820px), (pointer: coarse) and (max-height: 820px)');
+  const html = document.documentElement;
+  function apDung(){
+    const on = MQ.matches;
+    if(on === html.classList.contains('mob')) return;
+    html.classList.toggle('mob', on);
+    if(!on) html.classList.remove('mobL', 'mobR');
+    // khung ve doi kich thuoc -> cac ham resize/fitBars cua editor tu do lai
+    setTimeout(()=>window.dispatchEvent(new Event('resize')), 30);
+  }
+  if(MQ.addEventListener) MQ.addEventListener('change', apDung); else MQ.addListener(apDung);
+  apDung();
+
+  // ---- ngan keo ----
+  const ngan = s => { html.classList.toggle('mobL', s === 'L' && !html.classList.contains('mobL'));
+                      html.classList.toggle('mobR', s === 'R' && !html.classList.contains('mobR')); };
+  const dong = () => html.classList.remove('mobL', 'mobR');
+  $m('mobShade').addEventListener('click', dong);
+  // chon xong 1 khoi trong bang mau -> dong ngan, ve luon
+  $m('left').addEventListener('click', e => {
+    if(!html.classList.contains('mob')) return;
+    if(e.target.closest && e.target.closest('.sw')) setTimeout(dong, 120);
+  });
+
+  // ---- phim tat -> nut (goi dung handler ban phim cua editor, khong viet lai logic) ----
+  const phim = (key, ctrl) => document.body.dispatchEvent(new KeyboardEvent('keydown',
+    {key, ctrlKey:!!ctrl, bubbles:true, cancelable:true}));
+  const bam = id => { const b = $m(id); if(b) b.click(); };
+  $m('mobBar').addEventListener('click', e => {
+    const b = e.target.closest('button'); if(!b) return;
+    const m = b.dataset.m;
+    if(m === 'left') return ngan('L');
+    if(m === 'right') return ngan('R');
+    dong();
+    if(m === 'undo') return phim('z', true);
+    if(m === 'redo') return phim('y', true);
+    if(m === 'del'){
+      if(typeof selObjs === 'undefined' || !selObjs.length){ if(typeof hint==='function') hint('Chưa chọn khối nào — bấm ✋ Chọn rồi chạm vào khối.'); return; }
+      return phim('Delete');
+    }
+    bam(m);                                            // tPaint / tErase / tMove / t3d
+    setTimeout(dongBo, 30);
+  });
+  // tô sáng nút công cụ + 3D theo trạng thái THẬT của editor
+  function dongBo(){
+    for(const id of ['tPaint', 'tErase', 'tMove', 't3d']){
+      const src = $m(id), dst = document.querySelector('#mobBar [data-m="' + id + '"]');
+      if(src && dst) dst.classList.toggle('on', src.classList.contains('on'));
+    }
+    html.classList.toggle('show3d', typeof show3d !== 'undefined' && !!show3d);
+  }
+  const mo = new MutationObserver(dongBo);
+  for(const id of ['tPaint', 'tErase', 'tMove', 't3d']){ const e = $m(id); if(e) mo.observe(e, {attributes:true, attributeFilter:['class']}); }
+  dongBo();
+
+  // ---- 🎥 1 ngon xoay camera (chi 3D) ----
+  let camMode = false;
+  const cb = document.createElement('button'); cb.id = 'mobCam'; cb.textContent = '🎥 Xoay cam';
+  const tw = $m('threewrap'); if(tw) tw.appendChild(cb);
+  cb.addEventListener('click', () => { camMode = !camMode; cb.classList.toggle('on', camMode);
+    if(typeof hint==='function') hint(camMode ? '🎥 1 ngón = XOAY camera · tắt 🎥 để vẽ/chọn lại' : '1 ngón = vẽ/xoá/chọn theo công cụ'); });
+
+  // ---- CAM UNG -> CHUOT ----
+  function mev(type, p, el){
+    const ev = new MouseEvent(type, {clientX:p.x, clientY:p.y, screenX:p.x, screenY:p.y, button:0,
+      buttons:type === 'mouseup' ? 0 : 1, bubbles:true, cancelable:true, view:window});
+    el.dispatchEvent(ev);
+  }
+  const P = t => ({x:t.clientX, y:t.clientY});
+  function gan(el, la3d){
+    if(!el) return;
+    let S = null;                   // {mode:'cho'|'tool'|'cam'|'hai', p, hen}
+    const batDauTool = () => { if(!S || S.mode !== 'cho') return; clearTimeout(S.hen);
+      S.mode = 'tool'; mev('mousemove', S.p, el); mev('mousedown', S.p, el); };
+    el.addEventListener('touchstart', e => {
+      if(!html.classList.contains('mob')) return;
+      e.preventDefault();
+      const ts = e.touches;
+      if(ts.length === 1 && !S){
+        if(la3d && camMode){ S = {mode:'cam', p:P(ts[0])}; return; }
+        S = {mode:'cho', p:P(ts[0])};
+        S.hen = setTimeout(batDauTool, 90);
+        return;
+      }
+      if(ts.length >= 2){
+        if(S && S.mode === 'cho') clearTimeout(S.hen);
+        if(S && S.mode === 'tool') mev('mouseup', S.p, el);      // dang ve thi dung net lai, chuyen sang zoom
+        const a = P(ts[0]), b = P(ts[1]);
+        S = {mode:'hai', m:{x:(a.x + b.x) / 2, y:(a.y + b.y) / 2}, d:Math.hypot(a.x - b.x, a.y - b.y) || 1};
+      }
+    }, {passive:false});
+    el.addEventListener('touchmove', e => {
+      if(!S) return; e.preventDefault();
+      const ts = e.touches;
+      if(S.mode === 'cho'){ const p = P(ts[0]);
+        if(Math.hypot(p.x - S.p.x, p.y - S.p.y) > 8) batDauTool(); else return; }
+      if(S.mode === 'tool'){ S.p = P(ts[0]); mev('mousemove', S.p, el); return; }
+      if(S.mode === 'cam'){ const p = P(ts[0]), dx = p.x - S.p.x, dy = p.y - S.p.y; S.p = p;
+        cam3.theta -= dx * 0.008; cam3.phi = Math.max(0.1, Math.min(1.5, cam3.phi - dy * 0.006)); applyCam3(); return; }
+      if(S.mode === 'hai' && ts.length >= 2){
+        const a = P(ts[0]), b = P(ts[1]), m = {x:(a.x + b.x) / 2, y:(a.y + b.y) / 2}, d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+        const dx = m.x - S.m.x, dy = m.y - S.m.y, f = d / S.d;
+        if(la3d){
+          const s = cam3.r * 0.0016, bs = camBasis3(cam3);
+          cam3.target.addScaledVector(bs.right, -dx * s); cam3.target.addScaledVector(bs.up, dy * s);
+          cam3.r = Math.max(5, Math.min(rMax3(), cam3.r / f)); applyCam3();
+        } else {
+          const r = cv.getBoundingClientRect(), mx = m.x - r.left, my = m.y - r.top, old = cell;
+          panX += dx; panY += dy;
+          cell = Math.max(4, Math.min(80, cell * f));
+          panX = mx - (mx - panX) * (cell / old); panY = my - (my - panY) * (cell / old);
+          draw();
+        }
+        S.m = m; S.d = d;
+      }
+    }, {passive:false});
+    const het = e => {
+      if(!S) return; e.preventDefault();
+      if(S.mode === 'cho'){ clearTimeout(S.hen); S.mode = 'tool'; mev('mousemove', S.p, el); mev('mousedown', S.p, el); }
+      if(S.mode === 'tool'){ mev('mouseup', S.p, el); }
+      if(e.touches.length === 0) S = null;
+      else if(S.mode === 'hai' && e.touches.length === 1) S = {mode:'xong'};   // nhac 1 ngon: cho nhac not, khong ve
+    };
+    el.addEventListener('touchend', het, {passive:false});
+    el.addEventListener('touchcancel', het, {passive:false});
+  }
+  gan($m('cv'), false);
+  gan($m('cv3d'), true);
+
+  // ---- GAP / MO tung muc (chi co tac dung o html.mob — CSS nam duoi html.mob) ----
+  const KEY = 'obs_mob_gap';
+  let nho = {}; try{ nho = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }catch(e){}
+  const luu = () => { try{ localStorage.setItem(KEY, JSON.stringify(nho)); }catch(e){} };
+  // mac dinh GAP (muc it dung); con lai mo san
+  const GAP_SAN = /Chum creative|Mứt \(id|Black Stone|Oil drum|Gỗ mới|Hình đặc trưng|Thư viện hình|Xếp bè theo vòng|Hòm \(Crate\)|Nhập bàn|Blocker|Thay thế hàng loạt|Tách khối/i;
+  const muc = [];
+  function khoaCua(sec, head){ return sec.id || (head.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40); }
+  function gan1(sec){
+    const head = sec.firstElementChild; if(!head) return;
+    const k = khoaCua(sec, head); if(!k) return;
+    head.classList.add('mobHead');
+    const gap = (k in nho) ? nho[k] : GAP_SAN.test(head.textContent || '');   // luat mac dinh so theo CHU tieu de, khong theo id
+    sec.classList.toggle('mobCol', gap);
+    head.addEventListener('click', e => {
+      if(!html.classList.contains('mob')) return;
+      if(e.target.closest('input,select,button:not(.mobHead),a') && e.target !== head) return;   // bam nut/o nhap trong tieu de: de nguyen
+      const g = !sec.classList.contains('mobCol'); sec.classList.toggle('mobCol', g); nho[k] = g; luu();
+    });
+    muc.push({sec, k});
+  }
+  document.querySelectorAll('#left > .grp').forEach(gan1);
+  // ten khoi: dat vao title (giu duoc khi an chu) + bao ten khi cham chon tren dien thoai
+  $m('left').addEventListener('click', e => {
+    const sw = e.target.closest && e.target.closest('.sw');
+    if(!sw || !html.classList.contains('mob')) return;
+    const t = +sw.dataset.t, ty = (typeof TYPES !== 'undefined') ? TYPES[t] : null;
+    if(ty && typeof hint === 'function') setTimeout(() => hint('Đã chọn: ' + ty.name + ' (id ' + t + ')'), 0);
+  }, true);
+  const datTitle = () => document.querySelectorAll('#left .sw').forEach(sw => {
+    const t = +sw.dataset.t; if(!sw.title && typeof TYPES !== 'undefined' && TYPES[t]) sw.title = TYPES[t].name; });
+  datTitle(); setTimeout(datTitle, 1500);
+  document.querySelectorAll('#right > .field').forEach(gan1);
+  // thanh "Gap het · Mo het · Dong" dau moi ngan
+  for(const pn of ['left', 'right']){
+    const box = $m(pn); if(!box) continue;
+    const bar = document.createElement('div'); bar.className = 'mobDrawBar';
+    bar.innerHTML = '<button data-g="1">▸ Gập hết</button><button data-g="0">▾ Mở hết</button><button data-g="x">✕ Đóng</button>';
+    bar.addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return;
+      if(b.dataset.g === 'x') return dong();
+      const g = b.dataset.g === '1';
+      for(const m of muc) if(box.contains(m.sec)){ m.sec.classList.toggle('mobCol', g); nho[m.k] = g; }
+      luu(); });
+    box.insertBefore(bar, box.firstChild);
+  }
+  // thanh 2 (Level · Move · Do kho · Stage · Tai ve · Nap file) gap sau nut 📄
+  const tb = $m('topbar');
+  if(tb){
+    const t2 = document.createElement('button'); t2.id = 'mobT2'; t2.innerHTML = '📄 Level <span>▾</span>';
+    tb.insertBefore(t2, tb.firstChild);
+    let mo2 = false; try{ mo2 = localStorage.getItem('obs_mob_t2') === '1'; }catch(e){}
+    const dat = v => { mo2 = v; html.classList.toggle('mobT2', v); t2.querySelector('span').textContent = v ? '▴' : '▾';
+      try{ localStorage.setItem('obs_mob_t2', v ? '1' : '0'); }catch(e){}
+      setTimeout(()=>window.dispatchEvent(new Event('resize')), 30); };
+    dat(mo2);
+    t2.addEventListener('click', () => dat(!mo2));
+  }
+})();
 </script>
 </body>
 </html>
