@@ -2210,7 +2210,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 28/09 17:49', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 28/09 17:53', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -6551,6 +6551,7 @@ html.mob #left .sw.has-ico{font-size:0!important;min-height:54px!important;paddi
     if(on === html.classList.contains('mob')) return;
     html.classList.toggle('mob', on);
     if(!on) html.classList.remove('mobL', 'mobR');
+    if(on) setTimeout(datTitle, 0);
     // khung ve doi kich thuoc -> cac ham resize/fitBars cua editor tu do lai
     setTimeout(()=>window.dispatchEvent(new Event('resize')), 30);
   }
@@ -6706,8 +6707,11 @@ html.mob #left .sw.has-ico{font-size:0!important;min-height:54px!important;paddi
     const t = +sw.dataset.t, ty = (typeof TYPES !== 'undefined') ? TYPES[t] : null;
     if(ty && typeof hint === 'function') setTimeout(() => hint('Đã chọn: ' + ty.name + ' (id ' + t + ')'), 0);
   }, true);
-  const datTitle = () => document.querySelectorAll('#left .sw').forEach(sw => {
-    const t = +sw.dataset.t; if(!sw.title && typeof TYPES !== 'undefined' && TYPES[t]) sw.title = TYPES[t].name; });
+  // title CHI gan o dien thoai: tren PC no them tooltip trinh duyet khi re chuot = doi hanh vi PC (user: PC giu nguyen)
+  // function (khong const): apDung() o dau IIFE goi toi no truoc dong nay -> const se loi TDZ
+  function datTitle(){ if(!html.classList.contains('mob')) return;
+    document.querySelectorAll('#left .sw').forEach(sw => {
+      const t = +sw.dataset.t; if(!sw.title && typeof TYPES !== 'undefined' && TYPES[t]) sw.title = TYPES[t].name; }); }
   datTitle(); setTimeout(datTitle, 1500);
   document.querySelectorAll('#right > .field').forEach(gan1);
   // thanh "Gap het · Mo het · Dong" dau moi ngan
@@ -6730,7 +6734,8 @@ html.mob #left .sw.has-ico{font-size:0!important;min-height:54px!important;paddi
     let mo2 = false; try{ mo2 = localStorage.getItem('obs_mob_t2') === '1'; }catch(e){}
     const dat = v => { mo2 = v; html.classList.toggle('mobT2', v); t2.querySelector('span').textContent = v ? '▴' : '▾';
       try{ localStorage.setItem('obs_mob_t2', v ? '1' : '0'); }catch(e){}
-      setTimeout(()=>window.dispatchEvent(new Event('resize')), 30); };
+      // CHI o dien thoai: phat 'resize' tren PC lam editor do lai khung ve => PC doi 20 px (kiem 28/09)
+      if(html.classList.contains('mob')) setTimeout(()=>window.dispatchEvent(new Event('resize')), 30); };
     dat(mo2);
     t2.addEventListener('click', () => dat(!mo2));
   }
