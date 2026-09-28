@@ -2210,7 +2210,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 28/09 17:43', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 28/09 17:49', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -6484,7 +6484,7 @@ html.mob #left,html.mob #right{position:fixed;top:0;bottom:calc(58px + env(safe-
 html.mob #left{left:0;transform:translateX(-105%)}
 html.mob #right{right:0;left:auto;transform:translateX(105%)}
 html.mob.mobL #left,html.mob.mobR #right{transform:none}
-html.mob #mobShade{display:block;position:fixed;inset:0;background:#0008;z-index:55;opacity:0;pointer-events:none;transition:opacity .2s}
+html.mob #mobShade{display:block;position:fixed;inset:0;background:#0005;z-index:55;opacity:0;pointer-events:none;transition:opacity .2s}
 html.mob.mobL #mobShade,html.mob.mobR #mobShade{opacity:1;pointer-events:auto}
 /* 2 thanh cong cu: VUOT NGANG thay vi nen/giau (tren may tinh van giu luat khong xuong dong + tu nen) */
 html.mob #topbar,html.mob #topbar2{overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -6561,6 +6561,10 @@ html.mob #left .sw.has-ico{font-size:0!important;min-height:54px!important;paddi
   const ngan = s => { html.classList.toggle('mobL', s === 'L' && !html.classList.contains('mobL'));
                       html.classList.toggle('mobR', s === 'R' && !html.classList.contains('mobR')); };
   const dong = () => html.classList.remove('mobL', 'mobR');
+  // 28/09: #app la position:fixed => tao LOP CHONG rieng; ngan keo (z 60) nam TRONG lop do. De lop toi o
+  // ngoai (body) thi no phu len CA #app, ke ca ngan keo: ngan bi toi va ngon tay cham vao lop toi => KHONG CUON
+  // DUOC. Dua lop toi vao trong #app, duoi ngan keo.
+  { const app = $m('app'), sh = $m('mobShade'); if(app && sh) app.appendChild(sh); }
   $m('mobShade').addEventListener('click', dong);
   // chon xong 1 khoi trong bang mau -> dong ngan, ve luon
   $m('left').addEventListener('click', e => {
