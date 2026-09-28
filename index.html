@@ -2210,7 +2210,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 28/09 17:53', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 28/09 17:57', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -6264,6 +6264,11 @@ $('miniHide').onclick=()=>{ if(mini.on)toggleMini(); };
 /* ---------- boot ---------- */
 function resize(){const wrap=$('cwrap');cv.width=wrap.clientWidth;cv.height=wrap.clientHeight;draw(); if(show3d)resize3D();}
 window.addEventListener('resize',resize);
+/* 28/09 (user: "sua loi thieu 20px cua PC"): resize() truoc chi chay luc tai trang + khi CUA SO doi co. Luc do thanh
+   cong cu chua nen xong (fitBars chay sau) nen khung ve do hut ~20 px day, roi khong ai do lai. Theo doi THANG
+   vung chua #cwrap: no doi co vi bat ky ly do gi (nen thanh, an/hien thanh 2, keo bang ben) la do lai ngay. */
+if(typeof ResizeObserver==='function'){ new ResizeObserver(()=>{ const w=$('cwrap');
+  if(w&&(cv.width!==w.clientWidth||cv.height!==w.clientHeight)) resize(); }).observe($('cwrap')); }
 applyGame(loadGamePref(),true);fillRepSelects();buildShapeLib();buildTowerUI();
 if(!brush)selectBrush(1);
 $('gmSel').onchange=e=>applyGame(e.target.value);updateDepthLab();updateAxHint();resetTableState();
@@ -6517,6 +6522,9 @@ html.mob .mobHead::after{content:'▾';position:absolute;right:6px;top:50%;trans
 html.mob .mobCol>.mobHead::after{content:'▸'}
 html.mob .mobCol>:not(.mobHead){display:none!important}
 html.mob .mobCol{margin-bottom:6px}
+/* THANH CONG CU TREN (user 28/09): an nut TRUNG voi thanh day / khong dung duoc tren cam ung */
+html.mob .mobAn{display:none!important}
+html.mob #topbar .sep,html.mob #topbar2 .sep{margin:0 1px}
 html.mob .mobDrawBar{display:flex;gap:6px;position:sticky;top:0;z-index:3;background:var(--panel);padding:6px 0 8px;margin-bottom:4px;border-bottom:1px solid var(--line)}
 /* O CHON KHOI: tren dien thoai chi can ICON (user 28/09 "nhin icon la du biet khoi gi, bo ten cung duoc").
    Chu an bang font-size:0; ten van con trong title + hint khi cham. Inline style cua artIconsApply
@@ -6552,11 +6560,42 @@ html.mob #left .sw.has-ico{font-size:0!important;min-height:54px!important;paddi
     html.classList.toggle('mob', on);
     if(!on) html.classList.remove('mobL', 'mobR');
     if(on) setTimeout(datTitle, 0);
+    if(on) canLevel();
     // khung ve doi kich thuoc -> cac ham resize/fitBars cua editor tu do lai
     setTimeout(()=>window.dispatchEvent(new Event('resize')), 30);
   }
   if(MQ.addEventListener) MQ.addEventListener('change', apDung); else MQ.addListener(apDung);
   apDung();
+
+  // ---- ZOOM SAT LEVEL tren dien thoai (user 28/09: "view dau tien phai zoom gan vao level luon") ----
+  // fitView() goc chua toi thieu 6 o + tran 58 px/o + ghim day: tren man 390 px level nho trong be xiu.
+  // Boc lai: CHI o html.mob thi can sat hon (le mong, tran 80 px/o = tran zoom cua editor) va dat GIUA man.
+  // PC goi fitView y nhu cu (khong di vao nhanh nay).
+  if(typeof fitView === 'function'){
+    const fv0 = fitView;
+    fitView = function(){
+      fv0.apply(this, arguments);
+      if(!html.classList.contains('mob') || !objects.length) return;
+      const w = cv.width, h = cv.height, V = VIEWS[view];
+      let a = 1e9, b = -1e9, c = 1e9, d = -1e9;
+      for(const o of objects){
+        a = Math.min(a, fC(o, V.h) - axSize(o, V.h) / 2); b = Math.max(b, fC(o, V.h) + axSize(o, V.h) / 2);
+        c = Math.min(c, fC(o, V.v) - axSize(o, V.v) / 2); d = Math.max(d, fC(o, V.v) + axSize(o, V.v) / 2);
+      }
+      const vLo = Math.min(0, c), cols = Math.max(3, b - a + 1.2), rows = Math.max(3, d - vLo + 1.2);
+      cell = Math.max(5, Math.min(80, Math.min((w - 24) / cols, (h - 90) / rows)));
+      panX = w / 2 - ((a + b) / 2) * cell;
+      // giua man theo chieu doc, nhung chan thap nhat (nen ban) cach day >= 56 px de con cho nhan "nen ban"
+      panY = Math.min(h / 2 + ((vLo + d) / 2) * cell, h - 56 + vLo * cell);
+      draw();
+    };
+    const bf = $m('btnFit'); if(bf) bf.onclick = () => fitView();
+  }
+  function canLevel(){ setTimeout(() => {
+    if(!html.classList.contains('mob')) return;
+    try{ if(typeof resize === 'function') resize(); fitView();
+         if(typeof show3d !== 'undefined' && show3d && typeof fitAll3 === 'function') fitAll3(); }catch(e){}
+  }, 80); }
 
   // ---- ngan keo ----
   const ngan = s => { html.classList.toggle('mobL', s === 'L' && !html.classList.contains('mobL'));
@@ -6726,6 +6765,15 @@ html.mob #left .sw.has-ico{font-size:0!important;min-height:54px!important;paddi
       luu(); });
     box.insertBefore(bar, box.firstChild);
   }
+  // ---- THANH TREN tren dien thoai: an nut trung / vo dung (chi class; CSS nam duoi html.mob nen PC khong doi) ----
+  //  🖌️ 🧽 ✋ 🧊: da co o thanh day · 🪟 Preview: khung mini da tat o dien thoai · 🏷 ten khoi: tooltip re chuot
+  //  ❔ Chi dan: chu dai · chu "Mat:" "Buoc:" · 📁 nap THU MUC (trinh duyet dien thoai khong chon duoc thu muc) · 📋 copy JSON
+  for(const id of ['tPaint', 'tErase', 'tMove', 't3d', 'tMini', 'tHelp', 'btnCopy']){ const e = $m(id); if(e) e.classList.add('mobAn'); }
+  document.querySelectorAll('#topbar .t1lab').forEach(e => e.classList.add('mobAn'));
+  { const tip = $m('tipOn'); if(tip && tip.closest('label')) tip.closest('label').classList.add('mobAn'); }
+  document.querySelectorAll('#topbar2 input[type=file]').forEach(inp => {
+    if(inp.hasAttribute('webkitdirectory') || inp.hasAttribute('directory')){ const l = inp.closest('label'); if(l) l.classList.add('mobAn'); } });
+
   // thanh 2 (Level · Move · Do kho · Stage · Tai ve · Nap file) gap sau nut 📄
   const tb = $m('topbar');
   if(tb){
