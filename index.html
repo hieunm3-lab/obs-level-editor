@@ -743,7 +743,7 @@ let three_artLights = null, three_baseLights = null, ART_MAXANISO = 4;
 /* Bat tam thoi khi SINH ICON: cho phep lay texture/mesh that ngay ca luc nguoi dung
    da tat art cho khung 3D. Icon thi luc nao cung dung anh that cho de nhin. */
 let ART_FORCE = false;
-const ART_BUILD = '215776c16b11';        // doi moi lan nung lai art -> cache cu tu het han
+const ART_BUILD = 'c0f04732726f';        // doi moi lan nung lai art -> cache cu tu het han
 const artDung = () => ART_ON || ART_FORCE;
 /* Che do art: den sang & phang, day suong mu ra xa (suong mu lam khoi o xa xam xit).
    Tat art: tra lai y nguyen den cu. */
@@ -848,7 +848,10 @@ function emisOpt(type, ax){
 const POOL3 = {g:[], m:[], gi:0, mi:0};
 function poolReset(){ POOL3.gi = 0; POOL3.mi = 0; }
 function _poolSach(o){
-  for(const c of o.children) c.parent = null;        // scene cu da bo di: chi can cat lien ket
+  // 28/09 LOI "MAT KHOI": chi cat con NAO VAN LA CON cua o. Trong cung luot dung, mesh cu cua o co the
+  // DA duoc poolM giao cho khoi khac (wormhole/thanh go lam lech chi so Group<->Mesh); cat parent cua
+  // no la three.js ve khoi do o goc toa do => mat khoi toi khi dung lai lan nua ("refresh 3D").
+  for(const c of o.children) if(c.parent === o) c.parent = null;
   o.children.length = 0; o.parent = null;
   o.position.set(0, 0, 0); o.quaternion.set(0, 0, 0, 1); o.scale.set(1, 1, 1);
   o.userData = {}; o.visible = true; o.renderOrder = 0;
@@ -2207,7 +2210,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 28/09 17:29', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 28/09 17:33', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
