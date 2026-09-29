@@ -746,7 +746,7 @@ let three_artLights = null, three_baseLights = null, ART_MAXANISO = 4;
 /* Bat tam thoi khi SINH ICON: cho phep lay texture/mesh that ngay ca luc nguoi dung
    da tat art cho khung 3D. Icon thi luc nao cung dung anh that cho de nhin. */
 let ART_FORCE = false;
-const ART_BUILD = 'd6fd81581edf';        // doi moi lan nung lai art -> cache cu tu het han
+const ART_BUILD = '8394bc260cd6';        // doi moi lan nung lai art -> cache cu tu het han
 const artDung = () => ART_ON || ART_FORCE;
 /* Che do art: den sang & phang, day suong mu ra xa (suong mu lam khoi o xa xam xit).
    Tat art: tra lai y nguyen den cu. */
@@ -1094,9 +1094,14 @@ else artMeshInit();
    anh nen cho o chon. Sinh LUC CHAY (khong nhung vao file) nen khong ton dung luong file. */
 const ART_ICON = new Map();
 const ICO_KEY = 'obs_ico_' + (typeof ART_BUILD!=='undefined' ? ART_BUILD : '0');
+/* ⛰️ cache icon TACH THEO GAME (29/09): VS cung id nhung khac art -> khoa rieng, gan build cua vs_art.js */
+function icoKey(){
+  const g = (typeof ART_G!=='undefined' && ART_G) ? ART_G.cur : 'obs';
+  return g === 'vs' ? ICO_KEY + '_vs_' + ((window.ART_VS && window.ART_VS.build) || '0') : ICO_KEY;
+}
 function artIconLoad(){                       // doc cache -> dat NGAY, khong cho gi ca
   try{
-    const raw = localStorage.getItem(ICO_KEY);
+    const raw = localStorage.getItem(icoKey());
     if(!raw) return false;
     const o = JSON.parse(raw);
     let n = 0;
@@ -1109,11 +1114,14 @@ function artIconSave(){
     const o = {};
     ART_ICON.forEach((v, k)=>{ o[k] = v; });
     // don cache cua cac ban dung cu cho khoi day bo nho
+    // giu cache cua ban dung NAY cho ca 2 game (doi qua lai khong phai ve lai); VS thi chi giu build vs_art hien tai
+    const kk = icoKey(), vsCu = kk.indexOf('_vs_') > 0 ? kk : null;
     for(let i = localStorage.length - 1; i >= 0; i--){
       const k = localStorage.key(i);
-      if(k && k.indexOf('obs_ico_') === 0 && k !== ICO_KEY) localStorage.removeItem(k);
+      if(!k || k.indexOf('obs_ico_') !== 0 || k === kk) continue;
+      if(k.indexOf(ICO_KEY) !== 0 || (vsCu && k.indexOf(ICO_KEY + '_vs_') === 0)) localStorage.removeItem(k);
     }
-    localStorage.setItem(ICO_KEY, JSON.stringify(o));
+    localStorage.setItem(kk, JSON.stringify(o));
   }catch(e){ /* het cho hoac bi chan -> ke, lan sau render lai */ }
 }
 let _iconRen = null, _iconCv = null;
@@ -1143,6 +1151,7 @@ function artIconsWait(list, xong){
 }
 function artIconsMake(){
   if(!window.THREE || !MESH_READY) return;
+  const gIco = (typeof ART_G!=='undefined' && ART_G) ? ART_G.cur : 'obs';   // ⛰️ doi game giua chung -> bo lo nay
   ART_FORCE = true;                       // lay art that du nguoi dung da tat 🎨
   if(!_iconRen){
     const c = document.createElement('canvas'); c.width = c.height = 192;   // hien ~40px nen 192 la du net
@@ -1180,6 +1189,8 @@ function artIconsMake(){
   const cho = viec.map(v=>v.tx).concat(viec.map(v=>v.em.emissiveMap), [WORM.tex]).filter(Boolean);
   // BUOC 2: doi anh giai ma xong roi moi ve — khong thi icon ra RONG
   artIconsWait(cho, ()=>{
+    if(((typeof ART_G!=='undefined' && ART_G) ? ART_G.cur : 'obs') !== gIco){
+      gcyl.dispose(); gbox.dispose(); gcone.dispose(); ART_FORCE = false; return; }
     for(const v of viec){
       if(v.tx) v.tx.needsUpdate = true;
       if(v.em.emissiveMap) v.em.emissiveMap.needsUpdate = true;
@@ -1946,6 +1957,75 @@ function blkGroup(width, em, mo){
     return G;
   }catch(e){ console.warn('blocker 3D:', e && e.message); return null; }
 }
+
+/* ============ ⛰️ ART THEO GAME (29/09) ============
+   Valley Smash (block-shot-2) co texture/mesh/goc xoay RIENG cho 14 id (lon ca, da, go ve lai; hu 4-5 o
+   mesh moi). Bo art do nam trong `vs_art.js` CANH file nay (obs_vs_art_pack.py sinh) — chi tai khi chuyen
+   sang ⛰️, nguoi lam OBS khong ton mot byte. Khoa pool cua VS da doi thanh 'vs:…' nen GOP vao kho chung
+   khong de mat art OBS; chi TRAO bang id->khoa (+ goc xoay prefab), roi xoa cache sprite/3D/icon.
+   `var` chu khong `const`: artIconLoad() co the chay truoc khi khoi nay chay (TDZ). */
+var ART_G = {cur:'obs', obs:null, dang:null};
+function artGameChup(){
+  if(ART_G.obs) return;
+  ART_G.obs = {
+    tid: (typeof ART_TEX!=='undefined') ? ART_TEX.id : null,
+    col: (typeof ART_TEX!=='undefined') ? ART_TEX.col : null,
+    mid: (typeof ART_MESH!=='undefined') ? ART_MESH.id : null,
+    rot: (typeof ART_ROT!=='undefined') ? Object.assign({}, ART_ROT) : null};
+}
+function artGameNap(xong){
+  if(window.ART_VS){ xong(true); return; }
+  if(ART_G.dang){ ART_G.dang.push(xong); return; }
+  ART_G.dang = [xong];
+  const het = ok => { const l = ART_G.dang; ART_G.dang = null; l.forEach(f => { try{ f(ok); }catch(e){ console.warn('art VS:', e); } }); };
+  const s = document.createElement('script');
+  s.src = 'vs_art.js'; s.async = true;
+  s.onload = () => het(!!window.ART_VS); s.onerror = () => het(false);
+  (document.head || document.documentElement).appendChild(s);
+}
+function artGameTrao(g){
+  artGameChup(); const O = ART_G.obs, V = window.ART_VS;
+  const vs = (g === 'vs' && V);
+  if(typeof ART_TEX!=='undefined'){
+    if(vs){ Object.assign(ART_TEX.pool, V.tex.pool);
+            ART_TEX.id = Object.assign({}, O.tid, V.tex.id); ART_TEX.col = Object.assign({}, O.col, V.tex.col); }
+    else { ART_TEX.id = O.tid; ART_TEX.col = O.col; } }
+  if(typeof ART_MESH!=='undefined'){
+    if(vs){ Object.assign(ART_MESH.pool, V.mesh.pool); ART_MESH.id = Object.assign({}, O.mid, V.mesh.id); }
+    else ART_MESH.id = O.mid; }
+  if(typeof ART_ROT!=='undefined' && O.rot){
+    for(const k of Object.keys(ART_ROT)) delete ART_ROT[k];
+    Object.assign(ART_ROT, O.rot);
+    // id cua VS: xoa goc xoay OBS truoc — VS KHONG ghi bien the nao nghia la bien the do KHONG xoay
+    if(vs){ for(const k of Object.keys(V.tex.id)) delete ART_ROT[k]; Object.assign(ART_ROT, V.rot); } }
+  ART_G.cur = vs ? 'vs' : 'obs';
+  // cache ve theo KHOA LOAI (sprite 2D, material 3D, icon) -> phai don het
+  SP2.clear(); ART_ICON.clear();
+  if(typeof three!=='undefined' && three && three.objMat) three.objMat.clear();
+  const coCache = artIconLoad();
+  artIconsApply();
+  artAmAnh();
+  _napThreeIm(()=>{
+    artMeshInit().then(()=>{
+      if(!coCache){ ART_ICON.clear(); artIconsMake(); }
+      if(typeof three!=='undefined' && three && typeof build3D==='function') build3D();
+      artVeLai();
+    }).catch(e=>console.warn('art game:', e && e.message));
+  });
+  artVeLai();
+}
+/* Goi tu applyGame (ca luc khoi dong). OBS -> tra bang goc ngay; VS -> tai vs_art.js roi moi trao. */
+function artGame(g){
+  g = (g === 'vs') ? 'vs' : 'obs';
+  if(g === ART_G.cur) return;
+  if(g === 'obs'){ artGameTrao('obs'); return; }
+  artGameNap(ok=>{
+    if(!ok){
+      const m = 'Không tải được vs_art.js (art Valley Smash) — khối đang vẽ bằng art Ocean Block Shoot. File vs_art.js phải nằm CẠNH file editor.';
+      console.warn(m); if(typeof warn==='function') warn(m); return; }
+    if(typeof GAME==='undefined' || GAME === 'vs') artGameTrao('vs');
+  });
+}
 </script>
 <script>
 "use strict";
@@ -2224,7 +2304,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 29/09 16:50', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 29/09 17:09', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -2234,33 +2314,57 @@ const GAMES={
      *_BaseColor.png — giải nén PNG rồi lấy trung vị nhóm pixel bão hoà nhất). */
   vs :{ title:'⛰️ Valley Smash', sub:'Level Editor 2D · block-shot-2 · ver_1',
     crate:false, plank:false,
-    ids:[1,2,3,11,12,13,14,15,21,22,41,42,61,62],
+    ids:[1,2,3,11,12,13,14,15,21,22,41,42,61,62,
+         220,221,222,223,224,225,226,227,229,230,231,232,233,235,236,237,238],   // + 18 hũ màu mới (asset 26/09, ver_3 dùng thật)
+    /* mass + màu: ObjectDataTest.asset + *_BaseColor.png của block-shot-2 bản pull 29/09 (commit 322b17744).
+       ⚠ mass trong asset chỉ là MẶC ĐỊNH — remote config VS_BaseMassForAllSize ghi đè theo dải level. */
     over:{
-      1 :{name:'Lon cá trụ',   shape:'cyl', col:'#486089',mass:1,  lab:'⬤'},
-      2 :{name:'Lon cá nón',   shape:'cone',col:'#454689',mass:1,  lab:'▲'},
-      3 :{name:'Lon cá vuông', shape:'box', col:'#485680',mass:1,  lab:'■'},
-      11:{name:'Jar blue',     shape:'jar', col:'#1d70d0',mass:3,  lab:'🫐'},
-      12:{name:'Jar red',      shape:'jar', col:'#c31a1a',mass:3,  lab:'🍓'},
-      13:{name:'Jar orange',   shape:'jar', col:'#f38201',mass:3,  lab:'🍊'},
-      14:{name:'Jar purple',   shape:'jar', col:'#7c22d0',mass:3,  lab:'🍇'},
-      15:{name:'Jar pink',     shape:'jar', col:'#d0227a',mass:3,  lab:'🌸'},
-      21:{name:'Đá vuông',     shape:'box', col:'#afa8bf',mass:4.5,lab:'■'},
-      22:{name:'Đá trụ',       shape:'cyl', col:'#b1aac1',mass:4.5,lab:'⬤'},
-      41:{name:'Gỗ vuông mới', shape:'box', col:'#d07017',mass:4,  lab:'■'},
-      42:{name:'Gỗ trụ mới',   shape:'cyl', col:'#c9660b',mass:4,  lab:'⬤'},
-      61:{name:'Băng vuông',   shape:'box', col:'#2c98db',mass:3,  lab:'■'},
-      62:{name:'Băng trụ',     shape:'cyl', col:'#2794d9',mass:3,  lab:'⬤'},
+      1 :{name:'Lon cá trụ',   shape:'cyl', col:'#6d73a9',mass:1.16,  lab:'⬤'},
+      2 :{name:'Lon cá nón',   shape:'cone',col:'#404277',mass:1.16,  lab:'▲'},
+      3 :{name:'Lon cá vuông', shape:'box', col:'#5d6290',mass:1.16,  lab:'■'},
+      11:{name:'Jar blue',     shape:'jar', col:'#1e72d1',mass:1.21,  lab:'🫐'},
+      12:{name:'Jar red',      shape:'jar', col:'#ee4444',mass:1.21,  lab:'🍓'},
+      13:{name:'Jar orange',   shape:'jar', col:'#f38201',mass:1.21,  lab:'🍊'},
+      14:{name:'Jar purple',   shape:'jar', col:'#8733d8',mass:1.21,  lab:'🍇'},
+      15:{name:'Jar pink',     shape:'jar', col:'#eb4a9e',mass:1.21,  lab:'🌸'},
+      21:{name:'Đá vuông',     shape:'box', col:'#718ae6',mass:5.14,lab:'■'},
+      22:{name:'Đá trụ',       shape:'cyl', col:'#738ce8',mass:5.14,lab:'⬤'},
+      41:{name:'Gỗ vuông mới', shape:'box', col:'#d57619',mass:3.33,  lab:'■'},
+      42:{name:'Gỗ trụ mới',   shape:'cyl', col:'#ce690c',mass:3.63,  lab:'⬤'},
+      61:{name:'Băng vuông',   shape:'box', col:'#5cc0e7',mass:3.3,  lab:'■'},
+      62:{name:'Băng trụ',     shape:'cyl', col:'#2899dc',mass:3.3,  lab:'⬤'},
+      /* 18 HŨ MÀU MỚI (asset 26/09): cùng prefab Jar_Cylinder, khác verticalMaterial. 228/234 KHÔNG có —
+         Orange3/Pink3 chính là id 13/15. 🚨 Bên Ocean Block Shoot 220/221 là GỖ MỚI — chép level qua lại sẽ đổi khối. */
+      220:{name:'Jar green 1', shape:'jar', col:'#59c619',mass:1.21,  lab:'🍏'},   // xanh lá 1
+      221:{name:'Jar green 2', shape:'jar', col:'#59c619',mass:1.21,  lab:'🍏'},   // xanh lá 2
+      222:{name:'Jar green 3', shape:'jar', col:'#59c619',mass:1.21,  lab:'🍏'},   // xanh lá 3
+      223:{name:'Jar green 4', shape:'jar', col:'#59c619',mass:1.21,  lab:'🍏'},   // xanh lá 4
+      224:{name:'Jar green 5', shape:'jar', col:'#50b316',mass:1.21,  lab:'🍏'},   // xanh lá 5
+      225:{name:'Jar green 6', shape:'jar', col:'#6fde2e',mass:1.21,  lab:'🍏'},   // xanh lá 6
+      226:{name:'Jar orange 1', shape:'jar', col:'#f38201',mass:1.21,  lab:'🍊'},   // cam 1
+      227:{name:'Jar orange 2', shape:'jar', col:'#f38201',mass:1.21,  lab:'🍊'},   // cam 2
+      229:{name:'Jar orange 4', shape:'jar', col:'#f38201',mass:1.21,  lab:'🍊'},   // cam 4
+      230:{name:'Jar orange 5', shape:'jar', col:'#f38201',mass:1.21,  lab:'🍊'},   // cam 5
+      231:{name:'Jar orange 6', shape:'jar', col:'#f38201',mass:1.21,  lab:'🍊'},   // cam 6
+      232:{name:'Jar pink 1', shape:'jar', col:'#fde5f1',mass:1.21,  lab:'🌸'},   // hồng 1
+      233:{name:'Jar pink 2', shape:'jar', col:'#f699c8',mass:1.21,  lab:'🌸'},   // hồng 2
+      235:{name:'Jar pink 4', shape:'jar', col:'#c81e77',mass:1.21,  lab:'🌸'},   // hồng 4
+      236:{name:'Jar pink 5', shape:'jar', col:'#d02980',mass:1.21,  lab:'🌸'},   // hồng 5
+      237:{name:'Jar pink 6', shape:'jar', col:'#d53287',mass:1.21,  lab:'🌸'},   // hồng 6
+      238:{name:'Jar yellow', shape:'jar', col:'#fbc92a',mass:1.21,  lab:'🍋'},   // vàng
     },
     /* nhóm nào rỗng thì buildPalette ẩn luôn cả khối .grp */
     pal:{'pal-can':[1,2,3],'pal-box':[41,42],'pal-stone':[21,22],'pal-ice':[61,62],
-         'pal-jar':[11,12,13,14,15],'pal-chum':[],'pal-mut':[],'pal-sp':[],
+         'pal-jar':[11,12,13,14,15,220,221,222,223,224,225,226,227,229,230,231,232,233,235,236,237,238],'pal-chum':[],'pal-mut':[],'pal-sp':[],
          'pal-new':[],'pal-bstone':[],'pal-drum':[],'pal-wood2':[],'pal-nuke':[],'pal-shark':[],'pal-plank':[]},
-    gt:{'pal-can':['Lon cá (texture mới) 1','id 1 trụ · 2 nón · 3 vuông — prefab HopCa_Cylinder / Xo_Cone / HopCa_Box, mesh mới BS_FishCan-* trong 001.MATTerial/OBS2/3_Metal. Nón (id 2) CHỈ dùng được cỡ 1×1×1.'],
-        'pal-box':['Gỗ mới (Wood) 4','id 41/42 = GoNew_Box / GoNew_Cylinder, mass 4. 🚨 Bên Ocean Block Shoot 41/42 là Go_Box/Go_Cylinder mass 3 — chép level qua lại thì tháp đứng/đổ khác đi dù file y hệt.'],
-        'pal-jar':['Jar (Hũ) 3 — id 11–15','11 blue · 12 red · 13 orange · 14 purple · 15 pink. Cùng prefab Jar_Cylinder, khác verticalMaterial. Dài tối đa 5 (bên Ocean Block Shoot hũ chỉ tới 3). KHÔNG có id 16.']},
+    gt:{'pal-stone':['Đá (Stone) 5.14','id 21/22 = Da_Box / Da_Cylinder — texture Rock_* riêng của Valley Smash. mass asset 5.14 (remote config có thể ghi đè).'],
+        'pal-ice':['Băng (Ice) 3.3','id 61/62 = Bang_Box / Bang_Cylinder. mass asset 3.3 (remote config có thể ghi đè).'],
+        'pal-can':['Lon cá (texture mới) 1.16','id 1 trụ · 2 nón · 3 vuông — prefab HopCa_Cylinder / Xo_Cone / HopCa_Box, mesh mới BS_FishCan-* trong 001.MATTerial/OBS2/3_Metal. Nón (id 2) CHỈ dùng được cỡ 1×1×1.'],
+        'pal-box':['Gỗ mới (Wood) 3.33','id 41/42 = GoNew_Box / GoNew_Cylinder, mass 3.33 / 3.63 (asset 29/09; remote config có thể ghi đè). 🚨 Bên Ocean Block Shoot 41/42 là Go_Box/Go_Cylinder mass 3 — chép level qua lại thì tháp đứng/đổ khác đi dù file y hệt.'],
+        'pal-jar':['Jar (Hũ) 1.21 — id 11–15 · 220–238','11 blue · 12 red · 13 orange · 14 purple · 15 pink · 220–225 xanh lá 1–6 · 226–231 cam 1/2/4/5/6 · 232–237 hồng 1/2/4/5/6 · 238 vàng (228/234 không có: cam 3/hồng 3 = id 13/15). Cùng prefab Jar_Cylinder, khác verticalMaterial. Dài tối đa 5 (bên Ocean Block Shoot hũ chỉ tới 3). KHÔNG có id 16.']},
     /* CHỈ 14 id này có trần ⇒ mọi id khác rơi vào nhánh "CHƯA đăng ký" của objIssue và CHẶN Export */
     maxlen:(function(){ var M={};
-      [1,3,11,12,13,14,15,21,22,41,42,61,62].forEach(function(i){M[i]=5;});
+      [1,3,11,12,13,14,15,21,22,41,42,61,62,220,221,222,223,224,225,226,227,229,230,231,232,233,235,236,237,238].forEach(function(i){M[i]=5;});
       M[2]=1;                                   // nón: asset chỉ có prefab gốc
       return M; })(),
     /* bảng "Hình đặc trưng": bản gốc dùng chum 105-121 làm màu chi tiết, Valley Smash
@@ -2302,7 +2406,7 @@ function applyGame(g,boot){
   // giao diện
   const T=$('gmTitle'),S=$('gmSub'),sel=$('gmSel');
   if(T)T.textContent=P.title; if(S)S.textContent=P.sub; if(sel)sel.value=g;
-  document.body.dataset.game=g;
+  document.body.dataset.game=g; if(typeof artGame==='function')artGame(g);   // ⛰️ đổi bộ art (model/texture/icon) theo game — vs_art.js
   const cp=$('cratePanel'); if(cp)cp.style.display=P.crate?'':'none';
   buildPalette(P.gt||{});
   if(!TYPES[brush]||!Object.values(PAL).some(l=>l.indexOf(brush)>=0))selectBrush(1);
