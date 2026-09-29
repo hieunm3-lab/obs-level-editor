@@ -746,7 +746,7 @@ let three_artLights = null, three_baseLights = null, ART_MAXANISO = 4;
 /* Bat tam thoi khi SINH ICON: cho phep lay texture/mesh that ngay ca luc nguoi dung
    da tat art cho khung 3D. Icon thi luc nao cung dung anh that cho de nhin. */
 let ART_FORCE = false;
-const ART_BUILD = '8394bc260cd6';        // doi moi lan nung lai art -> cache cu tu het han
+const ART_BUILD = '3582dfb67625';        // doi moi lan nung lai art -> cache cu tu het han
 const artDung = () => ART_ON || ART_FORCE;
 /* Che do art: den sang & phang, day suong mu ra xa (suong mu lam khoi o xa xam xit).
    Tat art: tra lai y nguyen den cu. */
@@ -2014,6 +2014,42 @@ function artGameTrao(g){
   });
   artVeLai();
 }
+/* 🛷 BAN TUYET VALLEY SMASH — dung DUNG nhu Raft.ApplyDimension + SnowDecor + SetFeature cua block-shot-2
+   (so lieu: obs_vs_table_bake.py). X = max(dim.x+0.3, 2), Y = dim.y+0.1:
+     than   scale.x = (X-2)*1.0155/5.5 · scale.z = Y/4.2      2 dau  x = +-((X-2)/2 + 0.437) · scale.z = Y/4.2
+     mu tuyet 2 dau bam "Snow Pos" (con cua dau) · chan ban (cot + de + tuyet) KHONG co gian, KHONG dich theo dim.z
+     banh xe CHI hien khi be truot ngang. Tra null khi chua co art VS / mesh chua giai nen -> nguoi goi ve be OBS. */
+function vsTable(dx, dy, dz, ti, em, movH){
+  try{
+    const T = (ART_G.cur === 'vs' && window.ART_VS) ? window.ART_VS.table : null;
+    if(!T || !window.THREE) return null;
+    const K = T.k, P = T.parts;
+    const X = Math.max(dx + K.dx, 2), Y = dy + K.dy;
+    const kx = Math.max(1e-3, (X - 2) * K.sx), kz = Math.max(1e-3, Y * K.sz), hx = (X - 2) / 2 + K.hx;
+    const G = new THREE.Group(), top = new THREE.Group(), base = new THREE.Group();
+    top.position.y = T.y; top.scale.z = -1;              // Table_Snow_Top: scale z -1 trong prefab
+    base.position.set(0, T.y, -dz);                       // tableBase o goc be, mat ban moi dich theo dim.z
+    G.add(top); G.add(base);
+    let du = true;
+    const dat = (k, p, s) => {
+      const d = P[k]; const m = partMesh(d, T.tex, em); if(!m){ du = false; return; }
+      const g = new THREE.Group(); g.position.set(p[0], p[1], p[2]); g.scale.set(s[0], s[1], s[2]); g.add(m);
+      (d.g === 'top' ? top : base).add(g); };
+    dat('body', [0, P.body.p[1], 0], [kx, 1, kz]);
+    dat('hl', [-hx, P.hl.p[1], 0], [1, 1, kz]);
+    dat('hr', [ hx, P.hr.p[1], 0], [1, 1, kz]);
+    for(const k of ['sl', 'sr']){                          // SnowDecor: vi tri = "Snow Pos" (con cua dau, dau co scale z)
+      const b = T.bam[k], hp = P[b[0]].p, sx = (b[0] === 'hl' ? -hx : hx);
+      dat(k, [sx + b[1][0], hp[1] + b[1][1], b[1][2] * kz], P[k].sc);
+    }
+    for(const k of ['pole', 'foot', 'snow']) dat(k, P[k].p, P[k].sc);
+    if(movH) for(const k of ['w1', 'w2']) dat(k, P[k].p, P[k].sc);
+    if(!du) return null;
+    G.traverse(x => { if(x.isMesh) x.userData = {deck:true, ti:ti}; });   // bam vao ban = bam nen ban
+    G.userData = {that:true};
+    return G;
+  }catch(e){ console.warn('ban tuyet VS:', e && e.message); return null; }
+}
 /* Goi tu applyGame (ca luc khoi dong). OBS -> tra bang goc ngay; VS -> tai vs_art.js roi moi trao. */
 function artGame(g){
   g = (g === 'vs') ? 'vs' : 'obs';
@@ -2304,7 +2340,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 29/09 17:09', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 29/09 17:19', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -3393,7 +3429,8 @@ function drawDeck(V){
   ctx.setLineDash([]);
   // 🛶 Khuc cui cua be DAI TOI THIEU 3 (game: Mathf.Max(dim.x,3)). Ban hep hon thi be
   //    tho ra hai ben — ve them khung net dut cho khoi tuong be chi bang dung `dim`.
-  const LR3=Math.max(d.x,3);
+  // ⛰️ Valley Smash KHONG dung khuc cui (ban tuyet co gian theo dim) -> khong co luat toi thieu 3
+  const LR3=(typeof ART_G!=='undefined'&&ART_G&&ART_G.cur==='vs')?d.x:Math.max(d.x,3);
   if(LR3>d.x+1e-6 && view!=='side'){
     const ra=toScreen(cx-LR3/2,vHi), rb=toScreen(cx+LR3/2,vLo);
     ctx.strokeStyle='rgba(224,160,74,.8)'; ctx.setLineDash([3,3]); ctx.lineWidth=1;
@@ -5746,7 +5783,9 @@ function build3D(refit){
     if(dckZ!=null)dm.z=dckZ;
     // 🛶 BE THAT: cac khuc cui dung dung nhu Raft.SetupRaft cua game.
     const dkX3=yawed?0:dckX, dkZ3=yawed?0:dm.z;
-    const raft3=raftGroup(dm.x,dm.y,ti,ti===cur?0x241a00:0);
+    // ⛰️ Valley Smash: BAN TUYET (vsTable) thay khuc cui; chua nap xong vs_art.js / mesh thi tam ve be OBS
+    const raft3=((typeof vsTable==='function')?vsTable(dm.x,dm.y,yawed?0:dm.z,ti,ti===cur?0x241a00:0,!!(t.motion&&t.motion.movH)):null)
+             ||raftGroup(dm.x,dm.y,ti,ti===cur?0x241a00:0);
     const beThat=!!(raft3&&raft3.userData.that);
     // TAM NEN = DUNG `dim` khi export. Co be that roi thi cho no TANG HINH (van bat duoc tia
     // chuot) — game khong co tam phang nao ca, de lai la "mau tron cu" de len anh that.
