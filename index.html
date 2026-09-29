@@ -1051,13 +1051,22 @@ function meshLay(k){
 async function artMeshInit(){
   if(typeof ART_MESH==='undefined' || !window.DecompressionStream){ MESH_READY = true; return; }
   try{
-    const ks = Object.keys(ART_MESH.pool).filter(k => !MESH_RAW.has(k));
-    await Promise.all(ks.map(async k => {
-      MESH_CHO.add(k);
-      const m = ART_MESH.pool[k];
-      const [p,u,i] = await Promise.all([_unz(m.p), _unz(m.u), _unz(m.i)]);
-      MESH_RAW.set(k, {p,u,i,k:m.k});
-    }));
+    // ⚡ 29/09: bo mesh DANG giai nen luoi (MESH_CHO) — truoc day bi giai nen 2 lan; chia LO 6 mesh
+    //    moi lan may ranh thay vi 91 mesh mot luc (Blob/atob chay tren luong chinh).
+    const ks = Object.keys(ART_MESH.pool).filter(k => !MESH_RAW.has(k) && !MESH_CHO.has(k));
+    const ranh = () => new Promise(r => window.requestIdleCallback ? requestIdleCallback(r, {timeout:400}) : setTimeout(r, 16));
+    for(let a = 0; a < ks.length; a += 6){
+      await ranh();
+      await Promise.all(ks.slice(a, a + 6).map(async k => {
+        if(MESH_RAW.has(k) || MESH_CHO.has(k)) return;
+        MESH_CHO.add(k);
+        const m = ART_MESH.pool[k];
+        const [p,u,i] = await Promise.all([_unz(m.p), _unz(m.u), _unz(m.i)]);
+        MESH_RAW.set(k, {p,u,i,k:m.k});
+      }));
+    }
+    // mesh giai nen luoi con dang chay -> doi no xong moi bao DU (toi da ~5 s)
+    for(let n = 0; n < 100 && Object.keys(ART_MESH.pool).some(k => !MESH_RAW.has(k)); n++) await new Promise(r => setTimeout(r, 50));
     MESH_READY = true;
     meshXong();
   }catch(e){ console.warn('Khong giai nen duoc mesh:', e); }
@@ -1300,6 +1309,9 @@ function artPvwBind(){
 function artIconsApply(){
   document.querySelectorAll('.sw').forEach(sw=>{
     const u = ART_ICON.get(+sw.dataset.t);        // icon LUON dung, khong theo nut 🎨
+    // ⚡ 29/09: o da mang DUNG icon nay thi bo qua (gan lai data URL = trinh duyet tinh lai style + giai ma anh)
+    if(u && sw._ico === u && sw.classList.contains('has-ico')) return;
+    sw._ico = u || null;
     if(u){
       // buildPalette dat inline `style.background = mau` (viet tat) -> no GHI DE moi thuoc tinh
       // nen cua CSS class. Vi vay phai dat size/position/repeat THANG VAO INLINE o day.
@@ -2402,7 +2414,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 29/09 17:47', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 29/09 18:06', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -2489,6 +2501,8 @@ function applyGame(g,boot){
   for(const k of Object.keys(TYPES))delete TYPES[k];
   for(const k of Object.keys(TYPES_BASE))TYPES[k]=Object.assign({},TYPES_BASE[k]);
   if(P.over)for(const k of Object.keys(P.over))TYPES[k]=Object.assign({},TYPES_BASE[k]||{},P.over[k]);
+  // 🧩 loại tạm của khối id lạ đang nằm trên bàn phải sống qua đổi game (không thì khối mất loại → vẽ/xuất hỏng)
+  if(typeof TYPES_TAM!=='undefined') for(const k of Object.keys(TYPES_TAM)) if(!TYPES[k]) TYPES[k]=Object.assign({},TYPES_TAM[k]);
   // PAL
   for(const k of Object.keys(PAL))delete PAL[k];
   const src=P.pal||PAL_BASE; for(const k of Object.keys(PAL_BASE))PAL[k]=(src[k]||[]).slice();
@@ -5316,7 +5330,15 @@ function mapCrate(c){return{type:CRATE_T,sx:+c.size.x,sy:+c.size.y,sz:+c.size.z,
   cid:+c.id||1, ov:+c.openValue||0, cs:+c.countScope||0, ks:+c.keepShell?1:0,
   mo:c.massOpen!=null?+c.massOpen:CRATE_DEF.mo};}
 /* Đọc MỘT stage trong file → {tables,blockers} của editor. Tách ra để nạp được level nhiều stage. */
+/* 🧩 LOẠI TẠM cho id editor chưa biết (29/09): KHÔNG BAO GIỜ bỏ khối lúc nạp. Trước đây id lạ bị lọc bỏ âm thầm
+   (Valley Smash ver_3 Level18: 202 → 163 khối) ⇒ bấm Tải về là file MẤT khối. Nay giữ nguyên khối dưới dạng
+   hộp HỒNG "id X — chưa có trong editor"; xuất ra y như file gốc; panel Soát lỗi vẫn báo "chưa đăng ký". */
+const TYPES_TAM={}; let _tamMoi=null;
+function typeTam(id){ id=+id; if(!isFinite(id))return;
+  if(!TYPES_TAM[id]) TYPES_TAM[id]={name:'id '+id+' — chưa có trong editor',shape:'box',col:'#ff3fa4',mass:1,lab:'?',tam:true};
+  if(!TYPES[id]){ TYPES[id]=Object.assign({},TYPES_TAM[id]); if(_tamMoi)_tamMoi.add(id); } }
 function parseStage(st){
+  (st.objects||[]).forEach(o=>{ if(o&&o.type!=null&&!TYPES[o.type]) typeTam(o.type); });   // id lạ → loại tạm, KHÔNG bỏ
   const srcTbls=(st.tables&&st.tables.length)?st.tables:[{id:0,pos:{x:0,y:2.9,z:0},rot:{x:0,y:0,z:0,w:1},scl:{x:1,y:1,z:1},dim:null}];
   // dựng vào biến TẠM rồi mới gán — JSON hỏng nửa chừng sẽ nhảy vào catch mà không để lại
   // trạng thái lệch (tables mới nhưng objects/cur còn trỏ bàn cũ → mọi nét vẽ sau ghi vào mảng mồ côi)
@@ -5349,7 +5371,9 @@ function parseStage(st){
 function loadLevel(json,idxFromName){try{
   const L=typeof json==='string'?JSON.parse(json):json;
   const src=(L.stages&&L.stages.length)?L.stages:[{objects:[],tables:[],blockers:[]}];
+  _tamMoi=new Set();
   const newStages=src.map(parseStage);            // dựng HẾT vào biến tạm rồi mới commit (JSON hỏng nửa chừng không để lại state lệch)
+  const tamMoi=[..._tamMoi]; _tamMoi=null;
   stages=newStages; curStage=0;
   const s0=stages[0];
   tables=s0.tables; cur=0; objects=tables[0].objs; blockers=s0.blockers; curBlk=blockers.length?0:-1;   // tới đây mới COMMIT
@@ -5360,6 +5384,9 @@ function loadLevel(json,idxFromName){try{
   hint('Đã nạp Level '+fIndex.value+' — '+(stages.length>1?stages.length+' STAGE (đang xem Stage 1), ':'')
       +tables.length+' bàn'+(tables.length>1?' (chọn bàn ở thanh trên để sửa từng bàn)':'')+', '+nObj+' khối'
       +(rot?', có XOAY':'')+(dyn?', bàn ĐỘNG':'')+(blockers.length?', '+blockers.length+' blocker':'')+'.');
+  { const idTam=[...new Set(stages.flatMap(s=>s.tables.flatMap(t=>t.objs.filter(o=>TYPES[o.type]&&TYPES[o.type].tam).map(o=>o.type))))];
+    if(idTam.length){ const n=stages.reduce((a,s)=>a+s.tables.reduce((b,t)=>b+t.objs.filter(o=>TYPES[o.type]&&TYPES[o.type].tam).length,0),0);
+      warn('⚠ '+n+' khối có id editor CHƯA BIẾT ('+idTam.join(', ')+') — vẫn GIỮ NGUYÊN (hộp hồng), tải về ra y như file gốc. Kiểm lại game đang chọn ('+(typeof GAME!=='undefined'?GAME:'?')+').'); } }
 }catch(err){warn('JSON không hợp lệ: '+err.message);}}
 $('fileIn').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
   const m=/(\d+)/.exec(f.name||''); const idx=m?+m[1]:null;                  // đọc số Level từ TÊN FILE (Level778.json→778)
@@ -6688,7 +6715,9 @@ $('miniHide').onclick=()=>{ if(mini.on)toggleMini(); };
   window.addEventListener('mouseup',()=>{d=null;}); })();
 
 /* ---------- boot ---------- */
-function resize(){const wrap=$('cwrap');cv.width=wrap.clientWidth;cv.height=wrap.clientHeight;draw(); if(show3d)resize3D();}
+function resize(){const wrap=$('cwrap'),w=wrap.clientWidth,h=wrap.clientHeight;
+  if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}   // ⚡ cùng cỡ thì đừng gán: gán = xoá + cấp phát lại canvas
+  draw(); if(show3d)resize3D();}
 window.addEventListener('resize',resize);
 /* 28/09 (user: "sua loi thieu 20px cua PC"): resize() truoc chi chay luc tai trang + khi CUA SO doi co. Luc do thanh
    cong cu chua nen xong (fitBars chay sau) nen khung ve do hut ~20 px day, roi khong ai do lai. Theo doi THANG
