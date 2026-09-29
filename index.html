@@ -415,6 +415,8 @@
       <span class="t2lab" id="stgInfo"></span>
       <div class="sep"></div>
       <!-- nhóm tệp để icon trần + tooltip: có thêm dải lật level thì thanh vẫn đủ chỗ, không bị đẩy khuất -->
+      <!-- 📌 gắn thư mục levels: gắn rồi thì "Tải về" đổi thành "Ghi đè", ghi thẳng LevelN.json vào đó -->
+      <button class="tb" id="btnDir" title="📌 Gắn thư mục levels (vd ...\levels\prod-13\) — gắn rồi thì &quot;Tải về&quot; ghi đè thẳng LevelN.json, khỏi chép tay (Chrome/Edge)">📌</button>
       <button class="tb primary" id="btnExport" title="Tải Level{N}.json về máy — chép vào ...\levels\prod-13\">⬇️ Tải về</button>
       <button class="tb" id="btnCopy" title="📋 Copy toàn bộ JSON của level vào clipboard">📋</button>
       <label class="tb file tbig" title="📂 Nạp 1 file Level*.json">📂<span class="tblab">Nạp file</span><input type="file" id="fileIn" accept=".json,application/json" style="display:none"></label>
@@ -493,14 +495,14 @@
         <div class="fld"><input type="number" id="mHMin" value="-1" step="0.25" title="offset min quanh tâm" style="padding:4px 6px"><span class="cap">Min</span></div>
         <div class="fld"><input type="number" id="mHMax" value="1" step="0.25" title="offset max quanh tâm" style="padding:4px 6px"><span class="cap">Max</span></div>
         <div class="fld"><input type="number" id="mHSpd" value="1" step="0.1" title="tốc độ" style="padding:4px 6px"><span class="cap">Tốc độ</span></div>
-        <div class="fld"><select id="mHDir" title="điểm xuất phát" style="padding:5px 4px"><option value="0">mép</option><option value="1">giữa</option></select><span class="cap">Xuất phát</span></div>
+        <div class="fld"><select id="mHDir" title="điểm xuất phát" style="padding:5px 4px"><option value="0">mép</option><option value="1">giữa</option><option value="2">max</option></select><span class="cap">Xuất phát</span></div>
       </div>
       <label class="chk" style="margin:5px 0"><input type="checkbox" id="mV"> Trượt dọc (Y)</label>
       <div class="row" id="rowV" style="display:none;gap:6px">
         <div class="fld"><input type="number" id="mVMin" value="-1" step="0.25" title="offset min quanh tâm" style="padding:4px 6px"><span class="cap">Min</span></div>
         <div class="fld"><input type="number" id="mVMax" value="1" step="0.25" title="offset max quanh tâm" style="padding:4px 6px"><span class="cap">Max</span></div>
         <div class="fld"><input type="number" id="mVSpd" value="1" step="0.1" title="tốc độ" style="padding:4px 6px"><span class="cap">Tốc độ</span></div>
-        <div class="fld"><select id="mVDir" title="điểm xuất phát" style="padding:5px 4px"><option value="0">mép</option><option value="1">giữa</option></select><span class="cap">Xuất phát</span></div>
+        <div class="fld"><select id="mVDir" title="điểm xuất phát" style="padding:5px 4px"><option value="0">mép</option><option value="1">giữa</option><option value="2">max</option></select><span class="cap">Xuất phát</span></div>
       </div>
       <label class="chk" style="margin:7px 0 3px"><input type="checkbox" id="dimAuto" checked> Kích thước bàn tự ôm sát vật</label>
       <div class="row" id="rowDim" style="gap:6px">
@@ -744,7 +746,7 @@ let three_artLights = null, three_baseLights = null, ART_MAXANISO = 4;
 /* Bat tam thoi khi SINH ICON: cho phep lay texture/mesh that ngay ca luc nguoi dung
    da tat art cho khung 3D. Icon thi luc nao cung dung anh that cho de nhin. */
 let ART_FORCE = false;
-const ART_BUILD = '734f038c4a36';        // doi moi lan nung lai art -> cache cu tu het han
+const ART_BUILD = 'd6fd81581edf';        // doi moi lan nung lai art -> cache cu tu het han
 const artDung = () => ART_ON || ART_FORCE;
 /* Che do art: den sang & phang, day suong mu ra xa (suong mu lam khoi o xa xam xit).
    Tat art: tra lai y nguyen den cu. */
@@ -1448,9 +1450,11 @@ function _sprite2D(o, V, pxH, pxV){
   const dm = box ? null : visDims(o);
   // cap do phan giai theo bac 2 cho khoi phai ve lai khi zoom mot chut
   const bucket = Math.max(32, Math.min(512, Math.pow(2, Math.ceil(Math.log2(Math.max(pxH, pxV, 32))))));
+  // ⚠ Lam tron goc 1/64 chi du cho boi so 90°: goc le chenh ~1,8° van an CHUNG mot sprite -> thanh
+  //   dai xoay 30° va 31° hien y het nhau. 1/512 (~0,22°) du min cho nut ±15° lan o go so.
   const key = [o.type, mk, V.h+V.v, box?1:0,
                Math.round((o.sx||1)*8), Math.round((o.sy||1)*8), Math.round((o.sz||1)*8),
-               Math.round(q.x*64), Math.round(q.y*64), Math.round(q.z*64), Math.round(q.w*64),
+               Math.round(q.x*512), Math.round(q.y*512), Math.round(q.z*512), Math.round(q.w*512),
                bucket].join('|');
   _sp2Key = key;                       // cho duong tat trong sprite2D() nho lai
   let cv = SP2.get(key);
@@ -1502,7 +1506,11 @@ function _sprite2D(o, V, pxH, pxV){
   // Lat chinh tam anh la dung TUONG DUONG voi viec doi ben nhin — re, va khong dung toi
   // chieu quay tam giac nen khong lam khoi bi cull mat.
   const lat = latNgang(out);
-  if(SP2.size > SP2_MAX) SP2.clear();
+  // Day kho: vut BOT cai CU NHAT (Map giu dung thu tu them vao) thay vi clear() sach.
+  // Keo/go goc lien tuc sinh moi goc mot sprite; clear() sach la CA MAN HINH phai render lai
+  // trong mot khung -> chay het ngan sach 20ms, khoi nhap nhay. Vut 1/4 thi phan dang nhin con nguyen.
+  if(SP2.size > SP2_MAX){ const it = SP2.keys();
+    for(let i = 0, n = SP2_MAX >> 2; i < n; i++){ const e = it.next(); if(e.done) break; SP2.delete(e.value); } }
   SP2.set(key, lat);
   return lat;
 }
@@ -2216,7 +2224,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 29/09 14:10', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 29/09 16:50', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -2519,13 +2527,37 @@ let overlapObjs=new Set();
 // hòm CHỨA chính đồ của nó → chồng nhau là ĐÚNG, miễn cảnh báo. Khối NGOÀI hòm mà thò vào trong
 // thì vẫn phải báo (đó là lỗi thật: vào game nó nằm lọt trong khối kinematic).
 const crPair=(a,b)=>(isCrate(a)&&+b.inC===+a.cid)||(isCrate(b)&&+a.inC===+b.cid);
+/* ⭐ 22/09 — ĐÈ NHAU KHI XOAY GÓC LẺ: khung bao (AABB) của thanh dài xoay 45° phình thành hình
+   vuông to; lấy nó làm luật thì cạnh thanh nghiêng còn cả vùng TRỐNG mà vẫn bị chặn không cho đặt.
+   Nên: AABB chỉ làm VÒNG LOẠI NHANH, còn khi có khối đã xoay thì soi tiếp bằng SAT hộp-nghiêng
+   (15 trục tách) → đúng hình thật, khớp cái mắt thấy và khớp collider trong game.
+   Khối chưa xoay — và cả khối xoay bội số 90° — cho kết quả y HỆT luật cũ. */
+const _dot3=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z;
+const _crs3=(a,b)=>({x:a.y*b.z-a.z*b.y, y:a.z*b.x-a.x*b.z, z:a.x*b.y-a.y*b.x});
+function obbAxes(o){ const q=getRot(o), A=[];
+  for(const k of ['x','y','z']){ const v={x:0,y:0,z:0}; v[k]=1; A.push(qrotv(q,v)); }
+  return A; }
+function obbHit(a,b){
+  const A=obbAxes(a), B=obbAxes(b);
+  const ha=[fS(a,'x')/2,fS(a,'y')/2,fS(a,'z')/2], hb=[fS(b,'x')/2,fS(b,'y')/2,fS(b,'z')/2];
+  const d={x:fC(b,'x')-fC(a,'x'), y:fC(b,'y')-fC(a,'y'), z:fC(b,'z')-fC(a,'z')};
+  const L=A.concat(B);
+  for(const u of A) for(const v of B){ const c=_crs3(u,v); if(_dot3(c,c)>1e-12) L.push(c); }
+  for(const ax of L){ let ra=0, rb=0;
+    for(let i=0;i<3;i++){ ra+=ha[i]*Math.abs(_dot3(A[i],ax)); rb+=hb[i]*Math.abs(_dot3(B[i],ax)); }
+    if(Math.abs(_dot3(d,ax))>ra+rb-1e-6) return false; }         // có trục tách → KHÔNG đè
+  return true; }
+/* Luật ĐÈ NHAU dùng chung cho hitsAny / hitsAnyIn / computeOverlaps — sửa một chỗ là khớp cả ba. */
+function boxHit(a,b){
+  if(Math.abs(fC(a,'x')-fC(b,'x'))>=(axSize(a,'x')+axSize(b,'x'))/2-1e-6) return false;
+  if(Math.abs(fC(a,'y')-fC(b,'y'))>=(axSize(a,'y')+axSize(b,'y'))/2-1e-6) return false;
+  if(Math.abs(fC(a,'z')-fC(b,'z'))>=(axSize(a,'z')+axSize(b,'z'))/2-1e-6) return false;
+  return (isIdent(getRot(a))&&isIdent(getRot(b))) ? true : obbHit(a,b); }
 function computeOverlaps(){ const O=objects,s=new Set();
   for(let i=0;i<O.length;i++){const a=O[i];
     for(let j=i+1;j<O.length;j++){const b=O[j];
       if(crPair(a,b))continue;
-      if(Math.abs(fC(a,'x')-fC(b,'x'))<(axSize(a,'x')+axSize(b,'x'))/2-1e-6      // cỡ ĐÃ xoay, khớp hitsAny
-      && Math.abs(fC(a,'y')-fC(b,'y'))<(axSize(a,'y')+axSize(b,'y'))/2-1e-6
-      && Math.abs(fC(a,'z')-fC(b,'z'))<(axSize(a,'z')+axSize(b,'z'))/2-1e-6){s.add(a);s.add(b);}}}
+      if(boxHit(a,b)){s.add(a);s.add(b);}}}
   return s; }
 // object dưới con trỏ (world h,v) ở lớp sâu hiện tại
 const AXN=['X','Y','Z'];
@@ -2561,11 +2593,29 @@ function scanIssues(){ const out=[], ss=stages.length?stages:[{tables:tables}];
   return out; }
 
 let badObjs=new Set(), lastIssues=[];
+/* Điểm (h,v) có nằm trong HÌNH CHIẾU của khối lên mặt đang xem không?
+   Chưa xoay → khung bao như cũ (y hệt hành vi cũ). Đã xoay → soi BAO LỒI THẬT, tức đúng cái hình
+   mà drawObj/sprite vẽ ra: bấm vào thân thanh nghiêng là trúng, bấm vào góc TRỐNG của khung bao
+   thì không trúng. Không có chốt này thì thanh dài xoay 45° nuốt cả vùng trống quanh nó, xếp
+   khối cạnh bên là cứ bị "cướp" chuột. */
+function hitProj(o,hw,vw,V){
+  const q=getRot(o);
+  if(isIdent(q)){ return Math.abs(hw-fC(o,V.h))<=fS(o,V.h)/2+1e-6
+                      && Math.abs(vw-fC(o,V.v))<=fS(o,V.v)/2+1e-6; }
+  const H=hull2(projPts(o,q,V)); if(H.length<3) return false;
+  let neg=0,pos=0;
+  for(let i=0;i<H.length;i++){ const a=H[i], b=H[(i+1)%H.length];
+    const cr=(b.h-a.h)*(vw-a.v)-(b.v-a.v)*(hw-a.h);
+    if(cr<-1e-9)neg++; else if(cr>1e-9)pos++; }
+  return !(neg&&pos); }
 function pickObj(hw,vw){
-  const V=VIEWS[view]; const p={}; p[V.h]=hw; p[V.v]=vw; p[V.d]=sel[V.d];
+  const V=VIEWS[view], L=sel[V.d];
   // ưu tiên khối có tâm gần nhất
   let best=null,bd=1e9;
-  for(const o of objects) if(contains(o,p.x,p.y,p.z)){ const d=Math.abs(C(o,V.h)-hw)+Math.abs(C(o,V.v)-vw); if(d<bd){bd=d;best=o;} }
+  for(const o of objects){
+    if(fC(o,V.d)-axSize(o,V.d)/2>L+1e-6 || fC(o,V.d)+axSize(o,V.d)/2<L-1e-6) continue;   // đúng lớp sâu đang xem
+    if(!hitProj(o,hw,vw,V)) continue;
+    const d=Math.abs(C(o,V.h)-hw)+Math.abs(C(o,V.v)-vw); if(d<bd){bd=d;best=o;} }
   return best;
 }
 /* 🪏 LỆCH MÉP (chỉ thanh gỗ): nó dày 0,25 trong ô rộng 1 nên CÒN CHỖ TRỐNG theo chiều SÂU (Z).
@@ -2616,10 +2666,7 @@ function isDup(o){ return objects.some(k=>k.type===o.type&&Math.abs(k.px-o.px)<1
 /* ⭐ 26/08 — ĐỒNG BỘ VỚI 3D: đo bằng cỡ ĐÃ XOAY (`axSize`) chứ không phải cỡ khai báo (`fS`).
    Trước đây chỉ 3D biết khối xoay, 2D thì không ⇒ hai mặt BẤT ĐỒNG về việc có chồng nhau hay không.
    `axSize` tự trả về `fS` khi khối chưa xoay, nên level không có khối xoay chạy y hệt như cũ. */
-function hitsAny(o){ return objects.some(k=> !crPair(k,o)
-  && Math.abs(fC(k,'x')-fC(o,'x'))<(axSize(k,'x')+axSize(o,'x'))/2-1e-6
-  && Math.abs(fC(k,'y')-fC(o,'y'))<(axSize(k,'y')+axSize(o,'y'))/2-1e-6
-  && Math.abs(fC(k,'z')-fC(o,'z'))<(axSize(k,'z')+axSize(o,'z'))/2-1e-6); }
+function hitsAny(o){ return objects.some(k=> !crPair(k,o) && boxHit(k,o)); }   // luật chung: xem boxHit
 /* Nút 🧱 XẾP CHỒNG: mở khoá cho phép đặt khối lồng/đè vào khối có sẵn (lồng vật vào bẫy, nhét đồ
    vào khe, dựng cụm ghép...). Kể cả khi bật, vẫn CHẶN khối trùng khít y hệt (cùng loại + cùng tâm):
    nếu không, kéo chuột nhích trong CÙNG một ô sẽ đẻ ra hàng chục khối chồng khít lên nhau,
@@ -3030,8 +3077,19 @@ function draw(){
       const hc=fC(o,V.h),vc=fC(o,V.v),sh=axSize(o,V.h),sv=axSize(o,V.v),tl=toScreen(hc-sh/2,vc+sv/2);ctx.strokeRect(tl.x+1,tl.y+1,sh*cell-2,sv*cell-2);}
     ctx.setLineDash([]);ctx.restore();}
   // selected highlight — TẤT CẢ khối đang chọn (khối chính đậm hơn)
+  /* ⭐ 22/09: khối ĐÃ XOAY thì khoanh THEO HƯỚNG THẬT (bao lồi của hộp đã xoay — đúng hình mà
+     drawObj/sprite vẽ ra), khung bao AABB tụt xuống nét đứt mờ để vẫn thấy nó chiếm mấy ô.
+     Trước chỉ có mỗi khung bao ngay ngắn nên xoay góc lẻ xong nhìn như khối KHÔNG hề xoay. */
   for(const s of selObjs){const hc=fC(s,V.h),vc=fC(s,V.v),sh=axSize(s,V.h),sv=axSize(s,V.v);const tl=toScreen(hc-sh/2,vc+sv/2);
-    ctx.strokeStyle=s===selObj?'#ffb454':'#ffd9a0';ctx.lineWidth=s===selObj?2.5:1.8;ctx.strokeRect(tl.x-1,tl.y-1,sh*cell+2,sv*cell+2);}
+    const qs=getRot(s), xoay=!isCrate(s)&&!isIdent(qs);
+    ctx.save();
+    ctx.strokeStyle=s===selObj?'#ffb454':'#ffd9a0'; ctx.lineWidth=s===selObj?2.5:1.8;
+    if(xoay){ const H=hull2(projPts(s,qs,V));
+      ctx.beginPath(); H.forEach((p,i)=>{const t=toScreen(p.h,p.v); i?ctx.lineTo(t.x,t.y):ctx.moveTo(t.x,t.y);});
+      ctx.closePath(); ctx.stroke();
+      ctx.globalAlpha=0.32; ctx.lineWidth=1; ctx.setLineDash([4,3]); }
+    ctx.strokeRect(tl.x-1,tl.y-1,sh*cell+2,sv*cell+2);
+    ctx.restore();}
   // hover ghost
   if(hover){
     if(tool==='paint'){
@@ -4925,12 +4983,75 @@ function buildStage(tbls,blks){
 function buildJSON(){ pullMeta(); stageSaveCur();
   const out=stages.map(s=>buildStage(s.tables,s.blockers));
   return{levelIndex:+fIndex.value,moveCount:+fMove.value,difficulty:getDiff(),stages:out.length?out:[buildStage(tables,blockers)]};}
-$('btnExport').onclick=()=>{pullMeta();if(!tables.some(t=>t.objs.length)){warn('Chưa có khối nào.');return;}
+/* ============ 📌 GẮN THƯ MỤC LEVELS — bấm "Tải về" là GHI ĐÈ THẲNG vào file ============
+   Trước đây "Tải về" chỉ tạo <a download> → trình duyệt ném vào Downloads, trùng tên thì đẻ
+   "Level5 (1).json", rồi phải tự tay chép sang ...\levels\prod-13\. Nay gắn thư mục MỘT LẦN
+   bằng File System Access API (Chrome/Edge, chạy được cả trên file:// vì file:// là secure
+   context) → mỗi lần xuất là ghi đè đúng LevelN.json tại chỗ, không hỏi, không nhân bản.
+   · Handle thư mục cất trong IndexedDB nên đóng tool mở lại vẫn còn; Chrome bắt XIN LẠI QUYỀN
+     sau khi nạp lại trang, nên cú bấm "Tải về" đầu tiên có thể hiện một hộp cho phép — đó là
+     chốt bảo mật của trình duyệt, không né được, nhưng chỉ một lần mỗi phiên.
+   · Trình duyệt không có API (Firefox…) hoặc người dùng từ chối → TỰ ĐỘNG lùi về tải file kiểu
+     cũ, tuyệt đối không được để mất đường xuất file. */
+let lvDir=null;                                   // FileSystemDirectoryHandle đang gắn
+const DIR_OK=()=>!!window.showDirectoryPicker;
+function _idb(){ return new Promise((ok,no)=>{ const r=indexedDB.open('obsLvDir',1);
+  r.onupgradeneeded=()=>{ try{r.result.createObjectStore('h');}catch(e){} };
+  r.onsuccess=()=>ok(r.result); r.onerror=()=>no(r.error); }); }
+function _idbSet(v){ return _idb().then(db=>new Promise((ok,no)=>{ const t=db.transaction('h','readwrite');
+  if(v) t.objectStore('h').put(v,'dir'); else t.objectStore('h').delete('dir');
+  t.oncomplete=()=>ok(); t.onerror=()=>no(t.error); })); }
+function _idbGet(){ return _idb().then(db=>new Promise((ok,no)=>{ const t=db.transaction('h','readonly'),
+  q=t.objectStore('h').get('dir'); q.onsuccess=()=>ok(q.result||null); q.onerror=()=>no(q.error); })); }
+/* hoi=true chỉ được gọi TRONG một cú bấm của người dùng — Chrome chặn requestPermission ngoài gesture */
+async function dirQuyen(h,hoi){ if(!h) return false; if(!h.queryPermission) return true;
+  const o={mode:'readwrite'};
+  if(await h.queryPermission(o)==='granted') return true;
+  return hoi ? (await h.requestPermission(o))==='granted' : false; }
+function dirNhan(){ const b=$('btnDir'), x=$('btnExport');
+  if(!b) return;
+  const on=!!lvDir;
+  b.classList.toggle('primary',on);
+  b.textContent = '📌';   // icon trần: thanh 2 hết chỗ (chữ làm tràn 108px ở 1280) — tên thư mục nằm ở title + nút 💾
+  b.title = on ? '📌 Đang ghi đè thẳng vào thư mục "'+lvDir.name+'" — bấm để GỠ, về kiểu tải file thường'
+               : '📌 Gắn thư mục levels (vd ...\\levels\\prod-13\\) — gắn rồi thì "Tải về" ghi đè thẳng LevelN.json, khỏi chép tay (Chrome/Edge)';
+  if(x){ x.textContent = on ? '💾 Ghi đè' : '⬇️ Tải về';
+    x.title = on ? 'GHI ĐÈ Level{N}.json thẳng vào 📌 '+lvDir.name : 'Tải Level{N}.json về máy — chép vào ...\\levels\\prod-13\\'; } }
+$('btnDir').onclick=async()=>{
+  if(!DIR_OK()){ warn('Trình duyệt này không ghi thẳng vào thư mục được — dùng Chrome hoặc Edge.'); return; }
+  if(lvDir){ const ten=lvDir.name; lvDir=null; dirNhan();
+    try{ await _idbSet(null); }catch(e){}
+    hint('Đã gỡ thư mục "'+ten+'" — "Tải về" quay lại kiểu tải file thường.'); return; }
+  try{
+    const h=await window.showDirectoryPicker({id:'obsLevels',mode:'readwrite'});
+    if(!await dirQuyen(h,true)){ warn('Chưa cấp quyền GHI cho thư mục — vẫn dùng kiểu tải file thường.'); return; }
+    lvDir=h; dirNhan();
+    try{ await _idbSet(h); }catch(e){}              // không cất được thì phiên này vẫn chạy, chỉ là mở lại phải gắn lần nữa
+    hint('📌 Đã gắn "'+h.name+'" — từ giờ bấm 💾 Ghi đè là ghi thẳng LevelN.json vào đó.');
+  }catch(e){ if(e&&e.name!=='AbortError') warn('Không gắn được thư mục: '+(e.message||e)); }
+};
+/* Ghi 1 file vào thư mục đã gắn. createWritable() mở ra là CẮT SẠCH nội dung cũ ⇒ ghi đè thật,
+   không phải nối thêm. Trả về true nếu đã ghi xong. */
+async function dirGhi(ten,txt){
+  if(!lvDir) return false;
+  if(!await dirQuyen(lvDir,true)) return false;
+  const fh=await lvDir.getFileHandle(ten,{create:true});
+  const w=await fh.createWritable();
+  await w.write(txt); await w.close();
+  return true; }
+// mở lại tool: lấy lại thư mục đã gắn lần trước (quyền thì đợi cú bấm đầu tiên mới xin lại được)
+if(DIR_OK()) _idbGet().then(h=>{ if(h){ lvDir=h; dirNhan(); } }).catch(()=>{});
+$('btnExport').onclick=async()=>{pullMeta();if(!tables.some(t=>t.objs.length)){warn('Chưa có khối nào.');return;}
   if(typeof issueGate==='function'&&!issueGate('tải file'))return;
-  const blob=new Blob([JSON.stringify(buildJSON())],{type:'application/json'});const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);a.download='Level'+(+fIndex.value)+'.json';a.click();
-  hint('Đã tải Level'+(+fIndex.value)+'.json — chép vào ...\\levels\\prod-13\\');
-  { const nw=nukeWarnAll(); if(nw.length) warn(nw.join(' · ')); } };   // ☢ cảnh báo mềm, KHÔNG chặn tải
+  const nukeW=()=>{ const nw=nukeWarnAll(); if(nw.length) warn(nw.join(' · ')); };   // ☢ cảnh báo mềm, KHÔNG chặn tải
+  const ten='Level'+(+fIndex.value)+'.json', txt=JSON.stringify(buildJSON());
+  if(lvDir){ try{
+      if(await dirGhi(ten,txt)){ hint('💾 Đã GHI ĐÈ '+ten+' trong 📌 '+lvDir.name+' — khỏi chép tay.'); nukeW(); return; }
+      warn('Thư mục 📌 '+lvDir.name+' chưa được cấp quyền ghi — tải file kiểu thường.');
+    }catch(e){ warn('Ghi thẳng hỏng ('+((e&&e.message)||e)+') — tải file kiểu thường.'); } }
+  const blob=new Blob([txt],{type:'application/json'});const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=ten;a.click();
+  hint('Đã tải '+ten+' — chép vào ...\\levels\\prod-13\\'+(DIR_OK()?' (bấm 📌 Gắn thư mục để lần sau ghi đè thẳng)':'')); nukeW(); };
 $('btnCopy').onclick=()=>navigator.clipboard.writeText(JSON.stringify(buildJSON())).then(()=>hint('Đã copy JSON.'));
 /* 🪏 THANH GỖ từ file: size trong file là CỠ THẬT (đã nhân fsc) → chia ngược ra "ô đặt" của editor.
    Nhờ vậy nạp-rồi-xuất-lại ra đúng con số cũ. Type lạ (chưa khai trong TYPES) thì fsc=1 nên vẫn nạp được. */
@@ -5850,18 +5971,19 @@ let brushRot=null;
    nhãn hướng dùng brushRotLabel() — xem handler 4 phím mũi tên.) */
 function applyBrushRot(o){ if(brushRot)o.rot={x:brushRot.x,y:brushRot.y,z:brushRot.z,w:brushRot.w}; return o; }
 /* Cỡ theo TRỤC THẾ GIỚI khi khối đã xoay — không có cái này thì cọ 2×1×1 xoay 90° vẫn bị soi chồng
-   theo cỡ CHƯA xoay (chặn oan chỗ trống / cho lọt chỗ đè). Tool chỉ xoay bội số 90° nên chỉ cần
-   tìm trục local nào ánh xạ sang trục thế giới đang xét. */
+   theo cỡ CHƯA xoay (chặn oan chỗ trống / cho lọt chỗ đè).
+   ⭐ 22/09 — GÓC LẺ: bản cũ CHỐT theo trục local gần nhất ("tool chỉ xoay bội số 90°"), nên khối
+   xoay góc lẻ (nút ±15°, ô gõ số) vẫn bị đo bằng cỡ CHƯA xoay ⇒ khung bao 2D không nở, khung ngắm
+   sprite bị cắt cụt nên thanh dài xoay 30° hiện ra như một vệt chéo bị xén (đúng lỗi user báo).
+   Nay trả về ĐÚNG bề rộng hình chiếu (AABB) của hộp đã xoay: Σ|R[ax][k]|·size[k].
+   Với bội số 90° kết quả y HỆT cách cũ (mỗi hàng R chỉ có đúng một ±1) ⇒ level cũ không đổi. */
 function axSize(o,ax){ const q=getRot(o);
   if(Math.abs(q.x)<1e-6&&Math.abs(q.y)<1e-6&&Math.abs(q.z)<1e-6)return fS(o,ax);
-  let best=-1,src=ax;
+  let s=0;
   for(const k of ['x','y','z']){ const v={x:0,y:0,z:0}; v[k]=1;
-    const a=Math.abs(qrotv(q,v)[ax]); if(a>best){best=a;src=k;} }
-  return fS(o,src); }
-function hitsAnyIn(arr,o){ return arr.some(k=> k!==o && !crPair(k,o)
-  && Math.abs(fC(k,'x')-fC(o,'x'))<(axSize(k,'x')+axSize(o,'x'))/2-1e-6
-  && Math.abs(fC(k,'y')-fC(o,'y'))<(axSize(k,'y')+axSize(o,'y'))/2-1e-6
-  && Math.abs(fC(k,'z')-fC(o,'z'))<(axSize(k,'z')+axSize(o,'z'))/2-1e-6); }
+    const a=Math.abs(qrotv(q,v)[ax]); if(a>1e-9) s+=a*fS(o,k); }
+  return Math.round(s*1e6)/1e6; }              // cắt rác số lẻ để mép vẫn khít lưới như trước
+function hitsAnyIn(arr,o){ return arr.some(k=> k!==o && !crPair(k,o) && boxHit(k,o)); }   // luật chung: xem boxHit
 function isDupIn(arr,o){ return arr.some(k=>k!==o&&k.type===o.type
   &&Math.abs(k.px-o.px)<1e-3&&Math.abs(k.py-o.py)<1e-3&&Math.abs(k.pz-o.pz)<1e-3); }
 function placeOKIn(arr,o){ return stackOn()? !isDupIn(arr,o) : !hitsAnyIn(arr,o); }
@@ -6852,7 +6974,7 @@ html.mob #left .sw.has-ico{font-size:0!important;min-height:54px!important;paddi
   // ---- THANH TREN tren dien thoai: an nut trung / vo dung (chi class; CSS nam duoi html.mob nen PC khong doi) ----
   //  🖌️ 🧽 ✋ 🧊: da co o thanh day · 🪟 Preview: khung mini da tat o dien thoai · 🏷 ten khoi: tooltip re chuot
   //  ❔ Chi dan: chu dai · chu "Mat:" "Buoc:" · 📁 nap THU MUC (trinh duyet dien thoai khong chon duoc thu muc) · 📋 copy JSON
-  for(const id of ['tPaint', 'tErase', 'tMove', 't3d', 'tMini', 'tHelp', 'btnCopy']){ const e = $m(id); if(e) e.classList.add('mobAn'); }
+  for(const id of ['tPaint', 'tErase', 'tMove', 't3d', 'tMini', 'tHelp', 'btnCopy', 'btnDir']){ const e = $m(id); if(e) e.classList.add('mobAn'); }
   document.querySelectorAll('#topbar .t1lab').forEach(e => e.classList.add('mobAn'));
   { const tip = $m('tipOn'); if(tip && tip.closest('label')) tip.closest('label').classList.add('mobAn'); }
   document.querySelectorAll('#topbar2 input[type=file]').forEach(inp => {
