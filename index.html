@@ -746,7 +746,7 @@ let three_artLights = null, three_baseLights = null, ART_MAXANISO = 4;
 /* Bat tam thoi khi SINH ICON: cho phep lay texture/mesh that ngay ca luc nguoi dung
    da tat art cho khung 3D. Icon thi luc nao cung dung anh that cho de nhin. */
 let ART_FORCE = false;
-const ART_BUILD = '3582dfb67625';        // doi moi lan nung lai art -> cache cu tu het han
+const ART_BUILD = '86534edec357';        // doi moi lan nung lai art -> cache cu tu het han
 const artDung = () => ART_ON || ART_FORCE;
 /* Che do art: den sang & phang, day suong mu ra xa (suong mu lam khoi o xa xam xit).
    Tat art: tra lai y nguyen den cu. */
@@ -1979,7 +1979,8 @@ function artGameNap(xong){
   ART_G.dang = [xong];
   const het = ok => { const l = ART_G.dang; ART_G.dang = null; l.forEach(f => { try{ f(ok); }catch(e){ console.warn('art VS:', e); } }); };
   const s = document.createElement('script');
-  s.src = 'vs_art.js'; s.async = true;
+  // ?v=<build>: Pages cho trinh duyet cache 10 phut — doi art ma URL giu nguyen la nguoi dung van an ban cu
+  s.src = 'vs_art.js?v=0d5eca6be5e2'; s.async = true;
   s.onload = () => het(!!window.ART_VS); s.onerror = () => het(false);
   (document.head || document.documentElement).appendChild(s);
 }
@@ -2340,7 +2341,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 29/09 17:19', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 29/09 17:24', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
