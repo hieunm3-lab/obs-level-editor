@@ -403,6 +403,16 @@
   #hint.cu{opacity:.38}
   /* dien thoai: o truc de len o thong ke o 390px — thong tin lop da co o thanh Z */
   html.mob #axhint{display:none}
+  /* 💾 TOAST ghi đè thành công: nổi trên MỌI thứ, hiện 1,5 s rồi mờ dần (30/09) */
+  #toastLuu{position:fixed;left:50%;top:18px;transform:translate(-50%,0);z-index:2147483647;pointer-events:none;
+    display:flex;align-items:center;gap:10px;padding:12px 22px;border-radius:14px;max-width:92vw;box-sizing:border-box;
+    background:linear-gradient(180deg,#1f9d55,#177a42);border:1px solid #6ee7a0;color:#fff;font-size:16px;font-weight:800;
+    letter-spacing:.2px;box-shadow:0 14px 40px rgba(0,0,0,.55),0 0 0 4px rgba(46,204,113,.18);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #toastLuu .tl-ic{font-size:22px;line-height:1}
+  #toastLuu .tl-sub{font-weight:600;font-size:13px;opacity:.9}
+  #toastLuu.chay{animation:toastLuu 2.1s ease forwards}
+  @keyframes toastLuu{0%{opacity:0;transform:translate(-50%,-8px) scale(.98)} 7%{opacity:1;transform:translate(-50%,0) scale(1)}
+    71%{opacity:1;transform:translate(-50%,0) scale(1)} 100%{opacity:0;transform:translate(-50%,-4px) scale(1)}}
   #threewrap[style*="block"]~#issueDock{bottom:92px}     /* 3D: chua cho thanh di doc level (#t3dtravel) */
   html.mob #issueDock{left:6px;bottom:6px;width:min(240px,60vw)}
   html.mob #issueDock.ok{display:none}                    /* dien thoai: chi hien khi CO loi */
@@ -2643,7 +2653,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 12:23', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 14:00', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -5568,6 +5578,14 @@ $('btnDir').onclick=async()=>{
 };
 /* Ghi 1 file vào thư mục đã gắn. createWritable() mở ra là CẮT SẠCH nội dung cũ ⇒ ghi đè thật,
    không phải nối thêm. Trả về true nếu đã ghi xong. */
+/* 💾 TOAST: thông báo NỔI khi ghi đè xong — 1,5 s rõ rồi mờ dần 0,6 s (tổng 2,1 s), không chặn chuột.
+   Gọi liên tiếp thì dựng lại animation từ đầu (không chồng nhiều cái). */
+function toastLuu(chinh,phu){ let el=document.getElementById('toastLuu');
+  if(!el){ el=document.createElement('div'); el.id='toastLuu'; el.setAttribute('role','status'); el.setAttribute('aria-live','polite');
+    document.body.appendChild(el);
+    el.addEventListener('animationend',()=>{ el.classList.remove('chay'); el.style.display='none'; }); }
+  el.innerHTML='<span class="tl-ic">💾</span><span>'+chinh.replace(/</g,'&lt;')+'</span>'+(phu?'<span class="tl-sub">'+phu.replace(/</g,'&lt;')+'</span>':'');
+  el.style.display='flex'; el.classList.remove('chay'); void el.offsetWidth; el.classList.add('chay'); }
 async function dirGhi(ten,txt){
   if(!lvDir) return false;
   if(!await dirQuyen(lvDir,true)) return false;
@@ -5592,7 +5610,8 @@ $('btnExport').onclick=async(ev)=>{pullMeta();if(!tables.some(t=>t.objs.length))
   const taiThuong=!!(ev&&ev.shiftKey);                     // Shift+bấm = LUÔN tải file thường (QOL-2909)
   if(lvDir&&!taiThuong){ try{
       if(!await dirHoiDe(ten)){ hint('Đã huỷ — chưa ghi '+ten+'. (Shift+bấm Tải về = tải file thường)'); return; }
-      if(await dirGhi(ten,txt)){ dirDaGhi.add(ten); lvSrcName=ten; hint('💾 Đã GHI ĐÈ '+ten+' trong 📌 '+lvDir.name+' — khỏi chép tay.'); nukeW(); return; }
+      if(await dirGhi(ten,txt)){ dirDaGhi.add(ten); lvSrcName=ten; hint('💾 Đã GHI ĐÈ '+ten+' trong 📌 '+lvDir.name+' — khỏi chép tay.');
+        toastLuu('Đã ghi đè '+ten,'📌 '+lvDir.name); nukeW(); return; }
       warn('Thư mục 📌 '+lvDir.name+' chưa được cấp quyền ghi — tải file kiểu thường.');
     }catch(e){ warn('Ghi thẳng hỏng ('+((e&&e.message)||e)+') — tải file kiểu thường.'); } }
   const blob=new Blob([txt],{type:'application/json'});const a=document.createElement('a');
