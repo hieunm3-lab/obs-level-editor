@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+<link rel="preload" href="art.js?v=44b66adef971" as="script">
+<link rel="preload" href="three.min.js?v=r128" as="script">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Block Shoot — Level Editor 2D</title>
@@ -922,11 +925,11 @@
 </div>
 
 <script>/* nap three.js ngay tu giay dau, song song voi viec phan tich khoi du lieu art ben duoi */
-(function(){try{var s=document.createElement("script");s.dataset.three="1";s.src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js";(document.head||document.documentElement).appendChild(s);}catch(e){}})();
+(function(){try{var s=document.createElement("script");s.dataset.three="1";s.src="three.min.js?v=r128";(document.head||document.documentElement).appendChild(s);}catch(e){}})();
 </script>
 <script>
 </script>
-<script src="art.js?v=96c514f28571"></script>
+<script src="art.js?v=44b66adef971"></script>
 <script>
 
 /* ===================== ART THAT CUA GAME (them o ban v3) =====================
@@ -1336,7 +1339,7 @@ function _napThreeIm(cb){                 // nap three am tham (khong bao loi nh
   if(!s){
     s = document.createElement('script');
     s.dataset.three = '1';
-    s.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js';
+    s.src = 'three.min.js?v=r128';
     (document.head || document.documentElement).appendChild(s);
   }
   s.addEventListener('load', ()=>cb(), {once:true});
@@ -5882,7 +5885,7 @@ const GAME_CAM={theta:0,phi:1.487,y:5.83,z:-39.5,pitch:3};
 function ensureThree(cb){
   if(window.THREE){cb();return;}
   const s=document.createElement('script');
-  s.src='https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js';
+  s.src='three.min.js?v=r128';
   s.onload=cb; s.onerror=()=>{warn('Không tải được thư viện 3D (cần mạng).');show3d=false;$('t3d').classList.remove('on');$('threewrap').style.display='none';
     mini.on=false;$('tMini').classList.remove('on');$('mini3d').style.display='none';};
   document.head.appendChild(s);
