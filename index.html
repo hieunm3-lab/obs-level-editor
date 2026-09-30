@@ -2643,7 +2643,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 11:52', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 12:23', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -3593,7 +3593,13 @@ function draw(){
         ctx.strokeRect(tl.x+1,tl.y+1,gw-2,gh-2); ctx.setLineDash([]);
         ctx.fillStyle='#f0a93a'; ctx.font='700 11px Segoe UI'; ctx.textAlign='center';
         ctx.fillText('📦 '+S3.join('×')+' — bấm để đặt', tl.x+gw/2, tl.y-6); ctx.restore(); }
-      else { ctx.strokeStyle='#a8e635';ctx.lineWidth=2;ctx.strokeRect(tl.x+1,tl.y+1,gw-2,gh-2);
+      else { // 🖼️ bóng = ẢNH THẬT của khối sắp đặt (mờ 60%), cùng loại / cỡ / hướng cây cọ, đúng chỗ freeSpot sẽ đặt
+        try{ if(!(gT&&gT.plank) && typeof makeObj==='function' && typeof art2DDraw==='function'){
+            const cols=[hc]; if(fMirror.checked&&V.h==='x'&&Math.abs(hc)>1e-6) cols.push(-hc);
+            ctx.save(); ctx.globalAlpha=.6;
+            for(const ci of cols){ const go=makeObj(brush,ci,vc,dc,sh,sv,1); if(typeof applyBrushRot==='function')applyBrushRot(go); art2DDraw(go,V); }
+            ctx.restore(); } }catch(e){ try{ctx.restore();}catch(_){} }
+        ctx.strokeStyle='#a8e635';ctx.lineWidth=2;ctx.strokeRect(tl.x+1,tl.y+1,gw-2,gh-2);
         if(gf){ const c0=toScreen(hc-sh/2,vc+sv/2);         // ô ĐẶT (1×1) vẽ mảnh bên trong cho dễ ngắm
           ctx.save();ctx.strokeStyle='rgba(168,230,53,.45)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
           ctx.strokeRect(c0.x+1,c0.y+1,sh*cell-2,sv*cell-2);ctx.setLineDash([]);ctx.restore(); } } }
