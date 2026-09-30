@@ -2674,7 +2674,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 15:08', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 15:20', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -5636,7 +5636,7 @@ $('btnExport').onclick=async(ev)=>{pullMeta();if(!tables.some(t=>t.objs.length))
   if(lvDir&&!taiThuong){ try{
       if(!await dirHoiDe(ten)){ hint('Đã huỷ — chưa ghi '+ten+'. (Shift+bấm Tải về = tải file thường)'); return; }
       if(await dirGhi(ten,txt)){ dirDaGhi.add(ten); lvSrcName=ten; hint('💾 Đã GHI ĐÈ '+ten+' trong 📌 '+lvDir.name+' — khỏi chép tay.');
-        toastLuu('Đã ghi đè '+ten,'📌 '+lvDir.name); nukeW(); return; }
+        toastLuu('Đã ghi đè '+ten,'📌 '+lvDir.name); folderSauGhi(ten,txt); nukeW(); return; }
       warn('Thư mục 📌 '+lvDir.name+' chưa được cấp quyền ghi — tải file kiểu thường.');
     }catch(e){ warn('Ghi thẳng hỏng ('+((e&&e.message)||e)+') — tải file kiểu thường.'); } }
   const blob=new Blob([txt],{type:'application/json'});const a=document.createElement('a');
@@ -5820,17 +5820,37 @@ function folderShow(i){
   if(folderDirty&&!confirm('Level đang mở đã sửa nhưng chưa tải về.\nChuyển sang level khác sẽ MẤT thay đổi. Tiếp tục?')){renderFolderNav();return;}
   const it=folderFiles[i]; folderBusy=true;
   const rd=new FileReader();
-  rd.onload=()=>{ folderBusy=false; warn('');
-    loadLevel(rd.result,it.idx); lvSrcName=it.name||null;   // loadLevel tự warn() nếu JSON hỏng, và reset history
+  // THUMUC-3009: "áp level vào editor" dùng chung cho mọi đường đọc (File · tay cầm 📌 · bản vừa ghi trong bộ nhớ)
+  const apDung=(txt)=>{ folderBusy=false; warn('');
+    loadLevel(txt,it.idx); lvSrcName=it.name||null;   // loadLevel tự warn() nếu JSON hỏng, và reset history
     folderPos=i; folderDirty=false; renderFolderNav(); updateStats();   // ô #stats hiện tên level đang xem
     const tag='['+(i+1)+'/'+folderFiles.length+'] '+it.name;
     if($('warn').textContent) warn(tag+' — '+$('warn').textContent);
     else hint(tag+' — '+$('hint').textContent); };
-  rd.onerror=()=>{ folderBusy=false; warn('Không đọc được '+it.name); };
+  rd.onload=()=>apDung(rd.result);
+  // THUMUC-3009: File của <input webkitdirectory> bị Chrome VÔ HIỆU khi file trên ổ đã đổi (vd vừa 💾 Ghi đè) ⇒ tự cứu
+  rd.onerror=()=>folderCuu(it,apDung,'');
   // QOL2 C2: file vừa tạo / đổi số / nhân bản qua 📌 chỉ có tay cầm (handle), không có File
-  if(it.handle){ it.handle.getFile().then(f=>rd.readAsText(f)).catch(e=>{ folderBusy=false; warn('Không đọc được '+it.name+': '+(e&&e.message||e)); }); return; }
+  if(it.handle){ it.handle.getFile().then(f=>rd.readAsText(f)).catch(e=>folderCuu(it,apDung,e&&e.message||String(e))); return; }
   rd.readAsText(it.file);
 }
+/* THUMUC-3009 ① ghi đè xong: nếu 📌 CHÍNH là thư mục đang duyệt thì mục đó chuyển sang TAY CẦM (luôn đọc bản mới nhất)
+   + giữ nội dung vừa ghi làm dự phòng. 📌 là thư mục KHÁC thì file đang duyệt không đổi → để nguyên. */
+function folderSauGhi(ten,txt){
+  const it=folderFiles.find(x=>x.name===ten); if(!it) return;
+  if(!(typeof lgCanEdit==='function'&&lgCanEdit())) return;
+  it.txt=txt;
+  lvDir.getFileHandle(ten).then(h=>{ it.handle=h; }).catch(()=>{}); }
+/* THUMUC-3009 ② đọc lỗi → thử lấy lại qua 📌 (cùng thư mục) → bản vừa ghi trong bộ nhớ → báo RÕ cách xử lý */
+function folderCuu(it,apDung,loi){
+  const hetCach=()=>{ folderBusy=false;
+    warn('Không đọc được '+it.name+(loi?' ('+loi+')':'')+' — file đã bị đổi trên ổ sau khi nạp thư mục. Bấm 📁 Nạp thư mục lại'
+      +(typeof lgDirName!=='undefined'&&lgDirName?' ("'+lgDirName+'")':'')+', hoặc 📌 gắn đúng thư mục này để editor tự đọc bản mới.'); };
+  const tuBoNho=()=>{ if(typeof it.txt!=='string') return false;
+    apDung(it.txt); hint('['+it.name+'] mở bản vừa ghi đè (lấy trong bộ nhớ).'); return true; };
+  const quaGhim=(typeof lgCanEdit==='function'&&lgCanEdit())?lvDir.getFileHandle(it.name):Promise.reject(new Error('không có 📌'));
+  quaGhim.then(h=>{ it.handle=h; return h.getFile(); }).then(f=>f.text()).then(txt=>apDung(txt))
+    .catch(()=>{ if(!tuBoNho()) hetCach(); }); }
 const folderStep=d=>folderShow(folderPos+d);
 $('dirIn').onchange=e=>{
   const picked=[...e.target.files].filter(f=>/\.json$/i.test(f.name));   // .json.meta bị loại vì không kết thúc bằng .json
