@@ -340,13 +340,15 @@
   .ycol button{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:5px;font-size:12px;cursor:pointer}
   .ycol button:hover{border-color:var(--move)}
   /* C1: thanh tang Y — chi o khung 3D (nam trong #threewrap), cung kieu thanh lop Z */
-  #ybar{position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:4px;
-    background:#000b;border:1px solid var(--line);border-radius:10px;padding:6px 5px}
-  #ybar .tb{width:40px;justify-content:center;padding:3px 0;margin:0}
-  #ybar #yLab{font-size:13px;font-weight:800;color:var(--move)}
-  #ybar #yVal{width:44px;text-align:center;font-weight:700;padding:3px 2px}
+  /* YLENTREN-3009: tầng Y nằm TRÊN THANH, đúng chỗ cụm lớp Z — 2D hiện Z, 3D hiện Y */
+  #ybar{display:none;align-items:center;gap:3px;flex:0 0 auto}
+  body.v3d #ybar{display:inline-flex}
+  body.v3d #topbar #dPrev,body.v3d #topbar #depthLab,body.v3d #topbar #depthVal,body.v3d #topbar #dNext,body.v3d #topbar #allZwrap{display:none!important}
+  #ybar #yLab{font-size:13px;font-weight:700;color:var(--move);margin-right:2px}
+  #ybar #yVal{width:46px;flex:0 0 auto;font-size:13px;font-weight:700;text-align:center;padding:3px 1px;-moz-appearance:textfield;appearance:textfield}
   #ybar #yVal::-webkit-inner-spin-button,#ybar #yVal::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
   #ybar #yLock.on{background:var(--move);border-color:var(--move);color:#141824}
+  #app.tbtiny #ybar #yLab{display:none}  #app.tbtiny #ybar #yVal{width:44px}
   /* C3: o STAGE noi giua mep tren khung ve (roi khoi thanh 2) */
   #stgDock{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:7;display:flex;align-items:center;gap:6px;
     max-width:min(46%,520px);padding:4px 6px;border-radius:10px;background:rgba(14,16,22,.9);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.5)}
@@ -547,6 +549,8 @@
         title="Lớp đang sửa theo trục sâu của mặt đang xem (mặt Trên = trục Y). GÕ THẲNG số vào đây — nhận cả số lẻ.&#10;Mũi tên ↑↓←→ khi con trỏ đang ở trong ô này = nhảy sang lớp KẾ TIẾP CÓ KHỐI (giống ◀ ▶), không phải cộng trừ máy móc.">
       <button class="tb" id="dNext">▶</button>
       <label class="chk" id="allZwrap" style="margin-left:2px" title="Áp dụng XUYÊN chiều sâu Z khi Vẽ (đặt nhiều lớp) · Xoá (xoá cả cột) · Di chuyển (kéo cả cột) — khỏi làm từng lớp"><input type="checkbox" id="allZ" checked><span class="lbl">cả sâu </span><b class="ic">Z</b></label>
+      <!-- YLENTREN-3009: tầng Y của khung 3D — cùng chỗ cụm lớp Z (2D hiện Z · 3D hiện Y) -->
+      <span id="ybar" title="Tầng Y đang sửa trong khung 3D (▼ ▲ = xuống / lên 1 tầng · 🔓/🔒 = khoá tầng)"><span id="yLab" title="Tầng đang sửa — trục Y (chiều cao)">Y</span><button class="tb" id="yPrev" title="Xuống 1 tầng">▼</button><input id="yVal" type="number" step="1" value="0" title="Tầng đang sửa, số NGUYÊN từ mặt bè lên (tầng 0 = hàng khối sát bè). Chỉ có tác dụng khi bật 🔒 khoá tầng."><button class="tb" id="yNext" title="Lên 1 tầng">▲</button><button class="tb" id="yLock" title="TẮT (mặc định): sửa được khối ở mọi tầng như cũ.&#10;BẬT: chỉ khối ở ĐÚNG tầng đang chọn mới bấm/kéo/xoá/quét-chọn/đặt được; tầng khác mờ đi và tia chuột đi xuyên qua.">🔓</button></span>
       <label class="chk" style="margin-left:2px" title="Dí chuột vào khối là hiện TÊN khối (id, cỡ, khối lượng, vị trí) — cả ở 2D lẫn 3D"><input type="checkbox" id="tipOn" checked>🏷<span class="lbl"> tên khối</span></label>
       <button class="vbtn" id="tPlay" style="margin-left:auto" title="Chạy thử chuyển động của blocker (trượt + xoay) đúng như game">▶<span class="lbl"> Chạy thử</span></button>
       <button class="vbtn keeplbl" id="tMini" title="Preview 3D nhỏ ở góc, cập nhật ngay khi vẽ">🪟<span class="lbl"> Preview</span></button>
@@ -596,13 +600,7 @@
 
     <div id="cwrap">
       <canvas id="cv"></canvas>
-      <div id="threewrap"><canvas id="cv3d"></canvas><!-- 🧭 QOL2-3009 C1: tầng Y + khoá tầng (chỉ trong khung 3D) --><div id="ybar">
-        <span id="yLab" title="Tầng đang sửa — trục Y (chiều cao)">Y</span>
-        <button class="tb" id="yNext" title="Lên 1 tầng">▲</button>
-        <input id="yVal" type="number" step="1" value="0" title="Tầng đang sửa, số NGUYÊN từ mặt bè lên (tầng 0 = hàng khối sát bè). Chỉ có tác dụng khi bật 🔒 khoá tầng.">
-        <button class="tb" id="yPrev" title="Xuống 1 tầng">▼</button>
-        <button class="tb" id="yLock" title="TẮT (mặc định): sửa được khối ở mọi tầng như cũ.&#10;BẬT: chỉ khối ở ĐÚNG tầng đang chọn mới bấm/kéo/xoá/quét-chọn/đặt được; tầng khác mờ đi và tia chuột đi xuyên qua.">🔓</button>
-      </div><div id="t3dbar"><button class="vbtn" id="tGrid" title="Bật/tắt lưới 3 chiều (sàn mặt bàn + 2 vách), mỗi ô = 1 đơn vị khối — để căn khối cho thẳng">▦ Lưới 3D</button><button class="vbtn" id="tGameCam" title="Nhảy về ĐÚNG góc camera trong game: đứng sau pháo nhìn theo +Z (Z càng lớn = bè càng xa)">🎥 Góc game</button><span id="axLab" title="Khoá TRỤC cho nét quét đặt khối: hàng khối sẽ chạy thẳng theo trục này, 2 trục kia giữ nguyên như viên đầu. Đổi nhanh bằng phím mũi tên (khi không chọn khối nào).">Trục:</span><button class="vbtn axb on" id="tAxA" title="Tự động — khoá MẶT PHẲNG của viên đầu: quét tự do trên đúng mặt đó (như sơn lên tường), không nhảy sang mặt khác">Tự động</button><button class="vbtn axb" id="tAxX" title="Khoá trục X — quét ra hàng thẳng theo X">X</button><button class="vbtn axb" id="tAxY" title="Khoá trục Y — quét ra cột thẳng đứng theo Y">Y</button><button class="vbtn axb" id="tAxZ" title="Khoá trục Z — quét ra hàng thẳng theo Z (xa/gần pháo)">Z</button><span id="axRot" title="Góc xoay của CÂY CỌ (khối sắp đặt) quanh trục X — gõ Shift phải để xoay 90°" style="color:#ffb454;font-weight:700;margin:0 2px"></span><button class="vbtn" id="tFitAll" title="Lùi camera cho tới khi thấy TRỌN level (giữ nguyên góc nhìn) — level nhiều bè thì bấm cái này">⤢ Xem hết bàn</button></div><div id="camHud" title="La bàn góc nhìn: 🔺 = PHÁO (camera game) · 👁 = mắt bạn đang đứng · khung xám = biên level. Bấm để về góc game."><canvas id="cvCam" width="132" height="132"></canvas><div id="camHudTxt"></div></div><div id="td3hint"><b style="color:#a8e635">Sửa được ngay trong 3D:</b> ✏️Vẽ = bấm vào MẶT khối → khối mới dán đúng mặt đó · bấm CHỖ TRỐNG → đặt theo <b>lớp sâu đang chọn</b> (đổi lớp bằng ◀▶).<br>🧽Xoá = bấm khối (ô đỏ = sắp xoá) · ✋Di chuyển = kéo khối (Shift = lên/xuống) · <b style="color:#a8e635">kéo NỀN BÀN bằng CHUỘT PHẢI (hoặc Alt+kéo chỗ nào trên bè cũng được) = trượt cả bàn trên MẶT SÀN (trái-phải + xa-gần pháo) · ĐỘ CAO khoá cứng</b> · <b style="color:#48d1ff">kéo nền trống/nền bàn = QUÉT VÙNG CHỌN (xuyên NHIỀU BÀN, y như 2D) · Ctrl+kéo = quét thêm · Ctrl+bấm = thêm/bớt 1 khối</b> → rồi <b style="color:#ffb454">kéo 1 khối trong nhóm = dời CẢ CỤM</b> · <b style="color:#7ee081">bấm NỀN BÈ = chọn TRỌN bè đó → kéo (chuột trái) là cả bè đi tới chỗ mong muốn · Ctrl+D lúc đó đẻ ra BÈ MỚI</b> (rồi x/y/z xoay · ↑↓←→ dời · Ctrl+D nhân bản · <b style="color:#48d1ff">Ctrl+C/Ctrl+V chép-dán</b> · Del xoá).<br><b style="color:#ffb454">Camera: W/A/S/D bay · Q/E xuống/lên · giữ Shift = nhanh gấp đôi · giữ CHUỘT PHẢI = xoay góc</b> · lăn = zoom (lùi được tới hết biên level) · <b style="color:#48d1ff">Shift+kéo (hoặc chuột GIỮA) = DỜI KHUNG NHÌN, kéo xuống là thấy phần TRÊN</b> · <b style="color:#a8e635">⤢ Xem hết bàn</b> = lùi ra ôm trọn mọi bàn.<br><b style="color:#f3b229">▲ PHÁO</b> = MỐC GỐC, luôn đứng yên một chỗ (x=0, z=−8); mũi tên lá chỉ hướng bắn: <b>+Z là XA pháo</b> (khớp mặt Trước của 2D). Bàn dời xa/gần pháo bao nhiêu cứ nhìn mốc này mà căn. La bàn góc phải-dưới cho biết mắt bạn đang đứng đâu — bấm <b>🎥 Góc game</b> để về đúng góc người chơi thấy.</div></div>
+      <div id="threewrap"><canvas id="cv3d"></canvas><div id="t3dbar"><button class="vbtn" id="tGrid" title="Bật/tắt lưới 3 chiều (sàn mặt bàn + 2 vách), mỗi ô = 1 đơn vị khối — để căn khối cho thẳng">▦ Lưới 3D</button><button class="vbtn" id="tGameCam" title="Nhảy về ĐÚNG góc camera trong game: đứng sau pháo nhìn theo +Z (Z càng lớn = bè càng xa)">🎥 Góc game</button><span id="axLab" title="Khoá TRỤC cho nét quét đặt khối: hàng khối sẽ chạy thẳng theo trục này, 2 trục kia giữ nguyên như viên đầu. Đổi nhanh bằng phím mũi tên (khi không chọn khối nào).">Trục:</span><button class="vbtn axb on" id="tAxA" title="Tự động — khoá MẶT PHẲNG của viên đầu: quét tự do trên đúng mặt đó (như sơn lên tường), không nhảy sang mặt khác">Tự động</button><button class="vbtn axb" id="tAxX" title="Khoá trục X — quét ra hàng thẳng theo X">X</button><button class="vbtn axb" id="tAxY" title="Khoá trục Y — quét ra cột thẳng đứng theo Y">Y</button><button class="vbtn axb" id="tAxZ" title="Khoá trục Z — quét ra hàng thẳng theo Z (xa/gần pháo)">Z</button><span id="axRot" title="Góc xoay của CÂY CỌ (khối sắp đặt) quanh trục X — gõ Shift phải để xoay 90°" style="color:#ffb454;font-weight:700;margin:0 2px"></span><button class="vbtn" id="tFitAll" title="Lùi camera cho tới khi thấy TRỌN level (giữ nguyên góc nhìn) — level nhiều bè thì bấm cái này">⤢ Xem hết bàn</button></div><div id="camHud" title="La bàn góc nhìn: 🔺 = PHÁO (camera game) · 👁 = mắt bạn đang đứng · khung xám = biên level. Bấm để về góc game."><canvas id="cvCam" width="132" height="132"></canvas><div id="camHudTxt"></div></div><div id="td3hint"><b style="color:#a8e635">Sửa được ngay trong 3D:</b> ✏️Vẽ = bấm vào MẶT khối → khối mới dán đúng mặt đó · bấm CHỖ TRỐNG → đặt theo <b>lớp sâu đang chọn</b> (đổi lớp bằng ◀▶).<br>🧽Xoá = bấm khối (ô đỏ = sắp xoá) · ✋Di chuyển = kéo khối (Shift = lên/xuống) · <b style="color:#a8e635">kéo NỀN BÀN bằng CHUỘT PHẢI (hoặc Alt+kéo chỗ nào trên bè cũng được) = trượt cả bàn trên MẶT SÀN (trái-phải + xa-gần pháo) · ĐỘ CAO khoá cứng</b> · <b style="color:#48d1ff">kéo nền trống/nền bàn = QUÉT VÙNG CHỌN (xuyên NHIỀU BÀN, y như 2D) · Ctrl+kéo = quét thêm · Ctrl+bấm = thêm/bớt 1 khối</b> → rồi <b style="color:#ffb454">kéo 1 khối trong nhóm = dời CẢ CỤM</b> · <b style="color:#7ee081">bấm NỀN BÈ = chọn TRỌN bè đó → kéo (chuột trái) là cả bè đi tới chỗ mong muốn · Ctrl+D lúc đó đẻ ra BÈ MỚI</b> (rồi x/y/z xoay · ↑↓←→ dời · Ctrl+D nhân bản · <b style="color:#48d1ff">Ctrl+C/Ctrl+V chép-dán</b> · Del xoá).<br><b style="color:#ffb454">Camera: W/A/S/D bay · Q/E xuống/lên · giữ Shift = nhanh gấp đôi · giữ CHUỘT PHẢI = xoay góc</b> · lăn = zoom (lùi được tới hết biên level) · <b style="color:#48d1ff">Shift+kéo (hoặc chuột GIỮA) = DỜI KHUNG NHÌN, kéo xuống là thấy phần TRÊN</b> · <b style="color:#a8e635">⤢ Xem hết bàn</b> = lùi ra ôm trọn mọi bàn.<br><b style="color:#f3b229">▲ PHÁO</b> = MỐC GỐC, luôn đứng yên một chỗ (x=0, z=−8); mũi tên lá chỉ hướng bắn: <b>+Z là XA pháo</b> (khớp mặt Trước của 2D). Bàn dời xa/gần pháo bao nhiêu cứ nhìn mốc này mà căn. La bàn góc phải-dưới cho biết mắt bạn đang đứng đâu — bấm <b>🎥 Góc game</b> để về đúng góc người chơi thấy.</div></div>
       <div id="t3dtravel" title="Kéo vuốt để đi dọc level theo trục pháo — camera bám đúng đường các bè nằm nên bè luôn ở giữa khung. Bàn phím: W/S bay tới-lui, Q/E hạ-nâng."><button id="tvNear" title="Về bè GẦN PHÁO NHẤT">⏮ gần pháo</button><button id="tvPrev" title="Lùi 1 bè về phía pháo">◀ bè</button><input type="range" id="tvRange" min="0" max="1000" value="0"><button id="tvNext" title="Tiến 1 bè ra xa pháo">bè ▶</button><button id="tvFar" title="Tới bè XA PHÁO NHẤT">xa pháo ⏭</button><span id="tvLab"></span><span id="tvCount" style="opacity:.7"></span></div>
       <div id="mini3d">
         <div id="miniHead"><b>🪟 Preview 3D</b><span id="miniLab"></span><button id="miniFit" title="Vừa khung">⤢</button><button id="miniHide" title="Đóng">✕</button></div>
@@ -2646,7 +2644,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 14:42', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 14:56', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -5875,7 +5873,7 @@ function ensureThree(cb){
   if(window.THREE){cb();return;}
   const s=document.createElement('script');
   s.src='three.min.js?v=r128';
-  s.onload=cb; s.onerror=()=>{warn('Không tải được thư viện 3D (cần mạng).');show3d=false;$('t3d').classList.remove('on');$('threewrap').style.display='none';
+  s.onload=cb; s.onerror=()=>{warn('Không tải được thư viện 3D (cần mạng).');show3d=false;document.body.classList.remove('v3d');$('t3d').classList.remove('on');$('threewrap').style.display='none';
     mini.on=false;$('tMini').classList.remove('on');$('mini3d').style.display='none';};
   document.head.appendChild(s);
 }
@@ -6366,7 +6364,7 @@ function startLoop(){ if(!looping)loop3D(); }
 function sync3D(){ if(!three){ if(mini.on)mini.dirty=true; return; }
   if(show3d||mini.on){ build3D(false); mini.dirty=false; mini.last=performance.now(); } }
 function toggle3D(){
-  show3d=!show3d; $('t3d').classList.toggle('on',show3d); $('threewrap').style.display=show3d?'block':'none';
+  show3d=!show3d; document.body.classList.toggle('v3d',show3d); $('t3d').classList.toggle('on',show3d); $('threewrap').style.display=show3d?'block':'none';
   if(typeof qStgRefit==='function')qStgRefit();          // QOL2 C3: vào/ra 3D thì thanh 3D hiện/ẩn ⇒ căn lại ổ stage
   if(show3d){ ensureThree(()=>{ if(!three)init3D(); resize3D(); if(typeof qYEnter==='function')qYEnter(); build3D(); startLoop(); hint('Chế độ XEM 3D — bấm "Xem 3D" lần nữa để về vẽ 2D.'); }); }
   else hint('Về chế độ vẽ 2D.');
