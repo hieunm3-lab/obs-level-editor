@@ -317,6 +317,90 @@
   html:not(.mob) #left .grp.pcCol:not(.palOpen)>:not(.pcHead){display:none!important}
   html:not(.mob) #right>.field.pcCol>:not(.pcHead){display:none!important}
   html:not(.mob) #right>.field.pcCol>.pcHead{margin-bottom:0!important}
+
+  /* ===== QOL2-3009 (port lan 2 tu Desktop\index.html) ===== */
+  .tb.danger{border-color:var(--danger)}      /* A6: nut 🗑 Xoa vien do han — chi vien, khong them chu */
+  /* B6: ban phim doi theo TRUC THE GIOI (X/Z mat san) + cot Y rieng */
+  .movepad{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:4px}
+  .movepad .nudge{width:126px;flex:0 0 auto;margin:0}
+  .ycol{display:grid;grid-template-rows:repeat(3,1fr);gap:4px;width:40px;flex:0 0 auto;align-self:stretch}
+  .ycol .ylab{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--move)}
+  .ycol button{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:5px;font-size:12px;cursor:pointer}
+  .ycol button:hover{border-color:var(--move)}
+  /* C1: thanh tang Y — chi o khung 3D (nam trong #threewrap), cung kieu thanh lop Z */
+  #ybar{position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:4px;
+    background:#000b;border:1px solid var(--line);border-radius:10px;padding:6px 5px}
+  #ybar .tb{width:40px;justify-content:center;padding:3px 0;margin:0}
+  #ybar #yLab{font-size:13px;font-weight:800;color:var(--move)}
+  #ybar #yVal{width:44px;text-align:center;font-weight:700;padding:3px 2px}
+  #ybar #yVal::-webkit-inner-spin-button,#ybar #yVal::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+  #ybar #yLock.on{background:var(--move);border-color:var(--move);color:#141824}
+  /* C3: o STAGE noi giua mep tren khung ve (roi khoi thanh 2) */
+  #stgDock{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:7;display:flex;align-items:center;gap:6px;
+    max-width:min(46%,520px);padding:4px 6px;border-radius:10px;background:rgba(14,16,22,.9);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  #stgDock .sglab{font-size:12px;flex:0 0 auto}
+  #stgDock #stgNow{font-size:12px;color:#b072ff;font-weight:700;flex:0 0 auto}
+  #stgDock #stgBar{display:flex;flex-wrap:nowrap;gap:3px;margin:0;min-width:0;flex:1 1 auto;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+  #stgDock #stgBar .tbtab{flex:0 0 auto;padding:3px 8px;font-size:11.5px;white-space:nowrap}
+  #stgDock #stgBar .tbtab.on{background:#b072ff;border-color:#b072ff;color:#12081f;font-weight:700}
+  #stgDock #stgOps{flex:0 0 auto}
+  #stgDock #stgInfo{display:none}
+  /* C3: o CANH BAO goc trai-duoi khung ve (Soat loi game + dong khoi chong nhau + nut vien) */
+  #issueDock{position:absolute;left:10px;bottom:48px;z-index:7;width:min(320px,42%);display:flex;flex-direction:column;gap:4px;pointer-events:none}
+  #issueDock>*{pointer-events:auto}
+  #issueDock #valPanel{margin:0;padding:6px 8px;background:rgba(14,16,22,.92);max-height:34vh;overflow:auto}
+  #issueDock #valPanel>label{margin:0 0 4px}
+  #issueDock.ok #valHead{display:none}
+  #issueDock.ok #valPanel{padding:3px 8px}
+  #ovLine{display:flex;align-items:center;gap:6px;background:rgba(14,16,22,.92);border:1px solid #ff7a1a;border-radius:8px;padding:3px 6px;font-size:11px;color:#ff9a4a}
+  #ovLine #ovTxt{flex:1 1 auto;min-width:0}
+  #ovLine .tb{padding:1px 6px;font-size:11px;margin:0;flex:0 0 auto}
+  #ovLine .tb.off{opacity:.55}
+  #threewrap[style*="block"]~#issueDock{bottom:92px}     /* 3D: chua cho thanh di doc level (#t3dtravel) */
+  html.mob #issueDock{left:6px;bottom:6px;width:min(240px,60vw)}
+  html.mob #issueDock.ok{display:none}                    /* dien thoai: chi hien khi CO loi */
+  /* dien thoai: nam tren hang goi y / nut Xoay cam (bottom ~12..48px), sat trai — khong de #zbar (phai) */
+  html.mob #stgDock{top:auto!important;bottom:54px;left:6px!important;transform:none!important;max-width:62vw;padding:3px 4px}   /* !important: fitStgDock (PC) co the da ghi left inline luc khoi dong */
+  html.mob #issueDock:not(.ok){bottom:96px}
+  /* C2: bang luoi chon level (position:fixed de khong bi thanh 2 cat) */
+  #lvPick{padding:3px 7px}
+  #lgPop{position:fixed;z-index:1000;width:258px;max-height:min(440px,72vh);display:flex;flex-direction:column;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.55);overflow:hidden}
+  #lgPop[hidden]{display:none!important}
+  #lgPop .lghead{display:flex;align-items:center;gap:6px;padding:7px;border-bottom:1px solid var(--line)}
+  #lgFind{flex:1;min-width:0;padding:5px 7px;font-size:13px}
+  #lgCount{font-size:11px;color:var(--dim);white-space:nowrap}
+  #lgX{border:0;background:transparent;color:var(--dim);font-size:14px;cursor:pointer;padding:2px 5px;border-radius:5px}
+  #lgX:hover{background:var(--panel2);color:var(--txt)}
+  #lgList{overflow-y:auto;flex:1 1 auto;padding:6px 7px;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;align-content:start;min-height:40px}
+  .lgchip{position:relative;display:flex;align-items:center;justify-content:center;height:28px;border-radius:6px;cursor:pointer;
+    font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--txt);background:var(--panel2);border:1px solid transparent;user-select:none}
+  .lgchip:hover{border-color:var(--accent2)}
+  .lgchip.hi{outline:2px solid var(--accent2);outline-offset:-1px}
+  .lgchip.on{background:var(--accent2);color:#0b0d17;font-weight:800}
+  .lgchip.d1{color:#ff5a6e}
+  .lgchip.d2{color:#b072ff}
+  .lgchip.on.d1{background:#ff5a6e;color:#1a0508}
+  .lgchip.on.d2{background:#b072ff;color:#12081f}
+  .lgchip .dot{position:absolute;top:-3px;right:-2px;font-style:normal;font-size:10px;color:#ffb454}
+  .lgchip.gap{background:transparent;border:1px dashed #ff5a6e;color:#ff5a6e;cursor:default;font-size:11px}
+  .lgchip.wide{grid-column:1/-1;justify-content:flex-start;padding:0 8px}
+  #lgAct{border-top:1px solid var(--line);padding:6px 8px;font-size:12px;color:var(--txt)}
+  #lgAct .row1{display:flex;align-items:center;gap:5px;min-height:26px}
+  #lgAct .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  #lgAct .btns{margin-left:auto;display:flex;gap:3px}
+  #lgAct button{padding:2px 7px;font-size:12px;border-radius:5px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);cursor:pointer}
+  #lgAct button:disabled{opacity:.35;cursor:default}
+  #lgAct button.del{color:#ff5a6e}
+  #lgAct button.ok{background:var(--accent2);color:#0b0d17;border-color:var(--accent2)}
+  #lgAct button.ok.del{background:#ff5a6e;border-color:#ff5a6e;color:#1a0508}
+  #lgAct input{width:62px;padding:2px 5px}
+  #lgAct .why{font-size:11px;color:#ff5a6e;margin-top:3px;line-height:1.4}
+  #lgPop .lgempty{padding:12px 4px;font-size:12px;color:var(--dim);line-height:1.5;grid-column:1/-1}
+  #lgPop .lgfoot{display:flex;align-items:center;gap:8px;padding:6px 8px 8px}
+  #lgPop .lgfoot button{padding:5px 10px;border-radius:6px;border:1px solid var(--accent2);background:var(--accent2);color:#0b0d17;font-weight:700;cursor:pointer;white-space:nowrap}
+  #lgPop .lgfoot button:disabled{opacity:.4;cursor:default}
+  #lgDir{margin-left:auto;font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 </style>
 </head>
 <body>
@@ -423,7 +507,8 @@
         <input id="lvPos" type="number" min="1" step="1" style="width:48px" title="Gõ số thứ tự rồi Enter để nhảy tới">
         <span class="t2lab" id="lvCount"></span>
         <button class="tb" id="btnNextLv" title="Level sau (PageDown hoặc Alt+→)">▶</button>
-        <select id="lvSel" title="Nhảy thẳng tới 1 file trong thư mục"></select>
+        <select id="lvSel" title="Nhảy thẳng tới 1 file trong thư mục" style="display:none"></select>
+        <button class="tb" id="lvPick" title="📄 Bảng chọn level: gõ số, lưới số (ô đỏ = số THIẾU, màu = độ khó), đổi số / nhân bản / xoá / tạo mới">▦</button>
         <span id="lvName"></span>
       </div>
       <div class="sep"></div>
@@ -437,12 +522,6 @@
            Giá trị ghi ra file vẫn 0/1/2 và 3 màu lá/đỏ/tím giữ nguyên ở mọi bề ngang. -->
       <div class="snapseg" id="segDiff"
            title="Độ khó ghi vào file: Dễ = 0 · Khó 1 = 1 · Khó 2 = 2"><button data-d="0" class="on"><span class="dshort">Dễ</span><span class="dlong"> 0</span></button><button data-d="1"><span class="dshort">K</span><span class="dlong">hó </span><span class="dshort">1</span></button><button data-d="2"><span class="dshort">K</span><span class="dlong">hó </span><span class="dshort">2</span></button></div>
-      <div class="sep"></div>
-      <span class="t2lab" title="Stage — hết khối stage này thì game dựng stage kế. Lượt bắn dùng CHUNG cả level.">🎬</span>
-      <span class="t2lab" id="stgNow" style="color:#b072ff;font-weight:700">1/1</span>
-      <div id="stgBar" class="tblbar"></div>
-      <div id="stgOps"></div>
-      <span class="t2lab" id="stgInfo"></span>
       <div class="sep"></div>
       <!-- nhóm tệp để icon trần + tooltip: có thêm dải lật level thì thanh vẫn đủ chỗ, không bị đẩy khuất -->
       <!-- 📌 gắn thư mục levels: gắn rồi thì "Tải về" đổi thành "Ghi đè", ghi thẳng LevelN.json vào đó -->
@@ -458,7 +537,13 @@
 
     <div id="cwrap">
       <canvas id="cv"></canvas>
-      <div id="threewrap"><canvas id="cv3d"></canvas><div id="t3dbar"><button class="vbtn" id="tGrid" title="Bật/tắt lưới 3 chiều (sàn mặt bàn + 2 vách), mỗi ô = 1 đơn vị khối — để căn khối cho thẳng">▦ Lưới 3D</button><button class="vbtn" id="tGameCam" title="Nhảy về ĐÚNG góc camera trong game: đứng sau pháo nhìn theo +Z (Z càng lớn = bè càng xa)">🎥 Góc game</button><span id="axLab" title="Khoá TRỤC cho nét quét đặt khối: hàng khối sẽ chạy thẳng theo trục này, 2 trục kia giữ nguyên như viên đầu. Đổi nhanh bằng phím mũi tên (khi không chọn khối nào).">Trục:</span><button class="vbtn axb on" id="tAxA" title="Tự động — khoá MẶT PHẲNG của viên đầu: quét tự do trên đúng mặt đó (như sơn lên tường), không nhảy sang mặt khác">Tự động</button><button class="vbtn axb" id="tAxX" title="Khoá trục X — quét ra hàng thẳng theo X">X</button><button class="vbtn axb" id="tAxY" title="Khoá trục Y — quét ra cột thẳng đứng theo Y">Y</button><button class="vbtn axb" id="tAxZ" title="Khoá trục Z — quét ra hàng thẳng theo Z (xa/gần pháo)">Z</button><span id="axRot" title="Góc xoay của CÂY CỌ (khối sắp đặt) quanh trục X — gõ Shift phải để xoay 90°" style="color:#ffb454;font-weight:700;margin:0 2px"></span><button class="vbtn" id="tFitAll" title="Lùi camera cho tới khi thấy TRỌN level (giữ nguyên góc nhìn) — level nhiều bè thì bấm cái này">⤢ Xem hết bàn</button></div><div id="camHud" title="La bàn góc nhìn: 🔺 = PHÁO (camera game) · 👁 = mắt bạn đang đứng · khung xám = biên level. Bấm để về góc game."><canvas id="cvCam" width="132" height="132"></canvas><div id="camHudTxt"></div></div><div id="td3hint"><b style="color:#a8e635">Sửa được ngay trong 3D:</b> ✏️Vẽ = bấm vào MẶT khối → khối mới dán đúng mặt đó · bấm CHỖ TRỐNG → đặt theo <b>lớp sâu đang chọn</b> (đổi lớp bằng ◀▶).<br>🧽Xoá = bấm khối (ô đỏ = sắp xoá) · ✋Di chuyển = kéo khối (Shift = lên/xuống) · <b style="color:#a8e635">kéo NỀN BÀN bằng CHUỘT PHẢI (hoặc Alt+kéo chỗ nào trên bè cũng được) = trượt cả bàn trên MẶT SÀN (trái-phải + xa-gần pháo) · ĐỘ CAO khoá cứng</b> · <b style="color:#48d1ff">kéo nền trống/nền bàn = QUÉT VÙNG CHỌN (xuyên NHIỀU BÀN, y như 2D) · Ctrl+kéo = quét thêm · Ctrl+bấm = thêm/bớt 1 khối</b> → rồi <b style="color:#ffb454">kéo 1 khối trong nhóm = dời CẢ CỤM</b> · <b style="color:#7ee081">bấm NỀN BÈ = chọn TRỌN bè đó → kéo (chuột trái) là cả bè đi tới chỗ mong muốn · Ctrl+D lúc đó đẻ ra BÈ MỚI</b> (rồi x/y/z xoay · ↑↓←→ dời · Ctrl+D nhân bản · <b style="color:#48d1ff">Ctrl+C/Ctrl+V chép-dán</b> · Del xoá).<br><b style="color:#ffb454">Camera: W/A/S/D bay · Q/E xuống/lên · giữ Shift = nhanh gấp đôi · giữ CHUỘT PHẢI = xoay góc</b> · lăn = zoom (lùi được tới hết biên level) · <b style="color:#48d1ff">Shift+kéo (hoặc chuột GIỮA) = DỜI KHUNG NHÌN, kéo xuống là thấy phần TRÊN</b> · <b style="color:#a8e635">⤢ Xem hết bàn</b> = lùi ra ôm trọn mọi bàn.<br><b style="color:#f3b229">▲ PHÁO</b> = MỐC GỐC, luôn đứng yên một chỗ (x=0, z=−8); mũi tên lá chỉ hướng bắn: <b>+Z là XA pháo</b> (khớp mặt Trước của 2D). Bàn dời xa/gần pháo bao nhiêu cứ nhìn mốc này mà căn. La bàn góc phải-dưới cho biết mắt bạn đang đứng đâu — bấm <b>🎥 Góc game</b> để về đúng góc người chơi thấy.</div></div>
+      <div id="threewrap"><canvas id="cv3d"></canvas><!-- 🧭 QOL2-3009 C1: tầng Y + khoá tầng (chỉ trong khung 3D) --><div id="ybar">
+        <span id="yLab" title="Tầng đang sửa — trục Y (chiều cao)">Y</span>
+        <button class="tb" id="yNext" title="Lên 1 tầng">▲</button>
+        <input id="yVal" type="number" step="1" value="0" title="Tầng đang sửa, số NGUYÊN từ mặt bè lên (tầng 0 = hàng khối sát bè). Chỉ có tác dụng khi bật 🔒 khoá tầng.">
+        <button class="tb" id="yPrev" title="Xuống 1 tầng">▼</button>
+        <button class="tb" id="yLock" title="TẮT (mặc định): sửa được khối ở mọi tầng như cũ.&#10;BẬT: chỉ khối ở ĐÚNG tầng đang chọn mới bấm/kéo/xoá/quét-chọn/đặt được; tầng khác mờ đi và tia chuột đi xuyên qua.">🔓</button>
+      </div><div id="t3dbar"><button class="vbtn" id="tGrid" title="Bật/tắt lưới 3 chiều (sàn mặt bàn + 2 vách), mỗi ô = 1 đơn vị khối — để căn khối cho thẳng">▦ Lưới 3D</button><button class="vbtn" id="tGameCam" title="Nhảy về ĐÚNG góc camera trong game: đứng sau pháo nhìn theo +Z (Z càng lớn = bè càng xa)">🎥 Góc game</button><span id="axLab" title="Khoá TRỤC cho nét quét đặt khối: hàng khối sẽ chạy thẳng theo trục này, 2 trục kia giữ nguyên như viên đầu. Đổi nhanh bằng phím mũi tên (khi không chọn khối nào).">Trục:</span><button class="vbtn axb on" id="tAxA" title="Tự động — khoá MẶT PHẲNG của viên đầu: quét tự do trên đúng mặt đó (như sơn lên tường), không nhảy sang mặt khác">Tự động</button><button class="vbtn axb" id="tAxX" title="Khoá trục X — quét ra hàng thẳng theo X">X</button><button class="vbtn axb" id="tAxY" title="Khoá trục Y — quét ra cột thẳng đứng theo Y">Y</button><button class="vbtn axb" id="tAxZ" title="Khoá trục Z — quét ra hàng thẳng theo Z (xa/gần pháo)">Z</button><span id="axRot" title="Góc xoay của CÂY CỌ (khối sắp đặt) quanh trục X — gõ Shift phải để xoay 90°" style="color:#ffb454;font-weight:700;margin:0 2px"></span><button class="vbtn" id="tFitAll" title="Lùi camera cho tới khi thấy TRỌN level (giữ nguyên góc nhìn) — level nhiều bè thì bấm cái này">⤢ Xem hết bàn</button></div><div id="camHud" title="La bàn góc nhìn: 🔺 = PHÁO (camera game) · 👁 = mắt bạn đang đứng · khung xám = biên level. Bấm để về góc game."><canvas id="cvCam" width="132" height="132"></canvas><div id="camHudTxt"></div></div><div id="td3hint"><b style="color:#a8e635">Sửa được ngay trong 3D:</b> ✏️Vẽ = bấm vào MẶT khối → khối mới dán đúng mặt đó · bấm CHỖ TRỐNG → đặt theo <b>lớp sâu đang chọn</b> (đổi lớp bằng ◀▶).<br>🧽Xoá = bấm khối (ô đỏ = sắp xoá) · ✋Di chuyển = kéo khối (Shift = lên/xuống) · <b style="color:#a8e635">kéo NỀN BÀN bằng CHUỘT PHẢI (hoặc Alt+kéo chỗ nào trên bè cũng được) = trượt cả bàn trên MẶT SÀN (trái-phải + xa-gần pháo) · ĐỘ CAO khoá cứng</b> · <b style="color:#48d1ff">kéo nền trống/nền bàn = QUÉT VÙNG CHỌN (xuyên NHIỀU BÀN, y như 2D) · Ctrl+kéo = quét thêm · Ctrl+bấm = thêm/bớt 1 khối</b> → rồi <b style="color:#ffb454">kéo 1 khối trong nhóm = dời CẢ CỤM</b> · <b style="color:#7ee081">bấm NỀN BÈ = chọn TRỌN bè đó → kéo (chuột trái) là cả bè đi tới chỗ mong muốn · Ctrl+D lúc đó đẻ ra BÈ MỚI</b> (rồi x/y/z xoay · ↑↓←→ dời · Ctrl+D nhân bản · <b style="color:#48d1ff">Ctrl+C/Ctrl+V chép-dán</b> · Del xoá).<br><b style="color:#ffb454">Camera: W/A/S/D bay · Q/E xuống/lên · giữ Shift = nhanh gấp đôi · giữ CHUỘT PHẢI = xoay góc</b> · lăn = zoom (lùi được tới hết biên level) · <b style="color:#48d1ff">Shift+kéo (hoặc chuột GIỮA) = DỜI KHUNG NHÌN, kéo xuống là thấy phần TRÊN</b> · <b style="color:#a8e635">⤢ Xem hết bàn</b> = lùi ra ôm trọn mọi bàn.<br><b style="color:#f3b229">▲ PHÁO</b> = MỐC GỐC, luôn đứng yên một chỗ (x=0, z=−8); mũi tên lá chỉ hướng bắn: <b>+Z là XA pháo</b> (khớp mặt Trước của 2D). Bàn dời xa/gần pháo bao nhiêu cứ nhìn mốc này mà căn. La bàn góc phải-dưới cho biết mắt bạn đang đứng đâu — bấm <b>🎥 Góc game</b> để về đúng góc người chơi thấy.</div></div>
       <div id="t3dtravel" title="Kéo vuốt để đi dọc level theo trục pháo — camera bám đúng đường các bè nằm nên bè luôn ở giữa khung. Bàn phím: W/S bay tới-lui, Q/E hạ-nâng."><button id="tvNear" title="Về bè GẦN PHÁO NHẤT">⏮ gần pháo</button><button id="tvPrev" title="Lùi 1 bè về phía pháo">◀ bè</button><input type="range" id="tvRange" min="0" max="1000" value="0"><button id="tvNext" title="Tiến 1 bè ra xa pháo">bè ▶</button><button id="tvFar" title="Tới bè XA PHÁO NHẤT">xa pháo ⏭</button><span id="tvLab"></span><span id="tvCount" style="opacity:.7"></span></div>
       <div id="mini3d">
         <div id="miniHead"><b>🪟 Preview 3D</b><span id="miniLab"></span><button id="miniFit" title="Vừa khung">⤢</button><button id="miniHide" title="Đóng">✕</button></div>
@@ -466,6 +551,14 @@
       </div>
       <div id="stats"></div>
       <div id="axhint"></div>
+      <!-- 🎬 QOL2-3009 C3: ổ STAGE nổi giữa mép trên khung vẽ (rời khỏi thanh 2 — trả chỗ cho thanh công cụ). Giữ nguyên id. -->
+      <div id="stgDock">
+        <span class="sglab" title="Stage — hết khối stage này thì game dựng stage kế. Lượt bắn dùng CHUNG cả level.">🎬</span>
+        <span id="stgNow">1/1</span>
+        <div id="stgBar" class="tblbar"></div>
+        <div id="stgOps"></div>
+        <span id="stgInfo"></span>
+      </div>
       <!-- ③ QOL-2909: lớp sâu đang sửa — rời khỏi thanh công cụ, nổi ở góc phải-dưới khung vẽ (giữ nguyên id) -->
       <div id="zbar" title="Lớp sâu đang sửa (mặt Trước = Z · Trên = Y · Bên = X). ▲ ▼ = lớp kế tiếp CÓ KHỐI · phím &lt; &gt; cũng được.">
         <span id="depthLab">Z</span>
@@ -476,6 +569,14 @@
         <label class="chk" id="allZwrap" title="Áp dụng XUYÊN chiều sâu Z khi Vẽ (đặt nhiều lớp) · Xoá (xoá cả cột) · Di chuyển (kéo cả cột) — khỏi làm từng lớp"><input type="checkbox" id="allZ" checked><span>cả Z</span></label>
       </div>
       <div id="hint"></div>
+      <!-- 🧾 QOL2-3009 C3: ổ CẢNH BÁO góc trái-dưới: Soát lỗi game (dời từ bảng phải) + dòng khối chồng nhau + nút viền -->
+      <div id="issueDock" class="ok">
+        <div id="ovLine" style="display:none"><span id="ovTxt"></span><button class="tb" id="ovToggle" title="Bật/tắt viền cam nét đứt đánh dấu khối đâm nhau (cả 2D lẫn 3D). Vẫn đếm và vẫn chặn đặt chồng như thường — chỉ ẩn phần vẽ.">👁 viền</button></div>
+        <div class="field" id="valPanel" style="border:1px solid #7ee081;border-radius:8px;padding:9px;background:rgba(255,90,110,.05)">
+          <label id="valHead" title="Game bỏ qua khối có cỡ sai luật hoặc chưa có prefab variant — vào chơi khối biến mất mà không báo gì">🚫 Soát lỗi game (khối sẽ biến mất)</label>
+          <div id="valList" style="font-size:11px;max-height:168px;overflow:auto;line-height:1.5"></div>
+        </div>
+      </div>
       <!-- ô dán JSON: nằm TRONG khung vẽ dạng lớp nổi, không chiếm thêm dòng của thanh công cụ.
            (Không đặt trong #topbar2 được vì thanh đó có overflow-x:auto — sẽ bị cắt mất.) -->
       <textarea id="pasteBox" placeholder="Dán nội dung Level{N}.json vào đây rồi bấm ✅ Nạp JSON trên thanh công cụ..." style="display:none"></textarea>
@@ -508,12 +609,16 @@
       </div>
       <div id="objWarn" style="display:none">⚠ Khối đã xoay quanh NHIỀU trục — ba ô góc chỉ là số gần đúng đọc ngược từ quaternion. Dùng nút xoay 90° cho chắc.</div>
       <button class="btn" data-r="reset" style="margin:6px 0 0;padding:7px" title="Về thẳng">↺ Reset xoay</button>
-      <div style="font-size:10.5px;color:var(--dim);margin:9px 0 5px">✥ DỜI / HẠ:</div>
-      <div class="nudge" style="max-width:150px;margin:0 auto">
-        <span></span><button data-n="v+">▲</button><span></span>
-        <button data-n="h-">◀</button><button data-n="drop" title="hạ sát khối dưới">⤓</button><button data-n="h+">▶</button>
-        <span></span><button data-n="v-">▼</button><span></span>
+      <div style="font-size:10.5px;color:var(--dim);margin:9px 0 5px" title="Bốn mũi tên đi theo MẶT SÀN (X ngang · Z sâu) và GIỮ NGUYÊN độ cao; lên/xuống dùng cột Y bên phải. Mỗi lần nhích đúng bằng Bước trên thanh công cụ. Phím mũi tên ↑↓←→ vẫn đi theo mặt đang xem.">✥ DỜI / HẠ (theo trục thế giới):</div>
+      <div class="movepad">
+        <div class="nudge">
+          <span></span><button data-n="z+" title="Z + — ra XA pháo">▲</button><span></span>
+          <button data-n="x-" title="X − — sang trái">◀</button><button data-n="drop" title="Hạ sát xuống khối ngay dưới (hoặc mặt bàn)">⤓</button><button data-n="x+" title="X + — sang phải">▶</button>
+          <span></span><button data-n="z-" title="Z − — về PHÍA pháo">▼</button><span></span>
+        </div>
+        <div class="ycol"><button data-n="y+" title="Y + — lên cao">▲</button><span class="ylab">Y</span><button data-n="y-" title="Y − — xuống thấp">▼</button></div>
       </div>
+      <div style="font-size:10px;color:var(--dim);margin:4px 0 0;text-align:center">◀ ▶ = X · ▲ ▼ = Z · cột phải = Y · ⤓ = hạ sát khối dưới</div>
       <div class="qnote" title="Số Ô mỗi trục. Game chỉ cho khối dài trên TỐI ĐA 1 trục (TryGetSizeAxis), nên kéo dài trục này thì hai trục kia tự về 1. Cỡ sai luật báo đỏ ngay dưới.">📏 KÍCH THƯỚC (ô) — <b style="color:var(--txt)">chỉ dài 1 trục</b>:</div>
       <div class="row" style="gap:6px;margin:0 0 4px">
         <div class="fld"><input type="number" id="objSX" step="1" min="1" max="10" title="Số ô theo trục X (ngang)"><span class="cap">Ngang X</span></div>
@@ -536,6 +641,7 @@
         <div class="fld"><input type="number" id="tblYaw" step="5" title="Góc xoay quanh Y (độ) — 'chéo chéo'" placeholder="Yaw°" style="padding:4px 6px"><span class="cap">Góc Yaw°</span></div>
       </div>
 
+      <label class="chk" id="tblLockWrap" style="margin:2px 0 6px" title="TẮT (mặc định): kéo được bè trong khung 3D như cũ (chuột phải / Alt+kéo trên nền bè).&#10;BẬT: không kéo được bè trong 3D — tránh chạm nhầm khi xoay camera. Ô số X/Z/Cao/Yaw vẫn sửa được."><input type="checkbox" id="tblLock"> 🔒 Khoá kéo bàn trong 3D</label>
       <label class="chk" style="margin:5px 0"><input type="checkbox" id="mRot"> Xoay quanh Y ·
         <input type="number" id="mRotSpd" value="0" step="1" style="width:52px;padding:3px 5px" title="độ/giây"> °/s</label>
       <label class="chk" style="margin:5px 0"><input type="checkbox" id="mH"> Trượt ngang (X)</label>
@@ -645,6 +751,8 @@
     </div>
     <div class="field" id="impPanel" style="border:1px solid #7ee081;border-radius:8px;padding:9px;background:rgba(126,224,129,.06)">
       <label style="color:#7ee081;margin-bottom:6px">📥 Nhập bàn từ level khác</label>
+      <label class="btn ghost" style="cursor:pointer;display:block;text-align:center;margin-bottom:5px" title="Nạp bố cục từ một file Level*.json khác ĐÈ lên level đang mở.&#10;GIỮ NGUYÊN: số Level và file đích (💾 Ghi đè vẫn ghi đúng Level{N}.json đang mở).&#10;LẤY TỪ FILE NGUỒN: khối, bàn, blocker, lượt bắn, độ khó.&#10;⚠ Bố cục cũ mất, Ctrl+Z không lấy lại được (nạp file luôn xoá lịch sử).">⤵️ Nạp ĐÈ bố cục (giữ số Level)…<input type="file" id="impLayoutIn" accept=".json,application/json" style="display:none"></label>
+      <div style="font-size:10px;color:var(--dim);margin:0 0 8px;line-height:1.4">Thay ruột level đang mở bằng file khác — số Level + file đích giữ nguyên. Nút dưới thì NHẬP THÊM bàn.</div>
       <label class="btn ghost" style="cursor:pointer;display:block;text-align:center;margin-bottom:7px">📂 Chọn nhiều file Level…<input type="file" id="impIn" accept=".json,application/json" multiple style="display:none"></label>
       <div class="row" style="gap:5px;align-items:center;margin-bottom:5px">
         <span style="font-size:10px;color:var(--dim);white-space:nowrap">Lấy</span>
@@ -707,10 +815,6 @@
     <label class="chk" id="stackWrap" style="margin-bottom:4px" title="TẮT (mặc định): khối mới đè lên khối có sẵn thì bị chặn, không đặt được.&#10;BẬT: cho đặt lồng/chồng vào khối có sẵn (vẫn chặn trùng khít y hệt chỗ cũ). Chỗ chồng nhau vẫn hiện viền cam nét đứt để soát lại trước khi xuất."><input type="checkbox" id="fStack"> 🧱 Cho xếp chồng lên khối có sẵn</label>
     <div class="helptx" style="margin-bottom:8px">Bật khi cần nhét khối lồng vào nhau (đồ trong bẫy, cụm ghép). Bình thường cứ để tắt: nhắm vào chỗ trống mà kẹt là do bóng xem trước đang đứng đè khối khác — tool tự nhích sang mốc trống gần nhất, bóng ĐỎ nghĩa là quanh đó hết chỗ thật.</div>
     <hr>
-    <div class="field" id="valPanel" style="border:1px solid #7ee081;border-radius:8px;padding:9px;background:rgba(255,90,110,.05)">
-      <label id="valHead" title="Game bỏ qua khối có cỡ sai luật hoặc chưa có prefab variant — vào chơi khối biến mất mà không báo gì">🚫 Soát lỗi game (khối sẽ biến mất)</label>
-      <div id="valList" style="font-size:11px;max-height:168px;overflow:auto;line-height:1.5"></div>
-    </div>
     <div class="field"><label>Thay thế hàng loạt (giữ kích thước)</label>
       <div class="row" style="gap:6px;align-items:center;margin-bottom:5px">
         <span style="font-size:11px;color:var(--dim);flex:0 0 54px">Từ khối</span>
@@ -733,6 +837,13 @@
       <label class="chk" style="margin:2px 0 5px" title="Chỉ tách khối nằm trong LỚP SÂU đang xem (mặt cắt hiện tại) của bàn hiện tại — bỏ qua tuỳ chọn 'mọi bàn'"><input type="checkbox" id="splitLayer"> Chỉ mặt cắt (lớp) đang xem</label>
       <div id="splitInfo" style="font-size:11px;color:var(--dim);margin:0 0 7px;line-height:1.45"></div>
       <button class="btn" id="btnSplit" style="margin-bottom:0">✂️ Tách tất cả</button>
+    </div>
+    <!-- 🔗 QOL2-3009 B1: phép NGƯỢC của ✂️ Tách — gộp một hàng khối sát nhau thành 1 khối dài (phím G) -->
+    <div class="field" id="mergePanel"><label title="Ngược với ✂️ Tách: chọn các khối nằm THẲNG HÀNG, sát nhau theo MỘT trục (✋ Di chuyển → Ctrl+bấm hoặc kéo vùng chọn) rồi gộp thành một khối dài. Phím tắt: G">🔗 Gộp khối nhỏ → khối dài</label>
+      <div id="mergeInfo" style="font-size:11px;color:var(--dim);margin:0 0 6px;line-height:1.45"></div>
+      <div id="mergeMats" style="margin:0 0 4px"></div>
+      <div id="mergeMass" style="font-size:11px;color:var(--dim);margin:0 0 7px;line-height:1.45"></div>
+      <button class="btn" id="btnMerge" style="margin-bottom:0" disabled>🔗 Gộp (G)</button>
     </div>
     <hr>
     <div class="hk helptx" style="margin-top:8px">
@@ -1473,13 +1584,33 @@ function _sp2Ro(cv){
    `kho` la noi giu lai FBO de xai lai (moi renderer mot cai).
    Luu y: ve vao FBO thi `outputEncoding` KHONG ap dung — phai gan encoding vao
    texture cua FBO, khong la mau ra toi xin nhu mat lop sRGB. */
+/* ⚡ 30/09: chat lieu sprite DUNG CHUNG theo (texture, emission) / mau. Truoc day moi sprite tao moi roi dispose
+   => three giai phong chuong trinh shader => sprite sau bien dich lai (getProgramInfoLog ~830 ms / 150 level x4). */
+const _SP2_MAT = new Map();
+function _sp2Mat(tx, em, col){
+  const k = tx ? ('t' + tx.uuid + '|' + (em && em.emissiveMap ? em.emissiveMap.uuid : '')) : ('c' + col);
+  let m = _SP2_MAT.get(k);
+  if(!m){
+    m = tx ? new THREE.MeshLambertMaterial(Object.assign({map:tx}, em || {}))
+           : new THREE.MeshLambertMaterial({color:parseInt(String(col || '#888888').slice(1),16)});
+    _SP2_MAT.set(k, m);
+  }
+  return m;
+}
 function veFBO(ren, kho, scene, cam, W, H, out){
   try{
-    if(!kho.rt || kho.rt.width !== W || kho.rt.height !== H){
-      if(kho.rt) kho.rt.dispose();
-      kho.rt = new THREE.WebGLRenderTarget(W, H, {minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter});
-      if(THREE.sRGBEncoding!==undefined) kho.rt.texture.encoding = THREE.sRGBEncoding;
+    /* ⚡ 30/09: KHO render target theo kich thuoc. Truoc day doi co la dispose + tao lai (cap phat texture +
+       FBO tren GPU: texImage2D ~1.1 s / 150 level x4) vi sprite to nho lien tuc. Giu toi da 24 co. */
+    const kk = W + 'x' + H;
+    if(!kho.rtK) kho.rtK = new Map();
+    let rt = kho.rtK.get(kk);
+    if(!rt){
+      rt = new THREE.WebGLRenderTarget(W, H, {minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter});
+      if(THREE.sRGBEncoding!==undefined) rt.texture.encoding = THREE.sRGBEncoding;
+      kho.rtK.set(kk, rt);
+      if(kho.rtK.size > 24){ const cu = kho.rtK.keys().next().value; kho.rtK.get(cu).dispose(); kho.rtK.delete(cu); }
     }
+    kho.rt = rt;
     ren.setRenderTarget(kho.rt);
     ren.clear();
     ren.render(scene, cam);
@@ -1555,19 +1686,18 @@ function _sprite2D(o, V, pxH, pxV){
   const h = Math.max(8, Math.round(bucket * wV / Math.max(wH, wV)));
   const oc = new THREE.Object3D();
   oc.quaternion.set(q.x, q.y, q.z, q.w);
-  let mat = null;                      // chi chat lieu DUNG MOT LAN moi phai dispose
+  let mat = null;                      // ⚡ 30/09: chat lieu lay tu CACHE (_sp2Mat), khong con dispose
   if(ghep){
     const pg = plankGroup(o, false); if(!pg) return null;   // chat lieu cua no dung chung, giu lai
     oc.add(pg);
   }else{
-    mat = tx ? new THREE.MeshLambertMaterial(Object.assign({map:tx}, emisOpt(o.type, artAxis(o))))
-             : new THREE.MeshLambertMaterial({color:parseInt(ty.col.slice(1),16)});
+    mat = _sp2Mat(tx, tx ? emisOpt(o.type, artAxis(o)) : null, ty.col);
     const me = new THREE.Mesh(geo, mat);
     if(box) me.scale.set(fS(o,'x'), fS(o,'y'), fS(o,'z'));
     else    me.scale.set(dm.D, dm.L, dm.D);
     oc.add(me);
     if(ty.shape === 'worm' && typeof ART_WORM !== 'undefined'){   // 🌀 mat xoay: anh chua xong -> ve sau
-      const wf = wormFaces(o, q, V.d); if(!wf){ mat.dispose(); return null; }
+      const wf = wormFaces(o, q, V.d); if(!wf) return null;
       oc.add(wf);
     }
   }
@@ -1576,7 +1706,7 @@ function _sprite2D(o, V, pxH, pxV){
   const out = document.createElement('canvas');
   // FBO khong co khu rang cua MSAA -> ve o 2x roi luc dan len man hinh thu nho lai cho min
   const duoc = veFBO(S.ren, S, S.scene, cam, Math.min(512, w * 2), Math.min(512, h * 2), out);
-  S.scene.remove(oc); if(mat) mat.dispose();
+  S.scene.remove(oc);                  // mat thuoc cache _sp2Mat — KHONG dispose (dispose = bien dich lai shader)
   if(!duoc){                           // ca hai duong deu rong -> lan ve sau thu lai
     if(++_sp2Rong >= 8) sp2Tat('ảnh đọc ra rỗng');
     else if(typeof artVeLai==='function') artVeLai();
@@ -2414,7 +2544,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 29/09 18:06', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 11:04', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -2740,6 +2870,23 @@ function overlap(o,px,py,pz,sx,sy,sz,ignore){
 function anyOverlap(px,py,pz,sx,sy,sz,ignore){ return objects.some(o=>overlap(o,px,py,pz,sx,sy,sz,ignore)); }
 // khối CHỒNG NHAU (AABB giao thật, cùng bàn) → cảnh báo; game freeze-until-hit chịu được nhưng dễ gây nhầm khi xoá/xuất
 let overlapObjs=new Set();
+/* ===== QOL2-3009: trạng thái dùng chung, khai báo SỚM (draw() chạy lúc khởi động, trước khối JS cuối file) ===== */
+let ovShow=true;                                   // B3: bật/tắt viền cam khối đâm nhau (cả 2D lẫn 3D)
+/* B2 ✒️ VẾT NÉT: mỗi ô nét NÀY vừa đặt (xanh) / vừa xoá (đỏ). Giữ BẢN SAO — khối vừa xoá thì không còn để trỏ tới.
+   Buông chuột là dọn sạch: vết chỉ sống trong MỘT nét. */
+let strokeMarks=[];
+function markStroke(o,ti,mode){ strokeMarks.push({ti:(ti==null?cur:ti),mode:mode,
+  o:{type:o.type,px:o.px,py:o.py,pz:o.pz,sx:o.sx,sy:o.sy,sz:o.sz,rot:o.rot?{x:o.rot.x,y:o.rot.y,z:o.rot.z,w:o.rot.w}:null}}); }
+function clearStrokeMarks(){ strokeMarks.length=0; }
+/* C1 🧭 KHOÁ TẦNG Y (3D): tầng N = lát y từ N tới N+1; `sel.y` giữ ĐIỂM GIỮA tầng (dùng chung với mặt Trên 2D).
+   Mặc định TẮT — tắt thì mọi tầng sửa được y như cũ. */
+let yLockOn=false;
+function onYLayer(o){ if(!yLockOn)return true;
+  const y0=fC(o,'y')-axSize(o,'y')/2, y1=fC(o,'y')+axSize(o,'y')/2;
+  return sel.y>=y0-1e-6 && sel.y<=y1+1e-6; }
+/* B1 🔗 Gộp: viền XEM TRƯỚC (xanh lơ) khi thẻ Gộp đang mở — cộng vào vết nét (khai báo ở khối cuối file) */
+function overlayMarks(){ const mp=(typeof mergePreviewMark==='function')?mergePreviewMark():null;
+  return mp?strokeMarks.concat([mp]):strokeMarks; }
 // hòm CHỨA chính đồ của nó → chồng nhau là ĐÚNG, miễn cảnh báo. Khối NGOÀI hòm mà thò vào trong
 // thì vẫn phải báo (đó là lỗi thật: vào game nó nằm lọt trong khối kinematic).
 const crPair=(a,b)=>(isCrate(a)&&+b.inC===+a.cid)||(isCrate(b)&&+a.inC===+b.cid);
@@ -2949,7 +3096,7 @@ function addAt(hw,vw){
   let did=false;
   for(const dc of depthTargets()) for(const[ci]of cols){
     const o=applyBrushRot(makeObj(brush,ci,vcC,dc,sh,sv,1));   // ⭐ vẽ ở 2D cũng mang hướng của cây cọ
-    if(placeOK(o) && (V.v!=='y'||o.py-axSize(o,'y')/2>=-1e-6)){ objects.push(o); did=true; }
+    if(placeOK(o) && (V.v!=='y'||o.py-axSize(o,'y')/2>=-1e-6)){ objects.push(o); did=true; markStroke(o,cur,'add'); }
   }
   if(did&&!paintAnchor) paintAnchor={h:hcC,v:vcC,sh,sv};      // chốt mốc ở viên ĐẦU của nét vẽ
   return did;
@@ -2969,7 +3116,7 @@ function dropObj(o){ const i=objects.indexOf(o); if(i<0)return;
   if(!selObjs.length&&$('selBox'))$('selBox').style.display='none';
   if(fMirror.checked && VIEWS[view].h==='x'){ const m=objects.find(k=>Math.abs(k.px+o.px)<0.01&&Math.abs(k.py-o.py)<0.01&&Math.abs(k.pz-o.pz)<0.01&&k.type===o.type); if(m)objects.splice(objects.indexOf(m),1); } }
 function eraseAt(hw,vw){ const t=eraseTargets(hw,vw); if(!t.length)return false;
-  for(const o of t)dropObj(o); return true; }
+  for(const o of t){ markStroke(o,cur,'erase'); dropObj(o); } return true; }
 
 /* ============================================================
    HÒM (CRATE) — id 190
@@ -3288,10 +3435,18 @@ function draw(){
   for(const o of objects){ if(!isCrate(o))continue;
     const d0=C(o,V.d)-S(o,V.d)/2,d1=C(o,V.d)+S(o,V.d)/2; drawCrate(o,V,curD>=d0-1e-6&&curD<=d1+1e-6); }
   // CẢNH BÁO CHỒNG KHỐI: viền cam nét đứt trên khối chồng nhau (ở lớp đang xem)
-  if(overlapObjs.size){ctx.save();ctx.strokeStyle='#ff7a1a';ctx.lineWidth=2;ctx.setLineDash([4,3]);
+  if(ovShow&&overlapObjs.size){ctx.save();ctx.strokeStyle='#ff7a1a';ctx.lineWidth=2;ctx.setLineDash([4,3]);
     for(const o of overlapObjs){const d0=fC(o,V.d)-axSize(o,V.d)/2,d1=fC(o,V.d)+axSize(o,V.d)/2; if(!(curD>=d0-1e-6&&curD<=d1+1e-6))continue;
       const hc=fC(o,V.h),vc=fC(o,V.v),sh=axSize(o,V.h),sv=axSize(o,V.v),tl=toScreen(hc-sh/2,vc+sv/2);ctx.strokeRect(tl.x+1,tl.y+1,sh*cell-2,sv*cell-2);}
     ctx.setLineDash([]);ctx.restore();}
+  /* QOL2 B2 ✒️ VẾT NÉT đang kéo (xanh = vừa đặt · đỏ = vừa xoá) + B1 viền xem trước 🔗 Gộp (xanh lơ) */
+  { const _mk=overlayMarks(); if(_mk.length){ ctx.save(); ctx.lineWidth=2.5; ctx.setLineDash([5,3]);
+    for(const m of _mk){ if(m.ti!==cur)continue; const mo=m.o;
+      const d0=fC(mo,V.d)-axSize(mo,V.d)/2, d1=fC(mo,V.d)+axSize(mo,V.d)/2; if(!(curD>=d0-1e-6&&curD<=d1+1e-6))continue;
+      ctx.strokeStyle=m.mode==='erase'?'#ff5a6e':m.mode==='merge'?'#48d1ff':'#a8e635';
+      const hc=fC(mo,V.h),vc=fC(mo,V.v),sh=axSize(mo,V.h),sv=axSize(mo,V.v),tl=toScreen(hc-sh/2,vc+sv/2);
+      ctx.strokeRect(tl.x+1,tl.y+1,sh*cell-2,sv*cell-2); }
+    ctx.setLineDash([]); ctx.restore(); } }
   // selected highlight — TẤT CẢ khối đang chọn (khối chính đậm hơn)
   /* ⭐ 22/09: khối ĐÃ XOAY thì khoanh THEO HƯỚNG THẬT (bao lồi của hộp đã xoay — đúng hình mà
      drawObj/sprite vẽ ra), khung bao AABB tụt xuống nét đứt mờ để vẫn thấy nó chiếm mấy ô.
@@ -3554,7 +3709,10 @@ function updateStats(){const c={};let mass=0,nPlank=0,n=0;
       +(dead?`<br><span style="color:#ff5a6e;font-size:10px">⚠ ${dead} hòm KHÔNG BAO GIỜ mở được (số trên hòm &gt; số khối ngoài hòm)</span>`:''); }
   $('stats').innerHTML=folderInfoHTML()+`<b>${n}</b> khối · KL ~<b>${mass.toFixed(0)}</b><br><span style="font-size:10px">${Object.keys(c).sort((a,b)=>a-b).map(t=>`${typeName(t)}:${c[t]}`).join(' · ')||'—'}</span>`
     +(nPlank?`<br><span style="font-size:10px;color:#c98a3c" title="Thanh gỗ là PHẦN CỦA BÈ: đạn chặn lại nhưng không vỡ, không tính vào remain object nên KHÔNG cộng vào số khối / khối lượng / lượt bắn gợi ý.">🪏 ${nPlank} thanh gỗ (phần của bè — không tính vào số khối)</span>`:'')
-    +(ov?`<br><span style="color:#ff7a1a;font-size:10px">⚠ ${ov} khối CHỒNG NHAU (viền cam nét đứt)</span>`:'')+crWarn;
+    +crWarn;
+  // QOL2 C3: dòng "chồng nhau" dời sang ổ cảnh báo góc trái-dưới (cạnh nút 👁 viền); chỉ đụng DOM khi số ĐỔI
+  { const ln=$('ovLine'); if(ln&&ln._ov!==ov){ ln._ov=ov; ln.style.display=ov?'flex':'none';
+      $('ovTxt').textContent=ov?('⚠ '+ov+' khối CHỒNG NHAU'):''; } }
   // 🚨 ĐANG KÉO/VẼ thì DỪNG ở đây: 2 việc dưới đụng vào DOM của panel phải (đổi ô nhập, dựng
   // lại thẻ <select>) — trình duyệt phải tính lại layout GIỮA CÚ KÉO, khung vẽ nhúc nhích một
   // hàng thanh công cụ là cụm khối nhảy ~1,25 ô rồi bật về. Buông chuột mới chạy lại đầy đủ
@@ -3622,11 +3780,11 @@ cv.addEventListener('mousedown',e=>{
   startAutoScroll();                                  // kéo tới mép khung = khung tự trôi (xếp cao/rộng vô hạn)
   const wp=mouseWorld(mx,my),V=VIEWS[view];
   // armStroke = chỉ CHỤP trạng thái; bước undo chỉ được ghi khi có khối thật sự thêm/mất (xem commitStroke)
-  if(tool==='paint'){armStroke();painting='add';paintAnchor=null;
+  if(tool==='paint'){armStroke();clearStrokeMarks();painting='add';paintAnchor=null;paintLast=wp;
     if(!applyPaint(wp)) hint(stackOn()?'Không đặt được: chỗ đó đã có đúng khối này rồi.'
                                       :'Không đặt được: vướng khối có sẵn. Muốn đặt lồng vào thì bật 🧱 xếp chồng trên thanh công cụ.');
     draw();updateStats();}
-  else if(tool==='erase'){armStroke();painting='erase';eraseGuard=new Set();applyPaint(wp);draw();updateStats();}
+  else if(tool==='erase'){armStroke();clearStrokeMarks();painting='erase';eraseGuard=new Set();paintLast=wp;applyPaint(wp);draw();updateStats();}
   else{
     if(!(e.ctrlKey||e.metaKey)){                       // KÉO BLOCKER (ưu tiên hơn khối vì nó vẽ đè lên)
       const bh=pickBlk(wp.h,wp.v);
@@ -3784,7 +3942,7 @@ window.addEventListener('mousemove',e=>{
   let chg=false;                                     // chỉ tính lại thống kê khi có thay đổi THẬT (dí chuột không tính)
   if(moving){ if(!moving.active&&Math.hypot(e.clientX-moving.cx,e.clientY-moving.cy)>5){moving.active=true;pushHistory();cv.style.cursor='grabbing';}
     if(moving.active){moveSelTo(hover);chg=true;} }
-  if(painting){applyPaint(hover);chg=true;}
+  if(painting){paintPath(hover);chg=true;}          // QOL2 A1: đi HẾT quãng đường từ lần rê trước
   requestDraw(chg);                                  // gom lại: mỗi KHUNG HÌNH tính lại + vẽ đúng 1 lần
 });
 window.addEventListener('mouseup',()=>{
@@ -3793,7 +3951,8 @@ window.addEventListener('mouseup',()=>{
   if(moving){ moving=null;cv.style.cursor='grab';draw();updateStats(); }
   if(blkDrag){ if(blkDrag.active)hint('Đã dời blocker '+(blkDrag.at?'(điểm đến)':'')+' — số trong panel cập nhật theo.'); blkDrag=null;cv.style.cursor='grab';draw(); }
   if(painting)dropStroke();      // nét vẽ/xoá không đặt/xoá được gì → vứt ảnh chụp, history không sinh bước rỗng
-  painting=null;paintAnchor=null;dragPan=null;stopAutoScroll();
+  if(painting&&strokeMarks.length){ clearStrokeMarks(); sync3D(); }   // QOL2 B2: vết nét chỉ sống lúc còn giữ chuột
+  painting=null;paintAnchor=null;paintLast=null;dragPan=null;stopAutoScroll();
   freeCvRect();                                      // thả khung vẽ (lần sau đo lại — panel có thể đã đổi bề rộng)
   if(wasBusy){ updateStats(); draw(); }              // panel bên phải cập nhật đủ SAU khi buông chuột
 });
@@ -3820,7 +3979,7 @@ function autoTick(){
   if(!dx&&!dy)return;
   panX+=dx; panY+=dy;
   hover=mouseWorld(mx,my);                                                 // vị trí thế giới đổi theo khung → tiếp tục thao tác
-  if(painting)                 applyPaint(hover);
+  if(painting)                 paintPath(hover);
   else if(moving&&moving.active) moveSelTo(hover);
   else if(band&&band.active)   { band.h1=hover.h; band.v1=hover.v; }
   else if(blkDrag&&blkDrag.active) blkDragTo(hover);
@@ -3829,6 +3988,17 @@ function autoTick(){
 function startAutoScroll(){ if(autoScroll)return; autoScroll=true; requestAnimationFrame(autoTick); }
 function stopAutoScroll(){ autoScroll=false; }
 // TRẢ VỀ: có thay đổi thật hay không → nơi gọi dùng để quyết định ghi undo / báo lý do không đặt được.
+/* QOL2 A1 ✏️ Nét kéo 2D đi HẾT quãng đường giữa hai lần rê chuột — trước đây vụt nhanh qua 9 ô chỉ đặt được 4.
+   Bước = nửa Bước lưới (≤ 0,5 ô) nên không ô nào lọt kẽ; mẫu rơi cùng ô lưới với mẫu trước thì bỏ (đỡ tốn
+   addAt/hitsAny); trần 200 mẫu mỗi lần rê. Khoá mốc (paintAnchor) + placeOK lo việc không đặt đè. */
+let paintLast=null;
+function paintPath(to){
+  const a=paintLast||to, dh=to.h-a.h, dv=to.v-a.v, q=+snapStep||1;
+  const st=Math.max(0.1,Math.min(0.5,q/2)), k=Math.min(200,Math.max(1,Math.ceil(Math.hypot(dh,dv)/st)));
+  let any=false, lk='';
+  for(let i=1;i<=k;i++){ const p={h:a.h+dh*i/k, v:a.v+dv*i/k}, key=Math.round(p.h/q)+','+Math.round(p.v/q);
+    if(key===lk&&i<k)continue; lk=key; if(applyPaint(p))any=true; }
+  paintLast={h:to.h,v:to.v}; return any; }
 function applyPaint(wp){ if(painting==='add'){ const ok=addAt(wp.h,wp.v); if(ok)commitStroke(); return ok; }
   // XOÁ khi KÉO: mỗi ô chỉ xoá 1 khối/lượt (không "peel" cả chồng khối trùng vị trí khi "cả sâu Z" tắt).
   // Muốn xoá khối kế tiếp cùng chỗ → bấm lại (lượt mới). "cả sâu Z" bật thì colAt vẫn xoá cả cột 1 phát.
@@ -3841,15 +4011,19 @@ cv.addEventListener('wheel',e=>{e.preventDefault();const r=cv.getBoundingClientR
   const old=cell;cell=Math.max(4,Math.min(80,cell*(e.deltaY<0?1.12:0.89)));panX=mx-(mx-panX)*(cell/old);panY=my-(my-panY)*(cell/old);draw();},{passive:false});
 
 /* ---------- nudge (áp cho TẤT CẢ khối đang chọn) ---------- */
-$('selBox').onclick=e=>{const n=e.target.dataset.n;if(!n||!selObjs.length)return;const V=VIEWS[view];pushHistory();
-  for(const o of selObjs){
-    if(n==='h+')o[PK[V.h]]+=snapStep; else if(n==='h-')o[PK[V.h]]-=snapStep;
-    else if(n==='v+')o[PK[V.v]]+=snapStep; else if(n==='v-')o[PK[V.v]]-=snapStep;
+/* QOL2 B6: 4 nút đi theo MẶT SÀN X/Z (giữ độ cao) + cột Y riêng — trước đây ▲▼ bám trục dọc của MẶT ĐANG XEM nên
+   cùng một nút ở mặt Trước thì nâng khối, ở mặt Trên lại đẩy ra xa. Phím mũi tên ↑↓←→ vẫn theo mặt đang xem. */
+const NUDGE_AX={'x+':['px',1],'x-':['px',-1],'y+':['py',1],'y-':['py',-1],'z+':['pz',1],'z-':['pz',-1]};
+$('selBox').onclick=e=>{const n=e.target.dataset.n;if(!n||!selObjs.length)return;pushHistory();
+  for(const o of selObjs){ const ax=NUDGE_AX[n];
+    if(ax)o[ax[0]]=+(o[ax[0]]+ax[1]*snapStep).toFixed(4);
     else if(n==='drop'){ let top=o.sy/2; for(const k of objects){ if(k===o||selObjs.includes(k))continue;
         if(k.px-k.sx/2<o.px+o.sx/2-1e-6&&o.px-o.sx/2<k.px+k.sx/2-1e-6&&k.pz-k.sz/2<o.pz+o.sz/2-1e-6&&o.pz-o.sz/2<k.pz+k.sz/2-1e-6)
           top=Math.max(top,k.py+k.sy/2+o.sy/2); }
       o.py=top; } }
+  warnUnderDeck();                 // QOL2 A6: hạ/dời xuống có thể lọt dưới mặt bàn — báo ngay
   draw();updateStats();sync3D();};
+
 
 /* ---------- XOAY CẢ CỤM NHƯ 1 KHỐI CỨNG (user chốt 2026-07-16: "coi tất cả cái được chọn là 1 khối,
    lấy tâm ở giữa các khối đó để xoay" — để dựng THÁP XOẮN: chọn từng tầng, xoay quanh Y lệch dần).
@@ -3898,16 +4072,20 @@ $('selBox').addEventListener('click',e=>{const r=e.target.dataset.r;if(!r||!selO
    ⚡ draw() gọi hàm này mỗi khung, nên nó CHỈ ghi DOM khi "chữ ký" (khối, vị trí, cỡ, xoay, ô đang focus)
    đổi, và BỎ QUA hẳn lúc đang kéo/vẽ (cùng chốt với updateStats — ghi ô nhập giữa cú kéo là khung vẽ giật).
    Ô đang gõ dở KHÔNG bao giờ bị ghi đè. `var` + hàm khai báo: draw() có thể chạy trước dòng này (TDZ). */
-var _objSig='', objBoxDirty=false;
+var _objSig='', objBoxDirty=false, _objFor=null, _objForN=0;
 function refreshObjBox(force){
   const b=$('selBox'); if(!b)return;
   const on=selObjs.length>0&&!!selObj;
-  if(!on){ if(b.style.display!=='none')b.style.display='none'; _objSig=''; return; }
+  if(!on){ if(b.style.display!=='none')b.style.display='none'; _objSig=''; _objFor=null; return; }
   if(!force&&((typeof moving!=='undefined'&&moving&&moving.active)||(typeof painting!=='undefined'&&painting)))return;
   if(b.style.display==='none'){ b.style.display='block'; _objSig=''; }
-  const o=selObj, q=getRot(o), ae=document.activeElement;
+  // QOL2 A3: bấm sang khối KHÁC mà một ô đang có con trỏ thì ô đó vẫn hiện số của khối CŨ — gõ tiếp là tính chênh
+  // lệch sai cho khối mới. Khối đổi ⇒ ghi đè CẢ ô đang gõ + lượt gõ kế tiếp là một bước Ctrl+Z mới.
+  const o=selObj, q=getRot(o), neu=(o!==_objFor||selObjs.length!==_objForN);
+  if(neu){ _objFor=o; _objForN=selObjs.length; objBoxDirty=false; }
+  const ae=neu?null:document.activeElement;
   const sig=[selObjs.length,o.type,o.px,o.py,o.pz,o.sx,o.sy,o.sz,q.x,q.y,q.z,q.w,GAME,ae&&ae.id].join('|');
-  if(!force&&sig===_objSig)return;
+  if(!force&&!neu&&sig===_objSig)return;
   _objSig=sig;
   const eu=quatToEuler(q);
   for(const ax of ['x','y','z']){ const A=ax.toUpperCase();
@@ -4097,10 +4275,12 @@ function buildPalette(gtMap){ gtMap=gtMap||{};
       dd.innerHTML=`<span class="shape">${TYPES[t].lab||'◆'}</span>${TYPES[t].name}`;dd.onclick=()=>selectBrush(t);box.appendChild(dd);}}
   document.querySelectorAll('.sw').forEach(s=>s.classList.toggle('active',+s.dataset.t===brush));
   if(typeof artIconsApply==='function') artIconsApply(); }
-function selectBrush(t){brush=t;document.querySelectorAll('.sw').forEach(s=>s.classList.toggle('active',+s.dataset.t===t));
+function selectBrush(t){const doiLoai=(t!==brush);brush=t;document.querySelectorAll('.sw').forEach(s=>s.classList.toggle('active',+s.dataset.t===t));
   if(t===CRATE_T){ const s=crateSizeSel(); bw.value=s[0]; bh.value=s[1]; bw.disabled=bh.disabled=true;   // hòm: cỡ theo preset ở panel 📦
     hint('Vẽ HÒM cỡ '+s.join('×')+' — đổi cỡ ở panel 📦 bên phải. Bấm lên tháp để đặt.'); }
-  else if(TYPES[t].fixed){bw.value=bh.value=1;bw.disabled=bh.disabled=true;}else{bw.disabled=bh.disabled=false;}
+  else if(TYPES[t].fixed){bw.value=bh.value=1;bw.disabled=bh.disabled=true;}else{bw.disabled=bh.disabled=false;
+    // QOL2 A4: ĐỔI LOẠI khối ⇒ cọ về 1×1×1 (cỡ dài của loại cũ hay ra cỡ mà loại mới không có prefab ⇒ vào game biến mất)
+    if(doiLoai){ bw.value=bh.value=1; const dz=$('depthZ'); if(dz)dz.value=1; }}
   const ml=$('shapeMat'); if(ml) ml.textContent=(TYPES[t].fixed?'Hộp gỗ':TYPES[t].name); setTool('paint');draw();}
 
 /* ---------- THƯ VIỆN HÌNH (Minecraft/Lego-style: xây từ khối 1×1×1, có màu + chiều sâu) ----------
@@ -5154,6 +5334,8 @@ window.addEventListener('keydown',e=>{
   if(CM&&e.key.toLowerCase()==='x'){e.preventDefault();copySel(true);return;}
   if(CM&&e.key.toLowerCase()==='v'){e.preventDefault();pasteClip();return;}
   /* ⛔ 26/08: mũi tên KHÔNG còn đổi trục khoá nữa (dùng 4 nút Trục trên thanh 3D). */
+  // QOL2 B1: G = 🔗 gộp hàng khối đang chọn thành 1 khối dài (rà 30/09: editor không có phím g/G nào khác)
+  if(!CM&&!e.altKey&&(e.key==='g'||e.key==='G')){ e.preventDefault(); doMerge(); return; }
   if(!selObjs.length)return;                          // phím tắt cho khối/nhóm đang chọn
   const V=VIEWS[view],k=e.key,kl=k.toLowerCase(); let did=true;
   if(kl==='x'||kl==='y'||kl==='z'){pushHistory();rotGroup(kl,e.shiftKey?-90:90);warnUnderDeck();refreshRotDeg();}   // x/y/z = xoay CẢ CỤM quanh tâm chung
@@ -5496,6 +5678,8 @@ function folderShow(i){
     if($('warn').textContent) warn(tag+' — '+$('warn').textContent);
     else hint(tag+' — '+$('hint').textContent); };
   rd.onerror=()=>{ folderBusy=false; warn('Không đọc được '+it.name); };
+  // QOL2 C2: file vừa tạo / đổi số / nhân bản qua 📌 chỉ có tay cầm (handle), không có File
+  if(it.handle){ it.handle.getFile().then(f=>rd.readAsText(f)).catch(e=>{ folderBusy=false; warn('Không đọc được '+it.name+': '+(e&&e.message||e)); }); return; }
   rd.readAsText(it.file);
 }
 const folderStep=d=>folderShow(folderPos+d);
@@ -5508,6 +5692,7 @@ $('dirIn').onchange=e=>{
   folderFiles=picked.map(f=>({file:f,name:f.name,idx:lvIdxOf(f.name)}));
   $('lvSel').innerHTML=folderFiles.map((it,i)=>'<option value="'+i+'">'+(i+1)+'. '+escHTML(it.name)+'</option>').join('');
   const root=(picked[0].webkitRelativePath||'').split('/')[0];
+  lgDirName=root||''; lgScanTok++; lgClose();                           // QOL2 C2: thư mục mới ⇒ dừng quét cũ, đóng bảng
   folderPos=-1; folderDirty=false; renderFolderNav();
   hint('Đã nạp thư mục'+(root?' "'+root+'"':'')+' — '+folderFiles.length+' file .json.');
   folderShow(0);
@@ -5981,6 +6166,7 @@ function build3D(refit){
       else if(!aSach){ // marker ĐẦU (đỉnh +Y, xanh sáng) & ĐUÔI (đáy −Y, tối) → phân biệt trên/dưới sau khi xoay
         const head=new THREE.Mesh(three.head,three.headMat); head.position.set(0,hy+0.03,0);head.raycast=()=>{};oc.add(head);
         const tail=new THREE.Mesh(three.tail,three.tailMat); tail.position.set(0,-hy-0.03,0);tail.raycast=()=>{};oc.add(tail);}}
+    if(typeof qol2Tbl3D==='function')qol2Tbl3D(t,ti,tg,cxo,czo);   // QOL2: khoá tầng (mờ) · viền cam · vết nét
     const rad=b?Math.max(b.w,b.dep):2;                          // gộp biên thế giới (thô, cho camera)
     gx0=Math.min(gx0,t.pos.x-rad);gx1=Math.max(gx1,t.pos.x+rad);gz0=Math.min(gz0,t.pos.z-rad);gz1=Math.max(gz1,t.pos.z+rad);gy=Math.max(gy,b?b.maxy:1);
     // ĐƯỜNG ĐI CỦA LEVEL (cho thanh kéo "gần pháo ↔ xa pháo"): tâm mỗi bè trong toạ độ DATA.
@@ -6063,7 +6249,8 @@ function sync3D(){ if(!three){ if(mini.on)mini.dirty=true; return; }
   if(show3d||mini.on){ build3D(false); mini.dirty=false; mini.last=performance.now(); } }
 function toggle3D(){
   show3d=!show3d; $('t3d').classList.toggle('on',show3d); $('threewrap').style.display=show3d?'block':'none';
-  if(show3d){ ensureThree(()=>{ if(!three)init3D(); resize3D(); build3D(); startLoop(); hint('Chế độ XEM 3D — bấm "Xem 3D" lần nữa để về vẽ 2D.'); }); }
+  if(typeof qStgRefit==='function')qStgRefit();          // QOL2 C3: vào/ra 3D thì thanh 3D hiện/ẩn ⇒ căn lại ổ stage
+  if(show3d){ ensureThree(()=>{ if(!three)init3D(); resize3D(); if(typeof qYEnter==='function')qYEnter(); build3D(); startLoop(); hint('Chế độ XEM 3D — bấm "Xem 3D" lần nữa để về vẽ 2D.'); }); }
   else hint('Về chế độ vẽ 2D.');
 }
 $('t3d').onclick=toggle3D;
@@ -6213,7 +6400,8 @@ function ray3(canvas,cam,e){ if(!three)return null;
   const rc=new THREE.Raycaster(); rc.setFromCamera(v,cam);
   for(const h of rc.intersectObjects(three.grp.children,true)){
     let n=h.object; while(n&&!(n.userData&&(n.userData.obj||n.userData.deck)))n=n.parent;
-    if(n)return {p:h.point,ud:n.userData}; }
+    if(n){ if(yLockOn&&n.userData.obj&&!onYLayer(n.userData.obj))continue;   // QOL2 C1: tầng khác → tia đi xuyên
+      return {p:h.point,ud:n.userData}; } }
   return null; }
 const tgOf=ti=>three.grp.children[ti];
 /* MẶT bị bấm = mặt của hộp bao (AABB) mà điểm chạm sát nhất — dùng tỉ lệ khoảng cách/nửa-cạnh
@@ -6317,6 +6505,7 @@ function planeTarget3(canvas,cam,e){
   return {ti,o:applyBrushRot(o),plane:true,ax,dir:1}; }
 /* ghost = ô sẽ đặt (xanh) hoặc khối sắp bị xoá (đỏ) — học từ Fancy Hole: hiện TRƯỚC + kèm toạ độ */
 function showGhost(t,red){ ensureGhost(); if(!ghost3)return;
+  if(!red&&yLockOn&&t&&t.o&&!onYLayer(t.o)){ ghost3.visible=false; return; }   // QOL2 C1: chỗ đó không thuộc tầng khoá
   if(!t){ghost3.visible=false;return;}
   const tg=tgOf(t.ti); if(!tg){ghost3.visible=false;return;}
   const o=t.o, ty=TYPES[o.type]||{shape:'box'}, g=ghost3.userData;
@@ -6359,7 +6548,7 @@ function commitBand3(){ const b=band3; bandDiv().style.display='none';
   const hit=[];
   tables.forEach((t,ti)=>{ const g=tgOf(ti); if(!g)return;
     for(const o of t.objs){ const s=screenOf(o,g,cam,r);
-      if(s.front && s.x>=x0 && s.x<=x1 && s.y>=y0 && s.y<=y1) hit.push(o); } });   // tâm khối lọt khung chọn
+      if(s.front && s.x>=x0 && s.x<=x1 && s.y>=y0 && s.y<=y1 && onYLayer(o)) hit.push(o); } });   // tâm khối lọt khung chọn
   setSel(b.add?Array.from(new Set(selObjs.concat(hit))):hit);
   draw(); sync3D();
   const nt=selTbls().length;
@@ -6371,7 +6560,7 @@ function commitBand3(){ const b=band3; bandDiv().style.display='none';
    sẽ khoá xoay camera vĩnh viễn. Đây đúng là lỗi đã dính 26/08. */
 function endPaint3(){
   if(!paint3)return;
-  const n=paint3.n, md=paint3.mode; paint3=null;
+  const n=paint3.n, md=paint3.mode; paint3=null; clearStrokeMarks();
   if(n){ commitStroke(); draw(); updateStats(); sync3D();
     hint((md==='erase'?'Đã xoá ':'Đã đặt ')+n+' khối trong 3D — Ctrl+Z hoàn tác cả nét.'); }
   else dropStroke();          // bấm hụt (kín đặc / trúng chỗ trống lúc xoá) → không đẻ bước undo rỗng
@@ -6405,7 +6594,7 @@ function paintStep3(canvas,getCam,e){
     if(!(h&&h.ud.obj))return;
     const arr=tables[h.ud.ti]&&tables[h.ud.ti].objs; if(!arr)return;
     const k=arr.indexOf(h.ud.obj); if(k<0)return;
-    arr.splice(k,1); releaseIfCrate(h.ud.obj);
+    markStroke(h.ud.obj,h.ud.ti,'erase'); arr.splice(k,1); releaseIfCrate(h.ud.obj);
     selObjs=selObjs.filter(x=>x!==h.ud.obj); if(selObj===h.ud.obj)selObj=selObjs[0]||null;
     paint3.n++; if(ghost3)ghost3.visible=false; draw(); updateStats(); sync3D(); return; }
   /* viên ĐẦU bấm vào khoảng không thì mới dùng 'lớp sâu đang chọn'; giữa nét quét thì bám
@@ -6422,11 +6611,12 @@ function paintStep3(canvas,getCam,e){
   } else {                                 // viên ĐẦU: được nhích ra chỗ trống gần nhất (chữa "khó đặt")
     o=freeSpot3(ti,t0.o,t0.ax,t0.dir); if(!o)return;
   }
+  if(yLockOn&&!onYLayer(o))return;                        // QOL2 C1: khoá tầng ⇒ khối mới cũng phải thuộc tầng đang chọn
   const now=(window.performance&&performance.now)?performance.now():Date.now();
   if(paint3.n && now-paint3.t0<PAINT3_CD) return;        // chưa hết cooldown → bỏ qua nhịp này
   const key=ti+'|'+o.px+'|'+o.py+'|'+o.pz;
   if(paint3.last===key)return;                                   // chuột rung trong cùng một ô → không đặt đè lần nữa
-  paint3.last=key; paint3.t0=now; tables[ti].objs.push(o); paint3.n++;
+  paint3.last=key; paint3.t0=now; tables[ti].objs.push(o); paint3.n++; markStroke(o,ti,'add');
   if(!paint3.anchor){ paint3.anchor=Object.assign({},o); paint3.ti=ti; paint3.nax=t0.ax||'y'; }   // chốt mốc + MẶT PHẲNG ở viên ĐẦU
   draw(); updateStats(); sync3D(); }
 
@@ -6446,7 +6636,7 @@ function bind3DEdit(canvas,getCam){
       if(ghost3)ghost3.visible=false; };
     if((tool==='paint'||tool==='erase')&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
       paint3={canvas,getCam,mode:tool,n:0,last:null,t0:0,anchor:null,ti:0,nax:''};
-      armStroke();                       // chỉ CHỤP; chỉ ghi undo nếu nét này đặt/xoá được thật (xem mouseup)
+      armStroke(); clearStrokeMarks();                       // chỉ CHỤP; chỉ ghi undo nếu nét này đặt/xoá được thật (xem mouseup)
       paintStep3(canvas,getCam,e); return; }
     if(tool==='move'&&(e.ctrlKey||e.metaKey)){        // Ctrl = CỘNG DỒN vào nhóm: kéo→quét thêm, bấm→thêm/bớt 1 khối
       mkBand(true); return; }
@@ -6586,6 +6776,8 @@ function deckPickPoint(canvas,cam,e,planeY){
 }
 function startDeckDrag(ti,canvas,getCam,e,tis){
   const t=tables[ti]; if(!t)return false;
+  { const lk=$('tblLock'); if(lk&&lk.checked){   // QOL2 B5: mọi đường kéo bè đều qua đây nên một chốt là đủ
+    hint('🔒 Đang khoá kéo bàn — bỏ tick "Khoá kéo bàn trong 3D" ở thẻ Bàn nếu muốn dời bè (ô số X/Z vẫn sửa được).'); return false; } }
   // `tis` = danh sách bàn cùng đi (quét TRỌN nhiều bè rồi kéo); mặc định chỉ bàn được bấm
   const list=(tis&&tis.length?tis:[ti]).filter(k=>tables[k]);
   const keepSel=!!(tis&&tis.length);                  // kéo cả bè do quét trọn → GIỮ vùng chọn để còn thấy đang cầm gì
@@ -6607,6 +6799,9 @@ function startDeckDrag(ti,canvas,getCam,e,tis){
    Một cú kéo đổi được cả 2 trục ngang cùng lúc, không cần phím phụ. */
 function deckDragMove(e){
   const d=deckDrag3, t=tables[d.ti]; if(!t)return;
+  // QOL2 A2: ngưỡng 4px chặn NGAY ĐẦU — trước đây ghi toạ độ rồi mới xét ⇒ bấm chọn nền bè mà tay rung là cả bè
+  // bị hút về lưới 0.1, lại KHÔNG có bước undo (moved vẫn false ⇒ mouseup dropStroke).
+  if(!d.moved){ if(Math.hypot(e.clientX-d.cx,e.clientY-d.cy)<=4)return; d.moved=true; }
   const p=deckPickPoint(d.canvas,d.getCam(),e,0); if(!p)return;
   const st=snapStep<0.1?snapStep:0.1, sn=x=>Math.round(x/st)*st;
   const dX=p.x-d.gx, dZ=p.z-d.gz;
@@ -6615,14 +6810,15 @@ function deckDragMove(e){
     tt.pos.x=+sn(r.px0+dX).toFixed(3);                 // ngang trái↔phải
     tt.pos.z=+sn(r.pz0+dZ).toFixed(3); }               // ngang xa↔gần pháo
   // ⛔ pos.y KHÔNG đụng tới — độ cao bàn giữ nguyên
-  if(!d.moved&&Math.hypot(e.clientX-d.cx,e.clientY-d.cy)>4)d.moved=true;
-  if(d.moved){ if(d.ti===cur){ $('tblX').value=t.pos.x; $('tblZ').value=t.pos.z; }
+  { if(d.ti===cur){ $('tblX').value=t.pos.x; $('tblZ').value=t.pos.z; }
     renderTblBar(); draw(); sync3D();
     const n=(d.tis||[]).length;
     hint((n>1?n+' bè':'Bàn '+t.id)+' → X='+fmt(t.pos.x)+' · Z='+fmt(t.pos.z)+' · cao '+fmt(t.pos.y)+' (KHOÁ)'
        +' — thả chuột để chốt · Ctrl+Z hoàn tác'); }
 }
 function drag3Move(e){
+  // QOL2 A2: ngưỡng 4px chặn NGAY ĐẦU (chỉ BẤM chọn mà tay rung 1-2px thì khối bị hút về lưới, không có undo)
+  if(!drag3.moved){ if(Math.hypot(e.clientX-drag3.cx,e.clientY-drag3.cy)<=4)return; drag3.moved=true; }
   const cam=drag3.getCam(), canvas=drag3.canvas, o=drag3.o, tg=tgOf(drag3.ti); if(!tg)return;
   const r=canvas.getBoundingClientRect();
   const v=new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
@@ -6653,8 +6849,7 @@ function drag3Move(e){
         s.o.px=R4(L.px); s.o.pz=R4(L.pz); }
     }
   }
-  if(!drag3.moved&&Math.hypot(e.clientX-drag3.cx,e.clientY-drag3.cy)>4)drag3.moved=true;
-  if(drag3.moved){ draw(); updateStats(); sync3D(); }
+  draw(); updateStats(); sync3D();
 }
 
 /* ============================================================
@@ -6742,6 +6937,7 @@ $('tHelp').onclick=()=>{ const on=!document.body.classList.contains('helpon'); s
 /* ---------- BỀ RỘNG 2 BẢNG BÊN: kéo mép #lgrip/#rgrip, nhấn đúp về mặc định, nhớ qua localStorage ----------
    Đổi bề rộng bảng = khung vẽ đổi kích thước → phải gọi resize() (nó tự lo cả 3D).
    `side` quyết định cách đọc bề rộng từ con trỏ: bảng trái = clientX, bảng phải = innerWidth − clientX. */
+var _bootXong=false;   // ⚡ 30/09: trước lời gọi resize() chính của boot thì setW khỏi resize (đằng nào cũng đo lại ngay sau)
 function makeGrip(gripId,panelId,side,key,DEF,MIN,MAX,label){
   const grip=$(gripId), P=$(panelId);
   // trần thật = min(MAX, 34% bề ngang cửa sổ) — màn nhỏ (MacBook 1280) thì 2 bảng không được nuốt hết khung vẽ,
@@ -6751,7 +6947,7 @@ function makeGrip(gripId,panelId,side,key,DEF,MIN,MAX,label){
   const cap=()=>{ const W=window.innerWidth, narrow=W<1500?Math.round(DEF*0.8):MAX;
     return Math.max(MIN,Math.min(MAX,Math.round(W*0.34),narrow)); };
   const setW=w=>{ w=Math.max(MIN,Math.min(cap(),Math.round(w)));
-    P.style.width=w+'px'; P.style.minWidth=w+'px'; resize(); return w; };
+    P.style.width=w+'px'; P.style.minWidth=w+'px'; if(_bootXong)resize(); return w; };
   window.addEventListener('resize',()=>setW(parseInt(P.style.width,10)||DEF));   // thu nhỏ cửa sổ → bảng tự co theo
   const save=w=>{ try{ localStorage.setItem(key,w); }catch(e){} };
   let v=DEF; try{ v=+localStorage.getItem(key)||DEF; }catch(e){}
@@ -6792,7 +6988,7 @@ try{ new ResizeObserver(fitBarsSoon).observe($('center'));
      new MutationObserver(fitBarsSoon).observe($('topbar'),{childList:true,subtree:true,characterData:true});
 }catch(e){}
 
-resize();fitBars();fitView();updateStats();clipInfo();
+_bootXong=true;resize();fitBars();fitView();updateStats();clipInfo();
 hint('Bấm ô=tô · bấm khối=xoá · kéo=liên tục. Chọn khối rồi Ctrl+C · dí chuột · Ctrl+V để chép-dán.');
 /* ---------- CỠ GIAO DIỆN: nhớ qua localStorage, đổi là khung vẽ tính lại ngay ---------- */
 function applyUiScale(v){
@@ -6948,7 +7144,7 @@ function reclampPanels(){
       if(e.target!==head&&e.target.closest('input,select,button,a,textarea'))return;   // bấm ô/nút trong tiêu đề: để nguyên
       const g=!sec.classList.contains('pcCol'); sec.classList.toggle('pcCol',g); nho[k]=g; luu(); }); }
   // ⑤ bảng phải: thẻ ít dùng GẬP SẴN (lần đầu); còn lại mở. Hai ô nhỏ Cỡ khối / Chiều sâu Z giữ nguyên.
-  const GAP_SAN=/^(ringBox|cratePanel|impPanel|blkPanel|splitPanel|#repFrom)$/;
+  const GAP_SAN=/^(ringBox|cratePanel|impPanel|blkPanel|splitPanel|mergePanel|#repFrom)$/;
   document.querySelectorAll('#right > .field').forEach(sec=>{
     const h=sec.firstElementChild; if(!h||h.tagName!=='LABEL')return;
     if(sec.querySelector('#bw,#depthZ'))return;
@@ -6992,6 +7188,440 @@ function reclampPanels(){
     if(!q.offsetParent)return;
     e.preventDefault(); e.stopPropagation(); q.focus(); q.select(); },true);
 })();
+
+/* ════════════════════ QOL2-3009 — port lần 2 từ Desktop\index.html (bản đồng nghiệp 30/09) ════════════════════
+   Mọi thứ dưới đây chỉ THÊM; chỗ sửa vào code cũ đều ngắn và có ghi chú "QOL2". Hiệu năng: không việc gì chạy
+   mỗi khung khi không cần — viền/vết chỉ dựng khi có, bảng level chỉ đọc file khi MỞ bảng, ổ stage đo lại bằng rAF. */
+
+/* ---------- B2 + B3 + C1 trong khung 3D: chạy SAU vòng dựng khối của từng bàn (v2 lẫn lớp art v3) ---------- */
+function qol2Res(){ if(!three)return null;
+  if(!three.qOvGeo){
+    /* khung NÉT ĐỨT dựng sẵn (cắt mỗi cạnh thành gạch) → dùng CHUNG cho mọi khối, khỏi computeLineDistances */
+    const V=[[-.5,-.5,-.5],[.5,-.5,-.5],[.5,.5,-.5],[-.5,.5,-.5],[-.5,-.5,.5],[.5,-.5,.5],[.5,.5,.5],[-.5,.5,.5]];
+    const E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    const SEG=7, p=[];
+    for(const [a,b] of E) for(let k=0;k<SEG;k+=2){ const t0=k/SEG, t1=Math.min(1,(k+1)/SEG);
+      for(const t of [t0,t1]) for(let c=0;c<3;c++) p.push(V[a][c]+(V[b][c]-V[a][c])*t); }
+    const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(p),3));
+    three.qOvGeo=g;
+    const L=c=>new THREE.LineBasicMaterial({color:c,transparent:true,opacity:.95,depthTest:false});
+    three.qOvMat=L(0xff7a1a); three.qAddMat=L(0xa8e635); three.qDelMat=L(0xff5a6e); three.qMrgMat=L(0x48d1ff); }
+  return three; }
+/* bản MỜ của một material — tạo 1 lần rồi nhớ (WeakMap), không tạo mới mỗi lần dựng. Shader riêng (mặt xoáy
+   wormhole) không nhân bản được rẻ → trả null, nơi gọi ẩn hẳn mesh đó. */
+var _qFade=new WeakMap();                          // var: build3D có thể chạy trước khi khối này chạy (TDZ)
+function qFadeMat(m){ if(!m)return null; if(Array.isArray(m)){ const a=m.map(qFadeMat); return a.some(x=>!x)?null:a; }
+  if(m.isShaderMaterial)return null;
+  let f=_qFade.get(m); if(!f){ f=m.clone(); f.transparent=true; f.opacity=0.09; f.depthWrite=false; _qFade.set(m,f); }
+  return f; }
+function qol2Tbl3D(t,ti,tg,cxo,czo){
+  const marks=overlayMarks(), ov=ovShow&&overlapObjs.size>0;
+  if(!yLockOn&&!ov&&!marks.length)return;                     // không có gì để làm → không tốn gì
+  const R=qol2Res(); if(!R)return;
+  if(yLockOn||ov) for(const oc of tg.children){ const o=oc.userData&&oc.userData.obj; if(!o||oc.userData.qDone)continue;
+    if(yLockOn&&!onYLayer(o)){                                 // C1: khối ngoài tầng → mờ hẳn, bỏ viền/marker
+      oc.traverse(c=>{ if(c===oc)return;
+        if(c.isLine||c.isSprite||c.isPoints){ c.visible=false; return; }
+        if(c.isMesh){ if(c.geometry===three.head||c.geometry===three.tail){ c.visible=false; return; }
+          const f=qFadeMat(c.material); if(f)c.material=f; else c.visible=false; } });
+      continue; }
+    if(ov&&overlapObjs.has(o)){                                // B3: viền cam bao đúng hộp va chạm
+      const l=new THREE.LineSegments(R.qOvGeo,R.qOvMat); l.scale.set(fS(o,'x'),fS(o,'y'),fS(o,'z'));
+      const fo=(TYPES[o.type]||{}).off; if(fo)l.position.set(fo[0],fo[1],fo[2]);
+      // vỏ `oc` của trụ/nón/hũ mang visQuat = rot dữ liệu ∘ rot BAKE của prefab → bù ngược phần bake
+      if(!(TYPES[o.type]&&TYPES[o.type].shape==='box')){ const bq=bakedQuat(o); l.quaternion.set(-bq.x,-bq.y,-bq.z,bq.w); }
+      l.renderOrder=999; l.raycast=()=>{}; oc.add(l); } }
+  for(const m of marks){ if(m.ti!==ti)continue; const mo=m.o;   // B2: vết nét (khối vừa xoá thì không còn vỏ `oc`)
+    const l=new THREE.LineSegments(R.qOvGeo, m.mode==='erase'?R.qDelMat:m.mode==='merge'?R.qMrgMat:R.qAddMat);
+    l.scale.set(fS(mo,'x'),fS(mo,'y'),fS(mo,'z')); l.position.set(mo.px-cxo,mo.py,mo.pz-czo);
+    const q=getRot(mo); l.quaternion.set(q.x,q.y,q.z,q.w); l.renderOrder=998; l.raycast=()=>{}; tg.add(l); } }
+(function(){ const b=$('ovToggle'); if(!b)return;
+  b.onclick=()=>{ ovShow=!ovShow; b.classList.toggle('off',!ovShow); b.textContent=ovShow?'👁 viền':'🚫 viền';
+    hint(ovShow?'Đã BẬT viền cam đánh dấu khối đâm nhau.':'Đã TẮT viền cam (vẫn đếm, vẫn chặn đặt chồng — chỉ ẩn phần vẽ).');
+    draw(); sync3D(); }; })();
+
+/* ---------- C1 🧭 thanh tầng Y trong 3D ---------- */
+const yFloor=()=>Math.floor(sel.y+1e-6);
+function syncYBar(){ const el=$('yVal'); if(el&&document.activeElement!==el)el.value=yFloor(); }
+function setYFloor(N){ sel.y=Math.round(N)+0.5; syncYBar(); if(view==='top'){ updateDepthLab(); updateAxHint(); } }
+function yNav(d){ setYFloor(yFloor()+d); draw(); sync3D();
+  if(yLockOn)hint('🔒 Tầng '+yFloor()+' — chỉ khối ở tầng này mới bấm/kéo/xoá/đặt được.'); }
+/* vào 3D mà tầng đang chọn TRỐNG thì kéo về tầng có khối gần nhất — không thì cả tháp mờ tịt, bấm gì cũng trượt */
+function ySnapToBlocks(){
+  if(objects.some(o=>{ const y0=fC(o,'y')-axSize(o,'y')/2, y1=fC(o,'y')+axSize(o,'y')/2; return sel.y>=y0-1e-6&&sel.y<=y1+1e-6; }))return;
+  const v=[...new Set(objects.map(o=>Math.floor(fC(o,'y')+1e-6)))]; if(!v.length)return;
+  let best=v[0]; for(const t of v) if(Math.abs(t+0.5-sel.y)<Math.abs(best+0.5-sel.y)) best=t;
+  setYFloor(best); }
+function qYEnter(){ if(yLockOn)ySnapToBlocks(); syncYBar(); }
+(function(){ const el=$('yVal'); if(!el)return;
+  $('yPrev').onclick=()=>yNav(-1); $('yNext').onclick=()=>yNav(1);
+  el.addEventListener('input',()=>{ const v=+el.value; if(el.value===''||!isFinite(v))return;
+    sel.y=Math.round(v)+0.5; if(view==='top'){ updateDepthLab(); updateAxHint(); } draw(); sync3D(); });
+  el.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); el.blur(); } });
+  el.addEventListener('blur',syncYBar);
+  const lk=$('yLock');
+  lk.onclick=()=>{ yLockOn=!yLockOn; lk.classList.toggle('on',yLockOn); lk.textContent=yLockOn?'🔒':'🔓';
+    if(yLockOn){ ySnapToBlocks(); clearSel(); }            // khoá thì bỏ chọn cũ, tránh cầm nhầm khối tầng khác
+    hint(yLockOn?('🔒 Khoá tầng '+yFloor()+' — chỉ khối ở tầng này mới bấm/kéo/xoá/quét-chọn/đặt được; tầng khác mờ và chuột đi xuyên qua.')
+                :'🔓 Bỏ khoá tầng — sửa được khối ở mọi tầng như thường.');
+    draw(); sync3D(); };
+  syncYBar(); })();
+
+/* ---------- B1 🔗 GỘP KHỐI NHỎ → KHỐI DÀI (phép NGƯỢC của ✂️ Tách) ----------
+   Chỉ gộp MỘT hàng sát nhau theo MỘT trục; dài quá trần vật liệu thì TỪ CHỐI. Đo thẳng hàng trong hệ trục
+   CỦA KHỐI (xoay ngược bằng rot) ⇒ Tách xong Gộp lại về đúng chỗ cũ, kể cả thanh đã xoay. Dung sai 0,05 ô. */
+const MERGE_TOL=0.05;
+const _mergeOid=new WeakMap(); let _mergeOidN=0;
+const mergeOid=o=>{ if(!_mergeOid.has(o))_mergeOid.set(o,++_mergeOidN); return _mergeOid.get(o); };
+function mergeOpen(){ const pn=$('mergePanel'); return !!pn&&!pn.classList.contains('pcCol')&&!pn.classList.contains('mobCol'); }
+function mergePlan(list){
+  list=list||selObjs;
+  if(list.length<2) return {ok:false, why:list.length?'Mới chọn 1 khối — chọn thêm các khối nằm thẳng hàng sát nó.':'Chưa chọn khối nào — dùng ✋ Di chuyển, Ctrl+bấm hoặc kéo vùng chọn một hàng khối.'};
+  if(list.some(isCrate)) return {ok:false, why:'Vùng chọn có HÒM — hòm là vật chứa, không gộp được.'};
+  if(list.some(isPlank)) return {ok:false, why:'Vùng chọn có THANH GỖ — thanh gỗ cỡ tự do, không gộp được.'};
+  const tis=new Set(list.map(tiOf));
+  if(tis.size>1) return {ok:false, why:'Các khối nằm trên '+tis.size+' bàn khác nhau — chỉ gộp được khối cùng một bàn.'};
+  const inCs=new Set(list.map(o=>+o.inC||0));
+  if(inCs.size>1) return {ok:false, why:inCs.has(0)?'Lẫn khối TRONG hòm với khối ngoài hòm.':'Các khối thuộc những hòm khác nhau.'};
+  const q=qnorm(getRot(list[0]));
+  for(let i=1;i<list.length;i++){ const r=qnorm(getRot(list[i]));
+    if(Math.abs(q.x*r.x+q.y*r.y+q.z*r.z+q.w*r.w)<1-1e-4)
+      return {ok:false, why:'Các khối có GÓC XOAY khác nhau — xoay cho giống nhau rồi gộp.'}; }
+  const qi={x:-q.x,y:-q.y,z:-q.z,w:q.w}, o0=list[0];
+  const L=list.map(o=>({o, l:qrotv(qi,{x:o.px-o0.px,y:o.py-o0.py,z:o.pz-o0.pz}), s:{x:o.sx,y:o.sy,z:o.sz}}));
+  const AX=['x','y','z'], spread={};
+  for(const a of AX){ let lo=1e9,hi=-1e9; for(const e of L){ lo=Math.min(lo,e.l[a]); hi=Math.max(hi,e.l[a]); } spread[a]=hi-lo; }
+  const ax=AX.reduce((m,a)=>spread[a]>spread[m]?a:m,'x');
+  if(spread[ax]<MERGE_TOL) return {ok:false, why:'Các khối đang CHỒNG lên cùng một chỗ.'};
+  const cross=AX.filter(a=>a!==ax);
+  for(const b of cross){
+    if(spread[b]>MERGE_TOL) return {ok:false, why:'Các khối KHÔNG thẳng hàng: lệch nhau '+fmt(spread[b])+' ô theo trục '+b.toUpperCase()+' (chỉ gộp được một hàng dọc theo MỘT trục).'};
+    if(L.some(e=>Math.abs(e.s[b]-L[0].s[b])>0.01)) return {ok:false, why:'Có khối dày khác các khối còn lại theo trục '+b.toUpperCase()+' (một khối đang dài theo trục khác).'}; }
+  L.sort((a,b)=>a.l[ax]-b.l[ax]);
+  let len=0;
+  for(let i=0;i<L.length;i++){ len+=L[i].s[ax]; if(!i)continue;
+    const g=(L[i].l[ax]-L[i].s[ax]/2)-(L[i-1].l[ax]+L[i-1].s[ax]/2);
+    if(g>MERGE_TOL+1e-9) return {ok:false, why:'Có chỗ HỞ '+fmt(g)+' ô giữa khối thứ '+i+' và '+(i+1)+' (dọc trục '+ax.toUpperCase()+').'};
+    if(g<-MERGE_TOL-1e-9) return {ok:false, why:'Khối thứ '+i+' và '+(i+1)+' CHỒNG lên nhau '+fmt(-g)+' ô.'}; }
+  const lo=L[0].l[ax]-L[0].s[ax]/2, hi=L[L.length-1].l[ax]+L[L.length-1].s[ax]/2;
+  const c={x:0,y:0,z:0}; c[ax]=(lo+hi)/2;
+  for(const b of cross) c[b]=L.reduce((a,e)=>a+e.l[b],0)/L.length;
+  const w=isIdent(q)?c:qrotv(q,c);
+  const size={x:L[0].s.x,y:L[0].s.y,z:L[0].s.z}; size[ax]=R4(len);
+  const cnt=new Map(); for(const e of L) cnt.set(e.o.type,(cnt.get(e.o.type)||0)+e.s.x*e.s.y*e.s.z);
+  const prim=(selObj&&list.indexOf(selObj)>=0)?selObj:o0;
+  const mats=[...cnt.keys()].sort((a,b)=>(b===prim.type)-(a===prim.type)||cnt.get(b)-cnt.get(a)||a-b).map(t=>({t, cells:cnt.get(t),
+    why:objIssue({type:t,sx:size.x,sy:size.y,sz:size.z})}));
+  return {ok:true, ti:[...tis][0], ax, len:R4(len), size, rot:list[0].rot, prim, mats, n:list.length,
+    pos:{px:R4(o0.px+w.x), py:R4(o0.py+w.y), pz:R4(o0.pz+w.z)},
+    mass:list.reduce((a,o)=>a+((TYPES[o.type]||{}).mass||0)*o.sx*o.sy*o.sz,0)}; }
+let mergePick={sig:'', t:null}, mergeMatsSig='';
+function mergeMat(P){
+  const sig=selObjs.map(mergeOid).join(',');
+  const valid=t=>P.mats.some(m=>m.t===t&&!m.why);
+  if(mergePick.sig!==sig||!P.mats.some(m=>m.t===mergePick.t)){
+    const def=P.mats.find(m=>!m.why);
+    mergePick={sig, t:valid(P.prim.type)?P.prim.type:(def?def.t:P.prim.type)}; }
+  return mergePick.t; }
+function mergeResult(P,t){ const n=Object.assign({},P.prim);
+  n.type=t; n.px=P.pos.px; n.py=P.pos.py; n.pz=P.pos.pz; n.sx=P.size.x; n.sy=P.size.y; n.sz=P.size.z;
+  if(P.rot)n.rot=Object.assign({},P.rot); else delete n.rot;
+  if(n.md!=null&&!(TYPES[t]&&TYPES[t].nuke))delete n.md;          // metadata (☢ độ bền) chỉ đi theo đúng loại của nó
+  return n; }
+function mergePreviewMark(){
+  if(selObjs.length<2||!mergeOpen())return null;
+  const P=mergePlan(); if(!P.ok)return null;
+  const t=mergeMat(P), m=P.mats.find(x=>x.t===t); if(!m||m.why)return null;
+  return {ti:P.ti, mode:'merge', o:mergeResult(P,t)}; }
+function fillMergePanel(){
+  const inf=$('mergeInfo'), box=$('mergeMats'), ms=$('mergeMass'), btn=$('btnMerge');
+  if(!inf||!mergeOpen())return;                                   // thẻ đang gập → khỏi tính
+  const P=mergePlan();
+  if(!P.ok){ inf.textContent=P.why; inf.style.color='var(--dim)'; box.innerHTML=''; mergeMatsSig=''; ms.textContent=''; btn.disabled=true; return; }
+  const t=mergeMat(P), cur0=P.mats.find(m=>m.t===t);
+  const S=P.size, szs=S.x+'×'+S.y+'×'+S.z, nm=id=>(TYPES[id]?TYPES[id].name:'id '+id);
+  const round=TYPES[t]&&TYPES[t].shape&&TYPES[t].shape!=='box'&&P.ax!=='y';
+  inf.textContent=P.n+' khối → 1 khối '+szs+' (dài '+fmt(P.len)+' ô theo trục '+P.ax.toUpperCase()+(isIdent(getRot(P.prim))?'':' của khối')+')'
+    +(round?' · khối tròn dài theo '+P.ax.toUpperCase()+' sẽ NẰM ngang':'');
+  inf.style.color='var(--txt)';
+  const msig=P.mats.map(m=>m.t+':'+m.cells+':'+m.why).join('|')+'#'+mergePick.sig;
+  if(msig!==mergeMatsSig){ mergeMatsSig=msig;
+    box.innerHTML=P.mats.map(m=>'<label class="chk" style="margin:2px 0;'+(m.why?'opacity:.5':'')+'" title="'+(m.why?m.why.replace(/"/g,'&quot;'):'')+'">'
+      +'<input type="radio" name="mergeMat" value="'+m.t+'"'+(m.why?' disabled':'')+'> '
+      +(m.t===P.prim.type?'★ ':'')+escHTML(nm(m.t))+' ('+m.t+') ×'+fmt(m.cells)
+      +(m.why?' <span style="color:#ff5a6e">— '+escHTML(m.why)+'</span>':'')+'</label>').join('');
+    for(const r of box.querySelectorAll('input[name=mergeMat]'))
+      r.onchange=()=>{ mergePick.t=+r.value; fillMergePanel(); draw(); sync3D(); }; }
+  for(const r of box.querySelectorAll('input[name=mergeMat]')) r.checked=(+r.value===t);
+  const mNew=((TYPES[t]||{}).mass||0)*S.x*S.y*S.z;
+  ms.textContent=Math.abs(mNew-P.mass)>1e-6?('Khối lượng '+fmt(P.mass)+' → '+fmt(mNew)+' (đổi vật liệu thì độ nặng trong game đổi theo)'):'';
+  ms.style.color=Math.abs(mNew-P.mass)>1e-6?'var(--move)':'var(--dim)';
+  btn.disabled=!!(cur0&&cur0.why);
+  if(cur0&&cur0.why){ inf.textContent+=' — ⚠ '+cur0.why; inf.style.color='#ff5a6e'; } }
+function doMerge(){
+  const P=mergePlan();
+  if(!P.ok){ warn(P.why); return; }
+  const t=mergeMat(P), m=P.mats.find(x=>x.t===t);
+  if(m&&m.why){ warn('Không gộp được thành "'+(TYPES[t]?TYPES[t].name:t)+'": '+m.why); return; }
+  const arr=objsOfTi(P.ti), n=mergeResult(P,t), gone=new Set(selObjs);
+  let at=arr.length; arr.forEach((o,i)=>{ if(gone.has(o)&&i<at)at=i; });
+  pushHistory();
+  for(let i=arr.length-1;i>=0;i--) if(gone.has(arr[i])) arr.splice(i,1);   // splice TẠI CHỖ: `objects` là alias của bàn đang sửa
+  arr.splice(Math.min(at,arr.length),0,n);
+  setSel([n]); warn(''); draw(); updateStats(); sync3D(); refreshObjBox(true);
+  hint('🔗 Đã gộp '+P.n+' khối → 1 khối "'+(TYPES[t]?TYPES[t].name:t)+'" '+n.sx+'×'+n.sy+'×'+n.sz+'. Ctrl+Z để hoàn tác · ✂️ Tách để tách lại.'); }
+$('btnMerge').onclick=doMerge;
+(function(){ const _rrs=refreshRepSel;                           // vùng chọn đổi (setSel/clearSel/updateStats) ⇒ thẻ Gộp bám theo
+  refreshRepSel=function(){ const r=_rrs.apply(this,arguments); try{ fillMergePanel(); }catch(e){} return r; };
+  const pn=$('mergePanel');                                      // gập/mở thẻ (class pcCol/mobCol) ⇒ tính lại + viền xem trước
+  if(pn&&window.MutationObserver) new MutationObserver(()=>{ fillMergePanel(); draw(); sync3D(); }).observe(pn,{attributes:true,attributeFilter:['class']}); })();
+
+/* ---------- B4 ⤵️ NẠP ĐÈ BỐ CỤC — giữ số Level + file đích ----------
+   "Lấy tháp của Level 120 về làm Level 7": 📂 Nạp file thì số Level nhảy sang 120. Ở đây chỉ THAY RUỘT: số Level giữ,
+   lvSrcName giữ ⇒ 💾 Ghi đè (📌) vẫn ghi đúng Level{N}.json đang mở, không hỏi lại. */
+function applyImportedLayout(text,srcName){
+  const keepIdx=+fIndex.value; let L;
+  try{ L=JSON.parse(text); }catch(err){ warn('JSON không hợp lệ: '+err.message); return; }   // hỏng thì KHÔNG đụng level đang mở
+  const nCur=stages.reduce((a,s)=>a+s.tables.reduce((b,t)=>b+t.objs.length,0),0)||tables.reduce((a,t)=>a+t.objs.length,0);
+  if(nCur&&!confirm('Thay TOÀN BỘ bố cục của Level '+keepIdx+' bằng nội dung '+(srcName||'file vừa chọn')+' ?\n\n'
+      +nCur+' khối hiện tại sẽ mất, và Ctrl+Z KHÔNG lấy lại được (nạp file luôn xoá lịch sử hoàn tác).'))return;
+  const src=lvSrcName;
+  loadLevel(L,keepIdx);                                          // truyền số hiện tại ⇒ loadLevel giữ nguyên số Level
+  lvSrcName=src;                                                 // file đích giữ nguyên
+  if(folderFiles.length){ folderDirty=true; renderFolderNav(); }
+  hint('⤵️ Đã thay bố cục bằng '+(srcName||'file vừa chọn')+' — vẫn là Level '+keepIdx
+      +(lvDir?' · 💾 Ghi đè vẫn ghi vào Level'+keepIdx+'.json trong 📌 '+lvDir.name:'')+'.'); }
+if($('impLayoutIn'))$('impLayoutIn').onchange=e=>{ const f=e.target.files[0]; e.target.value=''; if(!f)return;
+  const rd=new FileReader(); rd.onload=()=>applyImportedLayout(rd.result,f.name); rd.readAsText(f); };
+
+/* ---------- C2 📄 LƯỚI CHỌN LEVEL (khi đã nạp cả thư mục) ----------
+   Nút ▦ cạnh ◀ [số] ▶ mở bảng: ô gõ số + Enter, lưới 5 cột (mũi tên để đi), ô ĐỎ nét đứt = số THIẾU (game báo
+   "Level data not found"), màu theo độ khó (Khó 1 đỏ · Khó 2 tím), ● = level đang mở có sửa chưa lưu.
+   Thao tác file (✏️ Đổi số kèm .meta · ⧉ Nhân bản · 🗑 Xoá kèm .meta · ＋ Mới = trắng, số lớn nhất + 1) cần QUYỀN GHI:
+   <input webkitdirectory> không có ⇒ dùng thư mục 📌 khi nó ĐÚNG là thư mục đang duyệt (cùng tên).
+   ⚡ Độ khó nằm TRONG file: KHÔNG quét nền lúc mở thư mục — chỉ đọc khi MỞ bảng, chia lô, đóng bảng là dừng. */
+let lgDirName='', lgScanTok=0, lgHi=-1, lgEdit=null, lgBusy=false, lgEat=false;
+const LG_COLS=5, LG_GAP_CHIPS=10, LG_DIFF={0:'Dễ',1:'Khó 1',2:'Khó 2'};
+const lgLabel=it=>it.idx!=null?('Level '+it.idx):it.name.replace(/\.json$/i,'');
+const lgOpenNow=()=>{ const p=$('lgPop'); return !!p&&!p.hidden; };
+const lgCanEdit=()=>!!(lvDir&&lvDir.getFileHandle&&lgDirName&&lvDir.name===lgDirName);
+const lgNoEditWhy=()=>lvDir?('📌 đang gắn "'+lvDir.name+'", không phải thư mục đang duyệt "'+lgDirName+'" — gắn 📌 đúng thư mục này thì mới tạo / đổi số / nhân bản / xoá được.')
+                           :'Bấm 📌 gắn ĐÚNG thư mục này (Chrome/Edge) thì mới tạo / đổi số / nhân bản / xoá file được.';
+const lgMaxIdx=()=>folderFiles.reduce((m,it)=>it.idx!=null&&it.idx>m?it.idx:m,0);
+function lgSort(){ folderFiles.sort((a,b)=>{ if(a.idx!=null&&b.idx!=null&&a.idx!==b.idx)return a.idx-b.idx;
+  if((a.idx==null)!==(b.idx==null))return a.idx==null?1:-1; return a.name.localeCompare(b.name,undefined,{numeric:true}); }); }
+async function lgRead(it){ if(it.handle)return (await it.handle.getFile()).text();
+  return await new Promise((ok,no)=>{ const rd=new FileReader(); rd.onload=()=>ok(rd.result); rd.onerror=no; rd.readAsText(it.file); }); }
+const lgDiffOf=t=>{ const m=/"difficulty"\s*:\s*(\d+)/.exec(t||''); return m?+m[1]:0; };
+async function lgScanDiff(){ const tok=++lgScanTok; let n=0;
+  for(const it of folderFiles.slice()){
+    if(tok!==lgScanTok||!lgOpenNow())return;                     // đóng bảng / đổi thư mục ⇒ dừng
+    if(it.diff!=null)continue;
+    try{ it.diff=lgDiffOf(await lgRead(it)); }catch(_){}
+    if(++n%25===0){ await new Promise(r=>setTimeout(r,0)); if(tok===lgScanTok&&lgOpenNow())lgRender(true); } }
+  if(tok===lgScanTok&&lgOpenNow())lgRender(true); }
+function lgEnsurePop(){ let p=$('lgPop'); if(p)return p;
+  p=document.createElement('div'); p.id='lgPop'; p.hidden=true; p.setAttribute('role','dialog');
+  p.innerHTML='<div class="lghead"><input id="lgFind" type="text" inputmode="numeric" autocomplete="off" placeholder="Gõ số… Enter"><span id="lgCount"></span>'
+    +'<button id="lgX" title="Đóng (Esc)">✕</button></div><div id="lgList" role="listbox"></div><div id="lgAct"></div>'
+    +'<div class="lgfoot"><button id="lgNew">＋ Mới</button><span id="lgDir"></span></div>';
+  document.body.appendChild(p);
+  const f=$('lgFind'); f.addEventListener('input',()=>{ lgHi=-1; lgRender(); }); f.addEventListener('keydown',lgFindKey);
+  $('lgX').onclick=()=>lgClose(); $('lgNew').onclick=()=>lgNewLevel();
+  p.addEventListener('mousedown',e=>{ if(e.target.closest('input'))return; e.preventDefault(); });   // bấm trong bảng không mất con trỏ ô gõ
+  p.addEventListener('click',lgPopClick);
+  return p; }
+function lgPlace(){ const p=$('lgPop'), r=$('lvPick').getBoundingClientRect(); const w=p.offsetWidth||260;
+  p.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+'px'; p.style.top=(r.bottom+6)+'px'; }
+function lgOpen(){ if(!folderFiles.length)return; const p=lgEnsurePop(); lgEdit=null; lgHi=-1; $('lgFind').value='';
+  p.hidden=false; lgRender(); lgPlace();
+  const on=$('lgList').querySelector('.lgchip.on'); if(on)on.scrollIntoView({block:'center'});
+  $('lgFind').focus(); lgScanDiff(); }
+function lgClose(){ const p=$('lgPop'); if(!p||p.hidden)return; p.hidden=true; lgEdit=null; lgScanTok++; }
+function lgRows(){ const q=($('lgFind')?$('lgFind').value:'').trim().toLowerCase(), rows=[], num=/^\d+$/.test(q); let prev=null;
+  folderFiles.forEach((it,i)=>{
+    const hit=!q||(num?(it.idx!=null&&String(it.idx).startsWith(q)):it.name.toLowerCase().includes(q));
+    if(!q&&it.idx!=null&&prev!=null&&it.idx>prev+1){ const a=prev+1, b=it.idx-1;
+      if(b-a+1<=LG_GAP_CHIPS) for(let n=a;n<=b;n++) rows.push({gap:true,a:n,b:n}); else rows.push({gap:true,a,b,wide:true}); }
+    if(it.idx!=null)prev=it.idx;
+    if(hit)rows.push({i,it}); });
+  return rows; }
+function lgChip(r){
+  if(r.gap) return r.wide?'<div class="lgchip gap wide" title="Thiếu Level '+r.a+'–'+r.b+' — game báo Level data not found">⚠ thiếu '+r.a+'–'+r.b+'</div>'
+                         :'<div class="lgchip gap" title="Thiếu Level '+r.a+' — game báo Level data not found">'+r.a+'</div>';
+  const it=r.it, i=r.i, on=i===folderPos, named=it.idx==null;
+  const dc=it.diff===1?' d1':it.diff===2?' d2':'', dn=it.diff==null?'':' · '+(LG_DIFF[it.diff]||('độ khó '+it.diff));
+  return '<div class="lgchip'+(on?' on':'')+(i===lgHi?' hi':'')+(named?' wide':'')+dc+'" role="option" data-i="'+i+'" title="'+escHTML(it.name)+dn+'">'
+    +escHTML(named?it.name.replace(/\.json$/i,''):String(it.idx))+(on&&folderDirty?'<i class="dot">●</i>':'')+'</div>'; }
+function lgRender(listOnly){ const list=$('lgList'); if(!list)return;
+  if(listOnly){ const keep=list.scrollTop, rows=lgRows(); if(rows.length)list.innerHTML=rows.map(lgChip).join(''); list.scrollTop=keep; return; }
+  const ed=lgCanEdit();
+  $('lgCount').textContent=folderFiles.length+' file';
+  $('lgDir').textContent='📁 '+(lgDirName||'thư mục')+(ed?' · 📌 ghi được':' · chỉ đọc');
+  $('lgDir').title=ed?'Thư mục đang duyệt chính là thư mục 📌 — thao tác file ghi thẳng vào đó.':lgNoEditWhy();
+  const nb=$('lgNew'); nb.textContent='＋ Mới → '+(lgMaxIdx()+1); nb.disabled=!ed;
+  nb.title=ed?('Tạo Level'+(lgMaxIdx()+1)+'.json TRẮNG trong thư mục rồi mở ra'):lgNoEditWhy();
+  const rows=lgRows();
+  list.innerHTML=rows.length?rows.map(lgChip).join(''):'<div class="lgempty">Không có level nào khớp "'+escHTML($('lgFind').value)+'".</div>';
+  lgRenderAct(ed); }
+function lgRenderAct(ed){ const bar=$('lgAct'), it=folderPos>=0?folderFiles[folderPos]:null;
+  if(!it){ bar.innerHTML='<span class="nm" style="color:var(--dim)">Chưa mở level nào</span>'; return; }
+  const E=lgEdit&&lgEdit.i===folderPos?lgEdit:null, why=E&&E.why?'<div class="why">'+escHTML(E.why)+'</div>':'';
+  const nm='<b class="nm" title="'+escHTML(it.name)+'">'+escHTML(lgLabel(it))+'</b>';
+  if(E&&E.mode==='del'){
+    bar.innerHTML='<div class="row1">Xoá '+nm+' (kèm .meta)?<button class="ok del" data-a="okdel">Xoá</button><button data-a="cancel">Huỷ</button></div>'
+      +'<div class="why">Không hoàn tác được'+(it.idx!=null?' · số '+it.idx+' sẽ thành chỗ THIẾU':'')+'.</div>'+why; return; }
+  if(E){
+    bar.innerHTML='<div class="row1">'+nm+(E.mode==='ren'?' → ':' ⧉→ ')
+      +'<input type="number" min="1" step="1" id="lgNum" value="'+E.val+'"><button class="ok" data-a="ok" title="Enter">✓</button><button data-a="cancel" title="Esc">✕</button></div>'+why;
+    const ni=$('lgNum'); ni.focus(); ni.select();
+    ni.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); lgCommit(); }
+      else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); lgEdit=null; lgRender(); $('lgFind').focus(); } };
+    return; }
+  const dis=ed?'':' disabled', w=escHTML(lgNoEditWhy());
+  bar.innerHTML='<div class="row1">'+nm+(folderDirty?'<i class="dot" style="font-style:normal;color:#ffb454" title="có sửa chưa lưu">●</i>':'')
+    +'<span class="btns"><button data-a="ren" title="'+(ed?'Đổi số level (đổi tên file, .meta đi theo)':w)+'"'+dis+'>✏️</button>'
+    +'<button data-a="dup" title="'+(ed?'Nhân bản sang số mới':w)+'"'+dis+'>⧉</button>'
+    +'<button class="del" data-a="del" title="'+(ed?'Xoá file (kèm .meta)':w)+'"'+dis+'>🗑</button></span></div>'; }
+function lgFindKey(e){ const rows=lgRows().filter(r=>!r.gap);
+  if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); lgClose(); $('lvPick').focus(); return; }
+  const typed=$('lgFind').value!=='';
+  const step={ArrowDown:LG_COLS,ArrowUp:-LG_COLS,ArrowRight:typed?0:1,ArrowLeft:typed?0:-1}[e.key];
+  if(step){ e.preventDefault(); e.stopPropagation(); if(!rows.length)return;
+    let k=rows.findIndex(r=>r.i===(lgHi>=0?lgHi:folderPos)); k=k<0?0:Math.max(0,Math.min(rows.length-1,k+step));
+    lgHi=rows[k].i; lgRender(); const el=$('lgList').querySelector('.lgchip.hi'); if(el)el.scrollIntoView({block:'nearest'}); return; }
+  if(e.key==='Enter'){ e.preventDefault(); const q=$('lgFind').value.trim(); let pick=lgHi>=0?lgHi:-1;
+    if(pick<0&&/^\d+$/.test(q)){ const ex=folderFiles.findIndex(it=>it.idx===+q); if(ex>=0)pick=ex; }
+    if(pick<0&&rows.length&&q)pick=rows[0].i;
+    if(pick<0){ if(q)warn('Không có Level '+q+' trong thư mục.'); return; }
+    lgClose(); folderShow(pick); } }
+function lgPopClick(e){
+  const chip=e.target.closest('.lgchip');
+  if(chip){ if(chip.classList.contains('gap'))return; lgClose(); folderShow(+chip.dataset.i); return; }
+  const btn=e.target.closest('#lgAct button'); if(!btn||btn.disabled)return;
+  const a=btn.dataset.a, it=folderPos>=0?folderFiles[folderPos]:null;
+  if(a==='cancel'){ lgEdit=null; lgRender(); $('lgFind').focus(); return; }
+  if(a==='ok'||a==='okdel'){ lgCommit(); return; }
+  if(!it)return;
+  if(a==='ren')lgEdit={i:folderPos,mode:'ren',val:it.idx!=null?it.idx:'',why:''};
+  if(a==='dup')lgEdit={i:folderPos,mode:'dup',val:lgMaxIdx()+1,why:''};
+  if(a==='del')lgEdit={i:folderPos,mode:'del',why:''};
+  lgRender(); }
+if($('lvPick'))$('lvPick').onclick=()=>{ if(lgOpenNow())lgClose(); else lgOpen(); };
+/* bấm RA NGOÀI: đóng bảng. Chỉ NUỐT cú bấm khi nó rơi vào KHUNG VẼ (không thì đặt/xoá mất một khối) — bấm vào nút /
+   bảng bên cạnh thì cho qua luôn, khỏi phải bấm 2 lần. Nuốt đúng HẾT cú bấm đó (tới click), không nuốt theo thời gian. */
+window.addEventListener('pointerdown',e=>{ if(!lgOpenNow())return;
+  const tg=e.target; if(tg.closest&&(tg.closest('#lgPop')||tg.closest('#lvPick')))return;
+  lgClose();
+  if(tg.closest&&tg.closest('#cwrap')){ lgEat=true; e.preventDefault(); e.stopImmediatePropagation(); } },true);
+for(const ty of ['mousedown','mouseup','click','contextmenu']) window.addEventListener(ty,e=>{ if(!lgEat)return;
+  e.preventDefault(); e.stopImmediatePropagation(); if(ty==='mouseup')setTimeout(()=>{ lgEat=false; },0); },true);
+window.addEventListener('keydown',e=>{ if(e.key!=='Escape'||!lgOpenNow())return;
+  if(e.target&&(e.target.id==='lgFind'||e.target.id==='lgNum'))return;
+  e.preventDefault(); e.stopImmediatePropagation(); lgClose(); },true);
+window.addEventListener('resize',()=>{ if(lgOpenNow())lgPlace(); });
+async function lgExists(name){ try{ await lvDir.getFileHandle(name); return true; }catch(_){ return false; } }
+async function lgWrite(name,text){ const h=await lvDir.getFileHandle(name,{create:true}); const w=await h.createWritable(); await w.write(text); await w.close(); return h; }
+function lgSetIndexText(text,n){ if(/"levelIndex"\s*:\s*-?\d+/.test(text))return text.replace(/("levelIndex"\s*:\s*)-?\d+/,'$1'+n);
+  const L=JSON.parse(text); L.levelIndex=n; return JSON.stringify(L); }
+function lgCheckNum(v,selfI){ const n=Math.round(+v);
+  if(!isFinite(n)||n<1||String(v).trim()==='')return {why:'Nhập số level nguyên ≥ 1.'};
+  const ex=folderFiles.findIndex(it=>it.idx===n);
+  if(ex>=0&&ex!==selfI)return {why:'Level '+n+' đã có ('+folderFiles[ex].name+') — không ghi đè. Xoá hoặc đổi số file đó trước.'};
+  return {n}; }
+function lgSelRebuild(){ const s=$('lvSel'); if(s)s.innerHTML=folderFiles.map((it,i)=>'<option value="'+i+'">'+(i+1)+'. '+escHTML(it.name)+'</option>').join(''); }
+async function lgPerm(){ if(!lgCanEdit()){ warn(lgNoEditWhy()); return false; }
+  if(await dirQuyen(lvDir,true))return true; warn('Chưa cho quyền ghi vào thư mục 📌 "'+lvDir.name+'".'); return false; }
+async function lgCommit(){
+  if(!lgEdit||lgBusy)return;
+  const E=lgEdit, it=folderFiles[E.i]; if(!it){ lgEdit=null; lgRender(); return; }
+  const fail=m=>{ lgBusy=false; if(lgEdit===E){ E.why=m; lgRender(); } else warn(m); };
+  if(E.mode!=='del'){ const ni=$('lgNum'); if(ni)E.val=ni.value; }
+  if(E.i===folderPos&&folderDirty&&E.mode!=='del')return fail('Level này đang mở và có sửa chưa lưu — bấm 💾 Ghi đè / ⬇️ Tải về trước (thao tác làm trên FILE trong thư mục).');
+  let chk=null;
+  if(E.mode!=='del'){ chk=lgCheckNum(E.val,E.mode==='ren'?E.i:-1); if(chk.why)return fail(chk.why);
+    if(E.mode==='ren'&&chk.n===it.idx){ lgEdit=null; lgRender(); return; } }
+  lgBusy=true;
+  try{
+    if(!(await lgPerm()))return fail('Chưa có quyền ghi vào thư mục.');
+    if(E.mode==='del'){
+      await lvDir.removeEntry(it.name); try{ await lvDir.removeEntry(it.name+'.meta'); }catch(_){}
+      const wasOpen=E.i===folderPos; folderFiles.splice(E.i,1); lgEdit=null; lgBusy=false; lgSelRebuild();
+      if(wasOpen){ folderPos=-1; folderDirty=false; lvSrcName=null;
+        if(folderFiles.length){ let k=Math.min(E.i,folderFiles.length-1);
+          if(folderFiles[k].idx==null){ const pv=folderFiles.slice(0,k).map(x=>x.idx!=null).lastIndexOf(true); if(pv>=0)k=pv; }
+          folderShow(k); } }
+      else if(E.i<folderPos)folderPos--;
+      renderFolderNav(); lgRender();
+      hint('🗑 Đã xoá '+it.name+' (kèm .meta)'+(it.idx!=null?' — Level '+it.idx+' giờ là chỗ THIẾU trong thư mục.':'.')); return; }
+    const n=chk.n, name='Level'+n+'.json';
+    if(await lgExists(name))return fail(name+' đã có trong thư mục — không ghi đè.');
+    const text=lgSetIndexText(await lgRead(it),n), h=await lgWrite(name,text);
+    const openIt=folderPos>=0?folderFiles[folderPos]:null;
+    if(E.mode==='ren'){
+      try{ const mh=await lvDir.getFileHandle(it.name+'.meta');           // .meta đi theo ⇒ GIỮ GUID của Unity
+        await lgWrite(name+'.meta',await (await mh.getFile()).text()); await lvDir.removeEntry(it.name+'.meta'); }catch(_){}
+      await lvDir.removeEntry(it.name);
+      const wasOpen=E.i===folderPos, old=it.name, oldIdx=it.idx;
+      it.name=name; it.handle=h; it.idx=n; delete it.file;
+      lgSort(); folderPos=openIt?folderFiles.indexOf(openIt):-1; lgSelRebuild();
+      if(wasOpen){ fIndex.value=n; lvSrcName=name; }
+      lgEdit=null; lgBusy=false; renderFolderNav(); lgRender();
+      hint('✏️ Đã đổi '+old+' → '+name+' (.meta đi theo, giữ GUID)'+(oldIdx!=null?' — Level '+oldIdx+' giờ là chỗ THIẾU.':'.')); return; }
+    const nit={name,handle:h,idx:n,diff:it.diff}; folderFiles.push(nit); lgSort();
+    folderPos=openIt?folderFiles.indexOf(openIt):-1; lgSelRebuild();
+    lgEdit=null; lgBusy=false; renderFolderNav(); lgClose(); folderShow(folderFiles.indexOf(nit));
+    hint('⧉ Đã nhân bản '+it.name+' → '+name+'.');
+  }catch(err){ fail('Không thao tác được: '+(err&&err.message||err)); }
+  finally{ lgBusy=false; } }
+async function lgNewLevel(){
+  if(lgBusy)return; if(!lgCanEdit()){ warn(lgNoEditWhy()); return; }
+  if(folderDirty&&!confirm('Level đang mở có sửa CHƯA LƯU.\nTạo level mới sẽ MẤT thay đổi. Tiếp tục?'))return;
+  const n=lgMaxIdx()+1, name='Level'+n+'.json'; lgBusy=true;
+  try{
+    if(!(await lgPerm()))return;
+    if(await lgExists(name)){ warn(name+' đã có trong thư mục — không ghi đè.'); return; }
+    loadLevel({levelIndex:n,moveCount:20,difficulty:0,stages:[{objects:[],tables:[],blockers:[]}]},n);   // 1 bàn trống, move 20, Dễ
+    const h=await lgWrite(name,JSON.stringify(buildJSON()));
+    const nit={name,handle:h,idx:n,diff:0}; folderFiles.push(nit); lgSort(); lgSelRebuild();
+    folderPos=folderFiles.indexOf(nit); folderDirty=false; lvSrcName=name;
+    lgClose(); renderFolderNav(); updateStats();
+    hint('＋ Đã tạo '+name+' (trắng) trong thư mục và mở ra — vẽ xong bấm 💾 Ghi đè.');
+  }catch(err){ warn('Không tạo được '+name+': '+(err&&err.message||err)); }
+  finally{ lgBusy=false; } }
+(function(){ const _rfn=renderFolderNav;                        // bảng đang mở thì vẽ lại theo (● chưa lưu, level đang mở)
+  renderFolderNav=function(){ const r=_rfn.apply(this,arguments); const b=$('lvPick'); if(b)b.disabled=!folderFiles.length;
+    if(lgOpenNow())lgRender(); return r; }; })();
+
+/* ---------- C3 🎬 ổ STAGE: căn GIỮA, nhưng không bao giờ đè ô thống kê (trái) hay #axhint / thanh 3D (phải) ----------
+   Đo bằng rAF và CHỈ khi không kéo/vẽ (đọc offsetWidth giữa cú kéo là ép trình duyệt dàn lại trang mỗi khung). */
+var _stgFitHen=0, _stgKey='';                     // var: toggle3D/renderStgBar có thể gọi tới trước khi khối này chạy
+function qStgRefit(){ _stgKey=''; fitStgDockSoon(); }
+function fitStgDock(){ const d=$('stgDock'), wrap=$('cwrap'); if(!d||!wrap)return;
+  if(document.documentElement.classList.contains('mob'))return;   // điện thoại: CSS lo (ổ nằm dưới)
+  const st=$('stats'), ax=$('axhint'), t3=show3d?$('t3dbar'):null;
+  const key=[wrap.clientWidth,st?st.offsetWidth:0,ax?ax.offsetWidth:0,show3d?1:0,d.scrollWidth].join('|');
+  if(key===_stgKey)return; _stgKey=key;
+  d.style.left='50%'; d.style.transform='translateX(-50%)'; d.style.top='';
+  const W=wrap.clientWidth, w=d.offsetWidth, pad=8; if(!W||!w)return;
+  let lo=pad, hi=W-w-pad;
+  if(st&&st.offsetWidth)lo=Math.max(lo,st.offsetLeft+st.offsetWidth+pad);
+  if(ax&&ax.offsetWidth)hi=Math.min(hi,ax.offsetLeft-w-pad);
+  if(t3&&t3.offsetWidth)hi=Math.min(hi,t3.offsetLeft-w-pad);
+  let x=(W-w)/2;
+  if(hi>=lo)x=Math.min(Math.max(x,lo),hi);
+  else if(st&&st.offsetHeight){ d.style.top=(st.offsetTop+st.offsetHeight+6)+'px'; x=pad; }   // hết chỗ ⇒ xuống dưới ô thống kê
+  d.style.left=Math.round(x)+'px'; d.style.transform='none'; }
+function fitStgDockSoon(){ if(_stgFitHen)return; _stgFitHen=requestAnimationFrame(()=>{ _stgFitHen=0;
+  if((moving&&moving.active)||painting)return; fitStgDock(); }); }
+(function(){ const _rsb=renderStgBar; renderStgBar=function(){ const r=_rsb.apply(this,arguments); fitStgDockSoon(); return r; };
+  const _us=updateStats; updateStats=function(){ const r=_us.apply(this,arguments);
+    if(!((moving&&moving.active)||painting))fitStgDockSoon(); return r; };
+  const _rv=renderVal; renderVal=function(){ const r=_rv.apply(this,arguments);
+    const d=$('issueDock'); if(d)d.classList.toggle('ok',!lastIssues.length); return r; };
+  window.addEventListener('resize',qStgRefit);
+  if(window.ResizeObserver)new ResizeObserver(qStgRefit).observe($('cwrap'));
+  fitStgDockSoon(); })();
 
 </script>
 
