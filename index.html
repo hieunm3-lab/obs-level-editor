@@ -165,7 +165,7 @@
   #camHudTxt{font-size:10.5px;color:var(--dim);text-align:center;margin-top:3px;line-height:1.35}
   #axhint{position:absolute;top:10px;right:10px;background:#0008;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--dim);pointer-events:none}
   /* preview 3D góc phải — xem trực tiếp trong lúc vẽ 2D */
-  #mini3d{position:absolute;right:10px;top:44px;width:300px;height:230px;min-width:180px;min-height:150px;background:#0b0d17;border:1px solid var(--line);border-radius:10px;display:none;flex-direction:column;overflow:hidden;resize:both;box-shadow:0 8px 26px #0009;z-index:6}
+  #mini3d{position:absolute;right:10px;top:64px;width:300px;height:230px;min-width:180px;min-height:150px;background:#0b0d17;border:1px solid var(--line);border-radius:10px;display:none;flex-direction:column;overflow:hidden;resize:both;box-shadow:0 8px 26px #0009;z-index:6}
   #miniHead{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--panel2);border-bottom:1px solid var(--line);font-size:11px;color:var(--dim);cursor:move;user-select:none}
   #miniHead b{color:var(--txt);font-weight:600}
   #miniHead button{margin-left:auto;background:none;border:1px solid var(--line);color:var(--dim);border-radius:5px;padding:1px 6px;font-size:11px;cursor:pointer}
@@ -287,6 +287,22 @@
 
   /* ===== QOL-2909 (port tu ban Desktop\level_editor.html) ===== */
   /* ③ thanh lop Z doc, noi goc phai-duoi khung ve (roi khoi thanh cong cu) */
+  /* 🧱 COTKHOI-3009: cột chọn nhanh CỠ KHỐI — nổi giữa mép TRÁI khung vẽ (đối xứng #zbar / #ybar bên phải) */
+  #sizebar{--sz:50px;--szgap:5px;--szpad:5px;position:absolute;left:10px;top:50%;z-index:8;
+    display:grid;grid-template-columns:repeat(2,var(--sz));gap:var(--szgap);align-content:start;
+    padding:var(--szpad);border-radius:10px;background:rgba(14,16,22,.9);border:1px solid var(--line);
+    box-shadow:0 8px 24px rgba(0,0,0,.5);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;box-sizing:border-box}
+  #sizebar.off{display:none}
+  #sizebar.one{grid-template-columns:var(--sz)}
+  #sizebar .szt{position:relative;width:var(--sz);height:var(--sz);cursor:pointer;border:1px solid #2a3350;border-radius:7px;
+    background:#171b26;overflow:hidden;box-sizing:border-box}
+  #sizebar .szt canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  #sizebar .szt:hover{border-color:var(--accent2,#48d1ff)}
+  #sizebar .szt.on{border-color:#3ecf6a;box-shadow:0 0 0 1px #3ecf6a inset}
+  #sizebar .szt b{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);font-size:11px;font-weight:800;line-height:1;
+    color:#e6ebff;background:rgba(8,10,18,.78);border-radius:3px;padding:2px 4px;pointer-events:none;white-space:nowrap}
+  #sizebar .szt.on b{color:#3ecf6a}
+  html.mob #sizebar{display:none!important}
   #zbar{position:absolute;right:10px;bottom:56px;z-index:4;display:flex;flex-direction:column;align-items:center;gap:4px;
     background:#000b;border:1px solid var(--line);border-radius:10px;padding:6px 5px}
   #zbar .tb{width:40px;justify-content:center;padding:3px 0;margin:0}
@@ -346,16 +362,47 @@
   #stgDock #stgOps{flex:0 0 auto}
   #stgDock #stgInfo{display:none}
   /* C3: o CANH BAO goc trai-duoi khung ve (Soat loi game + dong khoi chong nhau + nut vien) */
-  #issueDock{position:absolute;left:10px;bottom:48px;z-index:7;width:min(320px,42%);display:flex;flex-direction:column;gap:4px;pointer-events:none}
+  /* 30/09 (user: "box xanh xau qua"): dong bo kieu voi #stats / #stgDock — kinh toi, vien manh, bo tron.
+     Khong loi = VIEN NHO tu co theo chu; co loi = THE vien trai do; khoi dam nhau = THE vien trai cam. */
+  #issueDock{position:absolute;left:10px;bottom:48px;z-index:7;max-width:min(360px,42%);display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}
   #issueDock>*{pointer-events:auto}
-  #issueDock #valPanel{margin:0;padding:6px 8px;background:rgba(14,16,22,.92);max-height:34vh;overflow:auto}
-  #issueDock #valPanel>label{margin:0 0 4px}
+  #issueDock #valPanel{margin:0;padding:8px 11px 8px 10px;background:rgba(14,16,22,.94);border:1px solid rgba(255,90,110,.45);border-left:3px solid #ff5a6e;border-radius:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,.45);max-height:34vh;overflow:auto;width:100%;box-sizing:border-box}
+  #issueDock #valHead{margin:0 0 5px;font-size:11.5px;font-weight:700;letter-spacing:.2px;color:#ff8a98;text-transform:none}
+  #issueDock #valList{font-size:11px;line-height:1.55;max-height:none}
+  #issueDock #valList:empty::before{content:'✅ Không có lỗi game';color:#7ee081}
   #issueDock.ok #valHead{display:none}
-  #issueDock.ok #valPanel{padding:3px 8px}
-  #ovLine{display:flex;align-items:center;gap:6px;background:rgba(14,16,22,.92);border:1px solid #ff7a1a;border-radius:8px;padding:3px 6px;font-size:11px;color:#ff9a4a}
+  #issueDock.ok #valPanel{width:auto;padding:3px 11px;background:#0008;border:1px solid var(--line);border-radius:999px;box-shadow:none;overflow:visible;pointer-events:none}
+  #issueDock.ok #valList{font-size:11.5px;white-space:nowrap;color:#7ee081}
+  #ovLine{display:flex;align-items:center;gap:8px;background:rgba(14,16,22,.94);border:1px solid rgba(255,122,26,.45);border-left:3px solid #ff7a1a;border-radius:10px;
+    padding:4px 6px 4px 9px;font-size:11.5px;color:#ffae70;box-shadow:0 8px 24px rgba(0,0,0,.4);box-sizing:border-box;max-width:100%}
   #ovLine #ovTxt{flex:1 1 auto;min-width:0}
-  #ovLine .tb{padding:1px 6px;font-size:11px;margin:0;flex:0 0 auto}
+  #ovLine .tb{padding:2px 8px;font-size:11px;margin:0;flex:0 0 auto;border-radius:7px}
   #ovLine .tb.off{opacity:.55}
+  /* 30/09 (user: "thanh cuon vua to vua xau"): THANH CUON MANH 8px, ranh trong suot, con truot bo tron hop tong toi.
+     Chromium/Edge/Safari: ::-webkit-scrollbar. Firefox khong co pseudo do -> dung chuan scrollbar-width/color (@supports).
+     Luu y: phan tu nao dat `scrollbar-width` thi Chromium 121+ bo qua ::-webkit-scrollbar -> ep ve auto o duoi. */
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#3a4254;border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+  ::-webkit-scrollbar-thumb:hover{background:#56617c;border:2px solid transparent;background-clip:padding-box}
+  ::-webkit-scrollbar-thumb:active{background:#6f7da0;border:2px solid transparent;background-clip:padding-box}
+  ::-webkit-scrollbar-corner{background:transparent}
+  ::-webkit-scrollbar-button{display:none;width:0;height:0}
+  @supports selector(::-webkit-scrollbar){ *{scrollbar-width:auto!important;scrollbar-color:auto!important} }
+  @supports not selector(::-webkit-scrollbar){ *{scrollbar-width:thin;scrollbar-color:#3a4254 transparent} }
+  /* 30/09 (user: "sua lai may cho UI xau"): THE bang phai — truoc moi the mot mau VIEN DAY (xanh lo/cam/vang/xanh la)
+     trong nhu cau vong. Nay vien trung tinh manh + VACH MAU 3px ben trai (giu mau nhan dien). Style inline -> !important. */
+  #selBox,#ringBox,#cratePanel,#nukePanel,#impPanel,#mergeBox{border:1px solid var(--line)!important;border-left:3px solid var(--acc,var(--accent2))!important;
+    border-radius:10px!important;background:rgba(255,255,255,.025)!important;padding:8px 10px!important}
+  #selBox{--acc:var(--move)} #ringBox{--acc:var(--accent2)} #cratePanel{--acc:#f0a93a} #nukePanel{--acc:#e8c93a} #impPanel{--acc:#7ee081} #mergeBox{--acc:#8fc7ff}
+  /* nhan CHECKBOX khong in hoa (.field label{uppercase} an lan sang) — chi TIEU DE nhom giu in hoa */
+  .field label.chk{text-transform:none;letter-spacing:0;font-weight:500;color:var(--txt)}
+  /* dong goi y day khung: 5 s sau khi doi noi dung thi MO bot, khong de len nhan "nen ban" */
+  #hint{transition:opacity .45s}
+  #hint.cu{opacity:.38}
+  /* dien thoai: o truc de len o thong ke o 390px — thong tin lop da co o thanh Z */
+  html.mob #axhint{display:none}
   #threewrap[style*="block"]~#issueDock{bottom:92px}     /* 3D: chua cho thanh di doc level (#t3dtravel) */
   html.mob #issueDock{left:6px;bottom:6px;width:min(240px,60vw)}
   html.mob #issueDock.ok{display:none}                    /* dien thoai: chi hien khi CO loi */
@@ -570,11 +617,14 @@
       </div>
       <div id="hint"></div>
       <!-- 🧾 QOL2-3009 C3: ổ CẢNH BÁO góc trái-dưới: Soát lỗi game (dời từ bảng phải) + dòng khối chồng nhau + nút viền -->
+      <!-- 🧱 COTKHOI-3009: CỘT CHỌN NHANH CỠ KHỐI — nổi giữa mép TRÁI khung vẽ. Chỉ là LỐI TẮT đặt ô "Cỡ khối" (ngang × dọc
+           theo mặt đang xem) ở bảng phải; "Chiều sâu Z" + "≡ cả sâu Z" vẫn nguyên. Chỉ hiện lúc ✏️ Vẽ. -->
+      <div id="sizebar" class="off" title="Cỡ khối game nhận cho loại đang cầm — bấm để đặt cỡ cây cọ.&#10;Cọ vẽ theo MẶT ĐANG XEM (dày 1 theo trục sâu): muốn thanh dài theo trục sâu thì đổi mặt nhìn (Trước/Trên/Bên)."></div>
       <div id="issueDock" class="ok">
         <div id="ovLine" style="display:none"><span id="ovTxt"></span><button class="tb" id="ovToggle" title="Bật/tắt viền cam nét đứt đánh dấu khối đâm nhau (cả 2D lẫn 3D). Vẫn đếm và vẫn chặn đặt chồng như thường — chỉ ẩn phần vẽ.">👁 viền</button></div>
-        <div class="field" id="valPanel" style="border:1px solid #7ee081;border-radius:8px;padding:9px;background:rgba(255,90,110,.05)">
+        <div class="field" id="valPanel">
           <label id="valHead" title="Game bỏ qua khối có cỡ sai luật hoặc chưa có prefab variant — vào chơi khối biến mất mà không báo gì">🚫 Soát lỗi game (khối sẽ biến mất)</label>
-          <div id="valList" style="font-size:11px;max-height:168px;overflow:auto;line-height:1.5"></div>
+          <div id="valList"></div>
         </div>
       </div>
       <!-- ô dán JSON: nằm TRONG khung vẽ dạng lớp nổi, không chiếm thêm dòng của thanh công cụ.
@@ -2254,6 +2304,55 @@ function vsTable(dx, dy, dz, ti, em, movH){
     return G;
   }catch(e){ console.warn('ban tuyet VS:', e && e.message); return null; }
 }
+/* 🧱 COTKHOI-3009: ảnh nhỏ THẬT cho cột chọn nhanh cỡ khối (v2 gọi lúc rảnh).
+   null = chưa sẵn (thử lại) · false = không có art. Ảnh dựng xong LƯU localStorage ⇒ lần mở sau khỏi render. */
+const SZT = {mem:new Map(), ls:null, lsKey:'', hen:0};
+function sztKho(){
+  const k = 'obs_szt_' + (typeof ART_BUILD!=='undefined' ? ART_BUILD : '0')
+          + ((typeof ART_G!=='undefined' && ART_G && ART_G.cur==='vs') ? '_vs_' + ((window.ART_VS && window.ART_VS.build) || '0') : '');
+  if(k !== SZT.lsKey){
+    SZT.lsKey = k; SZT.ls = {};
+    try{ const raw = localStorage.getItem(k); if(raw) SZT.ls = JSON.parse(raw) || {}; }catch(e){ SZT.ls = {}; }
+  }
+  return SZT.ls; }
+function sztLuu(){
+  if(SZT.hen) return;
+  SZT.hen = setTimeout(()=>{ SZT.hen = 0;
+    try{
+      const giu = [SZT.lsKey];                            // don ban cu cua CUNG game; giu ban cua game kia
+      for(let i = localStorage.length - 1; i >= 0; i--){ const k = localStorage.key(i);
+        if(k && k.indexOf('obs_szt_') === 0 && giu.indexOf(k) < 0 && (k.indexOf('_vs_') > 0) === (SZT.lsKey.indexOf('_vs_') > 0))
+          localStorage.removeItem(k); }
+      localStorage.setItem(SZT.lsKey, JSON.stringify(SZT.ls));
+    }catch(e){ /* het cho / bi chan -> lan sau dung lai */ }
+  }, 200); }                                              // ghi sớm: mở lại trang (kể cả ngay sau đó) là có sẵn
+function szThumbArt(t, s, V){
+  if(!TYPES[t]) return false;
+  const kho = sztKho(), k = t + '|' + s.x + 'x' + s.y + 'x' + s.z + '|' + V.h + V.v, mk = SZT.lsKey + '|' + k;
+  const m = SZT.mem.get(mk); if(m) return m.complete === false ? null : m;
+  if(kho[k]){                                             // co anh luu san: giai ma (bat dong bo) roi tra ve
+    const im = new Image(); im.decoding = 'async'; const cv = document.createElement('canvas');
+    cv.complete = false; SZT.mem.set(mk, cv);
+    im.onload = ()=>{ cv.width = im.naturalWidth; cv.height = im.naturalHeight; cv.getContext('2d').drawImage(im, 0, 0); cv.complete = true; };
+    im.onerror = ()=>{ SZT.mem.delete(mk); delete kho[k]; };
+    im.src = kho[k]; return null; }
+  if(SP2_TAT || !window.THREE) return false;
+  if(typeof ART_TEX === 'undefined' || !ART_TEX.id[t]) return false;
+  const o = {type:t, px:0, py:0, pz:0, sx:s.x, sy:s.y, sz:s.z};
+  const wH = axSize(o, V.h), wV = axSize(o, V.v), kk = 92 / Math.max(wH, wV);
+  const n0 = SP2_NGAN.n, t0 = SP2_NGAN.t; SP2_NGAN.n = 0;
+  let cv = null;
+  try{ cv = sprite2D(o, V, wH * kk, wV * kk); }
+  finally{ SP2_NGAN.n = n0; SP2_NGAN.t = t0; }
+  if(!cv) return null;
+  // thu ve <=100 px roi luu (webp): vua anh o 50 px @2x, ~2-4 KB moi anh
+  const z = Math.min(1, 100 / Math.max(cv.width, cv.height)), o2 = document.createElement('canvas');
+  o2.width = Math.max(1, Math.round(cv.width * z)); o2.height = Math.max(1, Math.round(cv.height * z));
+  o2.getContext('2d').drawImage(cv, 0, 0, o2.width, o2.height);
+  SZT.mem.set(mk, o2);
+  try{ kho[k] = o2.toDataURL('image/webp', 0.9); sztLuu(); }catch(e){}
+  return o2;
+}
 /* Goi tu applyGame (ca luc khoi dong). OBS -> tra bang goc ngay; VS -> tai vs_art.js roi moi trao. */
 function artGame(g){
   g = (g === 'vs') ? 'vs' : 'obs';
@@ -2544,7 +2643,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 11:04', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 11:52', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -5716,7 +5815,8 @@ window.addEventListener('keydown',e=>{
 $('btnPaste').onclick=()=>{const box=$('pasteBox'),btn=$('btnPaste');
   if(box.style.display==='none'){box.style.display='';box.focus();btn.textContent='✅ Nạp JSON';btn.classList.add('primary');}
   else{loadLevel(box.value);lvSrcName=null;box.style.display='none';btn.textContent='📥 Dán JSON';btn.classList.remove('primary');}};
-function hint(t){$('hint').textContent=t;}
+function hint(t){const h=$('hint'); h.textContent=t; h.classList.remove('cu');   // 30/09: 5 s sau thì mờ bớt (CSS #hint.cu)
+  clearTimeout(hint._t); if(t) hint._t=setTimeout(()=>h.classList.add('cu'),5000);}
 /* warn nằm trên thanh công cụ nên có thể bị cắt bằng … khi thanh chật → gắn title để dí chuột đọc đủ,
    và dội luôn ra bong bóng hint giữa khung vẽ (chỗ rộng rãi, không bao giờ bị che). */
 function warn(t){const w=$('warn'); w.textContent=t; w.title=t||''; if(t)hint('⚠ '+t);}
@@ -6874,6 +6974,10 @@ function fitMini(){ const b=three&&three.tight; if(!b||!mini.cam)return;
 function initMini(){
   const c=$('cvMini');
   mini.ren=new THREE.WebGLRenderer({canvas:c,antialias:true});
+  // 30/09 (user: "màu preview 3D bị tối"): có art thật (v3) thì preview phải xuất sRGB y như khung 3D chính —
+  // thiếu dòng này texture ra TỐI hẳn. Bản v2 màu phẳng (không có ART_ON) giữ nguyên.
+  if(typeof ART_ON!=='undefined'&&ART_ON&&THREE.sRGBEncoding!==undefined) mini.ren.outputEncoding=THREE.sRGBEncoding;
+  mini.ren.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
   mini.cam=new THREE.PerspectiveCamera(48,1,0.1,600);
   camM.target=new THREE.Vector3();
   let dg=null;                                            // orbit riêng: kéo trái=xoay, kéo phải=dời, lăn=zoom
@@ -7064,12 +7168,14 @@ if(typeof syncTravelUI==='function'){
   const _s3=sync3D;     sync3D=function(){ _s3.apply(null,arguments); try{ syncTravelUI(true); }catch(e){} };
 }
 function renderVal(){ const L=$('valList'), P=$('valPanel'); if(!L||!P)return;
-  if(!lastIssues.length){ P.style.borderColor='#7ee081';
-    L.innerHTML='<span style="color:#7ee081">✅ Mọi khối đều vào được game.</span>'; return; }
-  P.style.borderColor='#ff5a6e';
+  // 30/09: màu/viền do CSS lo theo #issueDock.ok (không ghi style inline nữa)
+  if(!lastIssues.length){ L.textContent='✅ Không có lỗi game';
+    P.title='Soát lỗi game: mọi khối đều có prefab đúng cỡ — vào game không khối nào biến mất.'; return; }
+  P.title='';
   const g=new Map();                                     // lý do → danh sách khối
   for(const v of lastIssues){ const k=typeName(v.o.type)+' — '+v.msg; if(!g.has(k))g.set(k,[]); g.get(k).push(v); }
-  let html=`<div style="color:#ff8a98;margin-bottom:5px">${lastIssues.length} khối bị game BỎ QUA:</div>`;
+  let html='';
+  { const h=$('valHead'); if(h)h.textContent='🚫 '+lastIssues.length+' khối sẽ biến mất trong game'; }
   let shown=0;
   for(const [k,list] of g){
     html+=`<div style="margin-bottom:5px"><b style="color:#ffb3bd">${k}</b> <span style="color:var(--dim)">×${list.length}</span><br>`;
@@ -7622,6 +7728,112 @@ function fitStgDockSoon(){ if(_stgFitHen)return; _stgFitHen=requestAnimationFram
   window.addEventListener('resize',qStgRefit);
   if(window.ResizeObserver)new ResizeObserver(qStgRefit).observe($('cwrap'));
   fitStgDockSoon(); })();
+/* ============ 🧱 COTKHOI-3009: CỘT CHỌN NHANH CỠ KHỐI (bên trái khung vẽ) ============
+   Lấy ý từ bản đồng nghiệp (index 30/09) nhưng khớp mô hình cọ của mình: cọ = bw × bh theo MẶT ĐANG XEM, dày 1 theo
+   trục sâu; "Chiều sâu Z"/"≡ cả sâu Z" giữ nguyên. Cỡ hợp lệ hỏi thẳng objIssue() (hàm soát lỗi lúc xuất). */
+const SZB={key:'',hl:'',n:0,fitKey:'',job:0,thumb:new Map()};
+function szCands(t){
+  const V=VIEWS[view], out=[{x:1,y:1,z:1}];
+  if(!TYPES[t]||TYPES[t].fixed) return out;
+  for(const ax of [V.h,V.v]) for(let L=2;L<=5;L++){ const s={x:1,y:1,z:1}; s[ax]=L;
+    if(!objIssue({type:t,sx:s.x,sy:s.y,sz:s.z})) out.push(s); }
+  return out; }
+function szAn(){ const t=TYPES[brush]; return tool!=='paint'||!t||brush===CRATE_T||!!t.plank; }
+/* ảnh nhỏ: bản art (v3) trả canvas ẢNH THẬT qua szThumbArt(); null = chưa sẵn (thử lại lúc rảnh); false = không có art */
+function szVePhang(cv,t,s){ const V=VIEWS[view], c=cv.getContext('2d'), W=cv.width, H=cv.height;
+  c.clearRect(0,0,W,H); const wH=s[V.h], wV=s[V.v], k=Math.min((W-14)/wH,(H-22)/wV,26);
+  const w=wH*k, h=wV*k, x=(W-w)/2, y=(H-8-h)/2; const col=(TYPES[t]&&TYPES[t].col)||'#888';
+  c.fillStyle=col; c.strokeStyle='rgba(0,0,0,.55)'; c.lineWidth=2;
+  const r=(TYPES[t]&&TYPES[t].shape!=='box')?Math.min(w,h)*0.28:3;
+  c.beginPath(); if(c.roundRect)c.roundRect(x,y,w,h,r); else c.rect(x,y,w,h); c.fill(); c.stroke(); }
+function szVeAnh(cv,src){ const c=cv.getContext('2d'), W=cv.width, H=cv.height; c.clearRect(0,0,W,H);
+  const k=Math.min((W-6)/src.width,(H-16)/src.height), w=src.width*k, h=src.height*k;
+  c.drawImage(src,(W-w)/2,(H-10-h)/2,w,h); }
+function szThumbKey(t,s){ return [GAME,(typeof ART_G!=='undefined'&&ART_G)?ART_G.cur:'',t,s.x+'x'+s.y+'x'+s.z,view].join('|'); }
+function szDungAnh(){                                   // lấp ảnh THẬT từng ô lúc máy rảnh — không chặn vẽ
+  if(SZB.job) return; if(typeof szThumbArt!=='function') return;
+  let lan=0; const box=$('sizebar');
+  const buoc=()=>{ SZB.job=0; if(!box||box.classList.contains('off')) return;
+    let con=false;
+    for(const d of box.children){ if(d._xong) continue;
+      const k=d._k, c=SZB.thumb.get(k);
+      if(c){ szVeAnh(d.firstChild,c); d._xong=1; continue; }
+      let a=null; try{ a=szThumbArt(+d.dataset.t,d._s,VIEWS[view]); }catch(e){ a=false; }
+      if(a){ SZB.thumb.set(k,a); if(SZB.thumb.size>240)SZB.thumb.delete(SZB.thumb.keys().next().value);
+             szVeAnh(d.firstChild,a); d._xong=1; }
+      else if(a===false) d._xong=1;                     // không có art → giữ hộp màu phẳng
+      else con=true;
+      break; }                                          // MỘT ô mỗi lượt rảnh
+    if([...box.children].some(d=>!d._xong) && ++lan<400)
+      SZB.job=window.requestIdleCallback?requestIdleCallback(buoc,{timeout:con?700:300}):setTimeout(buoc,con?150:40); };
+  // lượt ĐẦU chờ máy rảnh thật (không ép sau 200 ms lúc trang còn đang khởi động)
+  SZB.job=window.requestIdleCallback?requestIdleCallback(buoc,{timeout:1500}):setTimeout(buoc,300); }
+function szDung(){
+  const box=$('sizebar'); if(!box) return;
+  box.innerHTML=''; SZB.hl='';
+  if(!szAn()){
+    for(const s of szCands(brush)){
+      const ax=s.x>1?'x':s.y>1?'y':s.z>1?'z':null, L=ax?s[ax]:1;
+      const d=document.createElement('div'); d.className='szt'; d.dataset.t=brush; d._s=s; d._k=szThumbKey(brush,s);
+      d.dataset.s=s.x+','+s.y+','+s.z;
+      d.title=(ax?'Thanh dài '+L+' ô theo trục '+ax.toUpperCase():'Khối lẻ 1 ô')+' — cỡ '+s.x+'×'+s.y+'×'+s.z;
+      const cv=document.createElement('canvas'); cv.width=cv.height=100; d.appendChild(cv);
+      const b=document.createElement('b'); b.textContent=ax?L+ax.toUpperCase():'1×1'; d.appendChild(b);
+      const c=SZB.thumb.get(d._k); if(c){ szVeAnh(cv,c); d._xong=1; } else szVePhang(cv,brush,s);
+      d.onclick=()=>szChon(s);
+      box.appendChild(d); }
+  }
+  SZB.n=box.children.length;
+  box.classList.toggle('one',SZB.n<=1);
+  box.classList.toggle('off',szAn()||!SZB.n);
+  SZB.fitKey=''; szFitSoon(); szDanh(); szDungAnh(); }
+function szChon(s){ const V=VIEWS[view], h=s[V.h], v=s[V.v];
+  if(+bw.value===h&&+bh.value===v){ hint('Cây cọ đang đúng cỡ '+s.x+'×'+s.y+'×'+s.z+'.'); return; }
+  const s0=snapState(); bw.value=h; bh.value=v;
+  pushHistory(s0);                                     // đổi cỡ = một bước undo, y như gõ ô "Cỡ khối"
+  bw.dispatchEvent(new Event('change')); bh.dispatchEvent(new Event('change'));
+  if(tool!=='paint') setTool('paint');
+  hint('Cây cọ đổi sang cỡ '+s.x+'×'+s.y+'×'+s.z+' (ô Cỡ khối: '+h+' × '+v+').'); draw(); }
+function szDanh(){ const box=$('sizebar'); if(!box) return;
+  const V=VIEWS[view], k=(+bw.value||1)+','+(+bh.value||1)+','+view; if(k===SZB.hl) return; SZB.hl=k;
+  for(const d of box.children){ const s=d._s; if(!s) continue;
+    d.classList.toggle('on', s[V.h]===(+bw.value||1) && s[V.v]===(+bh.value||1)); } }
+/* MÓC SAU draw(): chỉ so chuỗi khoá — không đổi thì không đụng DOM (draw là đường nóng) */
+function szSync(){ const k=[brush,view,tool,GAME,(typeof ART_G!=='undefined'&&ART_G)?ART_G.cur:'',
+    TYPES[brush]?1:0].join('|');
+  if(k!==SZB.key){ SZB.key=k; szDung(); return; }
+  szDanh(); }
+/* Vị trí: giữa mép trái, né #stats (trên) · #stgDock nếu nó rơi xuống bên trái · #issueDock (dưới).
+   Đo trong rAF theo KHOÁ — không đọc bố cục giữa cú kéo. */
+let _szFitHen=0;
+function szFitSoon(){ if(_szFitHen) return; _szFitHen=requestAnimationFrame(()=>{ _szFitHen=0;
+  if((typeof moving!=='undefined'&&moving&&moving.active)||painting) return; szFit(); }); }
+function szFit(){ const box=$('sizebar'), wrap=$('cwrap'); if(!box||!wrap||box.classList.contains('off')) return;
+  if(document.documentElement.classList.contains('mob')) return;
+  const st=$('stats'), isd=$('issueDock'), sd=$('stgDock');
+  const H=wrap.clientHeight, stB=st&&st.offsetHeight?st.offsetTop+st.offsetHeight:0,
+        isT=isd&&isd.offsetHeight?isd.offsetTop:H, sdL=sd&&sd.offsetWidth?sd.offsetLeft:1e9,
+        sdB=sd&&sd.offsetWidth?sd.offsetTop+sd.offsetHeight:0;
+  const key=[H,stB,isT,sdL,sdB,SZB.n].join('|'); if(key===SZB.fitKey) return; SZB.fitKey=key;
+  const cs=getComputedStyle(box), num=(n,d)=>parseFloat(cs.getPropertyValue(n))||d;
+  const sz=num('--sz',50), gp=num('--szgap',5), pd=num('--szpad',5), edge=2*pd+2;
+  const cols=SZB.n<=1?1:2, W=cols*sz+(cols-1)*gp+edge;
+  let top=Math.max(8,stB+8); if(sdL<10+W+8) top=Math.max(top,sdB+8);
+  const bot=Math.min(H-8,isT-8), room=bot-top;
+  const need=Math.ceil(SZB.n/cols); let rows=Math.floor((room-edge+gp)/(sz+gp)); rows=Math.min(need,rows);
+  if(rows<1){ box.style.visibility='hidden'; return; } box.style.visibility='';
+  const h=rows*sz+(rows-1)*gp+edge;
+  box.style.maxHeight=h+'px'; box.style.height=h+'px';
+  box.style.top=Math.round(Math.max(top,Math.min(bot-h,(top+bot)/2-h/2)))+'px'; box.style.transform='none'; }
+(function(){
+  const _dr=draw; draw=function(){ const r=_dr.apply(this,arguments); try{ szSync(); }catch(e){} return r; };
+  [bw,bh].forEach(el=>el.addEventListener('input',()=>{ try{ szDanh(); }catch(e){} }));
+  // cùng nhịp với ổ stage: số dòng #stats / ổ cảnh báo đổi ⇒ đo lại (theo khoá, rAF)
+  const _fs=fitStgDock; fitStgDock=function(){ const r=_fs.apply(this,arguments); szFit(); return r; };
+  window.addEventListener('resize',()=>{ SZB.fitKey=''; szFitSoon(); });
+  if(window.ResizeObserver) new ResizeObserver(()=>{ SZB.fitKey=''; szFitSoon(); }).observe($('cwrap'));
+  szSync(); })();
+
 
 </script>
 
