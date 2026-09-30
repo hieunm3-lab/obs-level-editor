@@ -989,7 +989,7 @@ function artTex(type, ax, hu){
     t = new THREE.Texture(img);
     if(THREE.sRGBEncoding!==undefined) t.encoding = THREE.sRGBEncoding;
     t.anisotropy = ART_MAXANISO;
-    img.addEventListener('load', ()=>{ t.needsUpdate = true; artVeLai(); }, {once:true});
+    img.addEventListener('load', ()=>{ t.needsUpdate = true; artAnhXong(); }, {once:true});
     if(hu){ t.repeat.set(0.5, 1); t.offset.set(0, 0); }
     ART_CACHE.set(k, t);
   }
@@ -1020,7 +1020,7 @@ function emisOpt(type, ax){
     const img = new Image(); img.src = src;
     t = new THREE.Texture(img);
     if(THREE.sRGBEncoding!==undefined) t.encoding = THREE.sRGBEncoding;
-    img.addEventListener('load', ()=>{ t.needsUpdate = true; artVeLai(); }, {once:true});
+    img.addEventListener('load', ()=>{ t.needsUpdate = true; artAnhXong(); }, {once:true});
     EMIS_CACHE.set(src, t);
   }
   if(t.version === 0 && t.image.complete && t.image.naturalWidth) t.needsUpdate = true;
@@ -1087,7 +1087,7 @@ function wormFaces(o, q, dAx, pool){
     const img = new Image(); img.src = ART_WORM.png;
     const t = new THREE.Texture(img);
     if(THREE.sRGBEncoding!==undefined) t.encoding = THREE.sRGBEncoding;
-    img.addEventListener('load', ()=>{ t.needsUpdate = true; artVeLai(); }, {once:true});
+    img.addEventListener('load', ()=>{ t.needsUpdate = true; artAnhXong(); }, {once:true});
     WORM.tex = t;
     WORM.geo = new THREE.PlaneGeometry(1, 1);
     // 🔴 CULL nhu game (Cull Back + Update() tat mat quay lung). Quad Unity phap tuyen -Z = HUONG RA
@@ -1166,6 +1166,29 @@ let _veHen = 0;
 // 25/09: 20 -> 10 ms. 20 > 16.7 ms/khung nen luc vua mo level / doi zoom, moi khung dung sprite deu KHUNG
 // (do x6: 18-20 ms). 10 ms + ~6 ms ve = duoi 16.7; sprite dung rai them vai khung (luon dung it nhat 1/khung).
 const SP2_NGAN = {t:0, n:0, ms:10};
+/* 🖼️ 30/09: ANH vua nap xong (texture khoi / mat xoay wormhole / anh phat sang). Truoc chi artVeLai() (ve lai) nen
+   thu dung LUC ANH CHUA XONG (mat xoay wormhole, material tam mau trung binh) KHONG BAO GIO duoc thay toi lan build3D
+   sau (user: phai next/back level moi het). Gop mot nhip moi khung: ve lai + dung lai 3D neu dang mo. */
+let _anhHen = 0;
+function artAnhXong(){
+  artVeLai();
+  if(_anhHen) return;
+  _anhHen = requestAnimationFrame(()=>{ _anhHen = 0;
+    if(typeof three!=='undefined' && three && typeof show3d!=='undefined' && show3d && typeof build3D==='function') build3D();
+    if(typeof mini!=='undefined' && mini && mini.on) mini.dirty = true; });
+}
+/* ③ tai NGAM (uu tien thap) moi texture con lai vao cache HTTP — ban web (tex/*.webp); ban 1 file (data URI) bo qua */
+function artTaiNgam(){
+  try{
+    if(typeof ART_TEX==='undefined' || !window.fetch) return;
+    const ds = Object.values(ART_TEX.pool).filter(v => typeof v==='string' && v.indexOf('data:')!==0);
+    let i = 0;
+    const buoc = ()=>{ const lo = ds.slice(i, i + 3); i += 3; if(!lo.length) return;
+      Promise.all(lo.map(u => fetch(u, {priority:'low'}).then(r => r.blob()).catch(()=>0))).then(()=>{
+        (window.requestIdleCallback || setTimeout)(buoc, {timeout:1500}); }); };
+    (window.requestIdleCallback || setTimeout)(buoc, {timeout:4000});
+  }catch(e){}
+}
 function artVeLai(){
   if(_veHen) return;
   _veHen = requestAnimationFrame(()=>{ _veHen = 0;
@@ -1522,6 +1545,13 @@ function artIconsSoon(){
 }
 /* Chay NGAY khi DOM xong: neu co cache thi icon hien cung luc voi bang chon,
    khong con khoang tho dung icon cu. Khong co cache thi moi phai render (chi lan dau). */
+/* ③ 30/09: nap level -> bat dau tai/giai ma anh cua cac loai trong level NGAY (truoc khi dung 3D); luc ranh thi tai ngam
+   phan con lai. loadLevel nam o script chinh (chay SAU khoi nay) -> boc luc DOMContentLoaded. */
+document.addEventListener('DOMContentLoaded', ()=>{
+  try{ if(typeof loadLevel==='function'){ const _ll=loadLevel;
+    loadLevel=function(){ const r=_ll.apply(this,arguments); try{ artAmAnh(); }catch(e){} return r; }; } }catch(e){}
+  window.addEventListener('load', ()=>setTimeout(artTaiNgam, 2500), {once:true});
+});
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', artIconsSoon);
 else artIconsSoon();
 
@@ -2644,7 +2674,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 14:56', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 15:08', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -5576,6 +5606,10 @@ function toastLuu(chinh,phu){ let el=document.getElementById('toastLuu');
     document.body.appendChild(el);
     el.addEventListener('animationend',()=>{ el.classList.remove('chay'); el.style.display='none'; }); }
   el.innerHTML='<span class="tl-ic">💾</span><span>'+chinh.replace(/</g,'&lt;')+'</span>'+(phu?'<span class="tl-sub">'+phu.replace(/</g,'&lt;')+'</span>':'');
+  // TOAST-VITRI-3009: KHÔNG đè thanh công cụ — đặt GIỮA KHUNG VẼ, ngay dưới ổ stage (user: "để dưới 1 chút ở chỗ board")
+  try{ const w=$('cwrap').getBoundingClientRect(), sd=$('stgDock'), r=sd&&sd.offsetWidth?sd.getBoundingClientRect():null;
+    el.style.left=Math.round(w.left+w.width/2)+'px';
+    el.style.top=Math.round(Math.max(w.top+12,(r&&r.bottom<w.top+w.height/2?r.bottom:w.top)+14))+'px'; }catch(e){}
   el.style.display='flex'; el.classList.remove('chay'); void el.offsetWidth; el.classList.add('chay'); }
 async function dirGhi(ten,txt){
   if(!lvDir) return false;
@@ -6250,8 +6284,13 @@ function build3D(refit){
       const qBT=rotBienThe(o);
       const mAx=(ty.shape!=='box')?'y':(qBT===undefined?meshAxisOf(o):(qBT||'y'));
       const rGeo=mKey?meshGeo(mKey, mAx):null;
-      const m=poolM(rGeo||geo,matFor(three.objMat,(selObjs.includes(o)?'S':'')+o.type+aKey+(rGeo?('M'+mKey+(Array.isArray(mAx)?mAx.join(','):mAx)):'')+(isCrate(o)?(cSee?'T':'O'):''),()=>{
-        const tx=artTex(o.type,aAx,!rGeo&&shp==='jar');
+      // 🖼️ 30/09: texture CHUA nap xong -> tam to MAU TRUNG BINH cua texture (khong de three ve DEN); khoa cache co
+      //    trang thai san sang => anh xong thi artAnhXong() dung lai 3D va lay material co texture that.
+      const tx0=artTex(o.type,aAx,!rGeo&&shp==='jar'), txOK=!!(tx0&&tx0.image&&tx0.image.complete&&tx0.image.naturalWidth);
+      const m=poolM(rGeo||geo,matFor(three.objMat,(selObjs.includes(o)?'S':'')+o.type+aKey+(rGeo?('M'+mKey+(Array.isArray(mAx)?mAx.join(','):mAx)):'')+(isCrate(o)?(cSee?'T':'O'):'')+(tx0&&!txOK?'w':''),()=>{
+        const tx=txOK?tx0:null;
+        if(tx0&&!txOK){ const c0=artCol(o.type), cc=c0&&(c0.v||c0.h||c0); return new THREE.MeshLambertMaterial({color:(typeof cc==='string'&&/^#[0-9a-f]{6}$/i.test(cc))?parseInt(cc.slice(1),16):parseInt(ty.col.slice(1),16),
+          emissive:selObjs.includes(o)?0x6a5200:0x000000,transparent:cSee,opacity:cSee?0.3:1,depthWrite:!cSee}); }
         // MeshLambert cho PHANG va SANG giong shader matcap cua game (MeshStandard ra
         // vung toi + anh kim loai, nhin xam xit). Chua co texture thi moi dung mau phang.
         // ⚡ emission that (set vang BlackStone); khoi dang CHON thi giu mau vang chon cu
