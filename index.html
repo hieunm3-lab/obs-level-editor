@@ -2674,7 +2674,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 15:20', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 15:37', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -5636,12 +5636,16 @@ $('btnExport').onclick=async(ev)=>{pullMeta();if(!tables.some(t=>t.objs.length))
   if(lvDir&&!taiThuong){ try{
       if(!await dirHoiDe(ten)){ hint('Đã huỷ — chưa ghi '+ten+'. (Shift+bấm Tải về = tải file thường)'); return; }
       if(await dirGhi(ten,txt)){ dirDaGhi.add(ten); lvSrcName=ten; hint('💾 Đã GHI ĐÈ '+ten+' trong 📌 '+lvDir.name+' — khỏi chép tay.');
-        toastLuu('Đã ghi đè '+ten,'📌 '+lvDir.name); folderSauGhi(ten,txt); nukeW(); return; }
+        toastLuu('Đã ghi đè '+ten,'📌 '+lvDir.name); folderSauGhi(ten,txt); folderDaLuu(); nukeW(); return; }
       warn('Thư mục 📌 '+lvDir.name+' chưa được cấp quyền ghi — tải file kiểu thường.');
     }catch(e){ warn('Ghi thẳng hỏng ('+((e&&e.message)||e)+') — tải file kiểu thường.'); } }
   const blob=new Blob([txt],{type:'application/json'});const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);a.download=ten;a.click();
+  a.href=URL.createObjectURL(blob);a.download=ten;a.click(); folderDaLuu();
   hint('Đã tải '+ten+' — chép vào ...\\levels\\prod-13\\'+(DIR_OK()?' (bấm 📌 Gắn thư mục để lần sau ghi đè thẳng)':'')); nukeW(); };
+/* 30/09: LƯU XONG (ghi đè hoặc tải về) ⇒ level đang mở KHÔNG còn "đã sửa chưa lưu". Trước đây folderDirty chỉ tắt khi nạp
+   level mới nên next vẫn hỏi "sẽ MẤT thay đổi" dù vừa lưu. Sửa tiếp thì pushHistory bật lại cờ như cũ. */
+function folderDaLuu(){ if(!folderFiles.length) return; folderDirty=false;
+  try{ renderFolderNav(); updateStats(); }catch(e){} }
 $('btnCopy').onclick=()=>navigator.clipboard.writeText(JSON.stringify(buildJSON())).then(()=>hint('Đã copy JSON.'));
 /* 🪏 THANH GỖ từ file: size trong file là CỠ THẬT (đã nhân fsc) → chia ngược ra "ô đặt" của editor.
    Nhờ vậy nạp-rồi-xuất-lại ra đúng con số cũ. Type lạ (chưa khai trong TYPES) thì fsc=1 nên vẫn nạp được. */
