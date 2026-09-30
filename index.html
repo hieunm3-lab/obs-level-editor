@@ -306,13 +306,6 @@
     color:#e6ebff;background:rgba(8,10,18,.78);border-radius:3px;padding:2px 4px;pointer-events:none;white-space:nowrap}
   #sizebar .szt.on b{color:#3ecf6a}
   html.mob #sizebar{display:none!important}
-  #zbar{position:absolute;right:10px;bottom:56px;z-index:4;display:flex;flex-direction:column;align-items:center;gap:4px;
-    background:#000b;border:1px solid var(--line);border-radius:10px;padding:6px 5px}
-  #zbar .tb{width:40px;justify-content:center;padding:3px 0;margin:0}
-  #zbar #depthLab{display:block!important;font-size:13px;margin:0;color:var(--accent2)}
-  #zbar #depthVal{width:44px!important}
-  #zbar #allZwrap{flex-direction:column;align-items:center;gap:1px;margin:2px 0 0!important;font-size:11px;font-weight:700;color:var(--dim)}
-  #threewrap[style*="block"]~#zbar{display:none}
   /* ② panel khoi dang chon */
   #selBox .qnote{font-size:11px;color:var(--dim);margin:9px 0 5px}
   #selBox .row .fld input{padding:4px 6px;text-align:center}
@@ -549,6 +542,11 @@
         <button data-s="1" class="on">1</button><button data-s="0.5">½</button><button data-s="0.25">¼</button><button data-s="0.02">tự do</button>
       </div>
       <div class="sep"></div>
+      <button class="tb" id="dPrev">◀</button>
+      <span id="depthLab">Z =</span><input id="depthVal" type="number" step="0.5" value="0"
+        title="Lớp đang sửa theo trục sâu của mặt đang xem (mặt Trên = trục Y). GÕ THẲNG số vào đây — nhận cả số lẻ.&#10;Mũi tên ↑↓←→ khi con trỏ đang ở trong ô này = nhảy sang lớp KẾ TIẾP CÓ KHỐI (giống ◀ ▶), không phải cộng trừ máy móc.">
+      <button class="tb" id="dNext">▶</button>
+      <label class="chk" id="allZwrap" style="margin-left:2px" title="Áp dụng XUYÊN chiều sâu Z khi Vẽ (đặt nhiều lớp) · Xoá (xoá cả cột) · Di chuyển (kéo cả cột) — khỏi làm từng lớp"><input type="checkbox" id="allZ" checked><span class="lbl">cả sâu </span><b class="ic">Z</b></label>
       <label class="chk" style="margin-left:2px" title="Dí chuột vào khối là hiện TÊN khối (id, cỡ, khối lượng, vị trí) — cả ở 2D lẫn 3D"><input type="checkbox" id="tipOn" checked>🏷<span class="lbl"> tên khối</span></label>
       <button class="vbtn" id="tPlay" style="margin-left:auto" title="Chạy thử chuyển động của blocker (trượt + xoay) đúng như game">▶<span class="lbl"> Chạy thử</span></button>
       <button class="vbtn keeplbl" id="tMini" title="Preview 3D nhỏ ở góc, cập nhật ngay khi vẽ">🪟<span class="lbl"> Preview</span></button>
@@ -619,15 +617,6 @@
         <div id="stgBar" class="tblbar"></div>
         <div id="stgOps"></div>
         <span id="stgInfo"></span>
-      </div>
-      <!-- ③ QOL-2909: lớp sâu đang sửa — rời khỏi thanh công cụ, nổi ở góc phải-dưới khung vẽ (giữ nguyên id) -->
-      <div id="zbar" title="Lớp sâu đang sửa (mặt Trước = Z · Trên = Y · Bên = X). ▲ ▼ = lớp kế tiếp CÓ KHỐI · phím &lt; &gt; cũng được.">
-        <span id="depthLab">Z</span>
-        <button class="tb" id="dNext" title="Lớp kế tiếp (phím &gt;)">▲</button>
-        <input id="depthVal" type="number" step="0.5" value="0"
-        title="Lớp đang sửa theo trục sâu của mặt đang xem (mặt Trên = trục Y). GÕ THẲNG số vào đây — nhận cả số lẻ.&#10;Mũi tên ↑↓←→ khi con trỏ đang ở trong ô này = nhảy sang lớp KẾ TIẾP CÓ KHỐI (giống ◀ ▶), không phải cộng trừ máy móc.">
-        <button class="tb" id="dPrev" title="Lớp trước (phím &lt;)">▼</button>
-        <label class="chk" id="allZwrap" title="Áp dụng XUYÊN chiều sâu Z khi Vẽ (đặt nhiều lớp) · Xoá (xoá cả cột) · Di chuyển (kéo cả cột) — khỏi làm từng lớp"><input type="checkbox" id="allZ" checked><span>cả Z</span></label>
       </div>
       <div id="hint"></div>
       <!-- 🧾 QOL2-3009 C3: ổ CẢNH BÁO góc trái-dưới: Soát lỗi game (dời từ bảng phải) + dòng khối chồng nhau + nút viền -->
@@ -2657,7 +2646,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 14:13', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 14:42', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
