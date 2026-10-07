@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<link rel="preload" href="art.js?v=44b66adef971" as="script">
+<link rel="preload" href="art.js?v=68fdb6adb48e" as="script">
 <link rel="preload" href="three.min.js?v=r128" as="script">
 
 <meta charset="UTF-8">
@@ -493,6 +493,7 @@
     <div class="grp"><div class="gt" title="id 220-221 — ✅ đã có trong ObjectDataTest.asset (bản 21/08/2026). mass 4 (nặng hơn hộp gỗ 41/42 = 3)">🪵 Gỗ mới (id 220-221) 4</div><div class="swatches" id="pal-wood2"></div></div>
     <div class="grp"><div class="gt" title="id 240 — NuclearBomb_Box (Unity commit 28/09/2026). ĐỘ BỀN = số phát bắn: MỖI phát bắn (trúng hay trượt) −1; về 0 thì số nhấp nháy 2 giây rồi NỔ = THUA màn (đi đúng luồng hết đạn). Chỉ thoát khi bom CHẠM MẶT NƯỚC trước lúc nổ. Bom cũng là target: phải hất xuống nước mới thắng. Nhập độ bền ở panel ☢ (chọn bom bằng ✋ Di chuyển). Mass 5, CHỈ 1×1×1.">☢ Nuclear bomb (id 240) — độ bền = số phát bắn</div><div class="swatches" id="pal-nuke"></div></div>
     <div class="grp"><div class="gt" title="id 250 — Shark_Box (Unity commit 29/09/2026). 4 MẶT BÊN có VÙNG CẮN (khung đỏ nét đứt): đạn trúng vùng cắn bị NUỐT MẤT, hộp đứng nguyên chỗ, chỉ bị đẩy 10% lực. Trúng MẶT TRÊN/DƯỚI hoặc RÌA ngoài vùng cắn thì dội như hộp đặc. KHÁC hố đen: cá mập vẫn là target — phải hất nó xuống nước mới thắng. Bị Magma hoá đá thì hết cắn. Mass 5, CHỈ 1×1×1.">🦈 Shark (id 250) 5 — nuốt đạn, không biến mất</div><div class="swatches" id="pal-shark"></div></div>
+    <div class="grp"><div class="gt" title="id 260–290 — sheet Object ID (GDD Object Mechanic, 07/10/2026): 260–265 xanh lá 1–6 · 270–275 cam 1–6 · 280–285 hồng 1–6 · 290 vàng. Model + texture lấy từ hũ Valley Smash (Jar_Cylinder, đủ prefab dài 1..5). Trạng thái "In Queue": Unity OBS CHƯA đăng ký — level xuất ra chỉ chạy được khi dev đã thêm id vào ObjectDataTest. mass 3 = tạm bằng hũ OBS 11–16.">🫙 Hũ màu mới (id 260–290) 3</div><div class="swatches" id="pal-jar2"></div></div>
     <div class="grp"><div class="gt" title="🪏 mã NỘI BỘ của editor nay là 901, KHÔNG còn 230 (id 230 từ 07/09/2026 là ☢ Nuclear bomb — khối THẬT của game). File xuất KHÔNG đổi: planks[].type vẫn ghi 1. Tấm ván MỎNG: mọi thứ như khối thường (đặt/kéo dài/xoay y hệt), chỉ CHIỀU SÂU (trục Z) bằng 0,25 lần khối 1×1. Nhìn mặt Trước vẫn vuông 1×1, nhìn mặt Bên mới thấy mỏng. Xếp sát nhau được: chỉnh Bước = ¼. GẮN LIỀN với bè: đạn chặn lại nhưng không vỡ, KHÔNG tính vào remain object. Xuất ra mảng RIÊNG planks[] nên cỡ TỰ DO — cao bao nhiêu cũng được, không dính trần 1..5 và không cần prefab biến thể.">🪏 Thanh gỗ (planks[]) — gắn liền bè · cỡ tự do</div><div class="swatches" id="pal-plank"></div>
       <div class="plankAnchorRow" title="Thanh gỗ chỉ dày 0,25 trong ô rộng 1 nên còn chỗ trống theo chiều SÂU (Z). Chọn dán nó vào mép nào của ô. Ở mặt TRÊN nhìn ra là trên/dưới, ở mặt BÊN là trái/phải, ở mặt TRƯỚC thì không thấy (Z là chiều sâu).">
         <span class="t1lab">Dán mép:</span>
@@ -916,7 +917,7 @@
 </script>
 <script>
 </script>
-<script src="art.js?v=44b66adef971"></script>
+<script src="art.js?v=68fdb6adb48e"></script>
 <script>
 
 /* ===================== ART THAT CUA GAME (them o ban v3) =====================
@@ -930,7 +931,7 @@ let three_artLights = null, three_baseLights = null, ART_MAXANISO = 4;
 /* Bat tam thoi khi SINH ICON: cho phep lay texture/mesh that ngay ca luc nguoi dung
    da tat art cho khung 3D. Icon thi luc nao cung dung anh that cho de nhin. */
 let ART_FORCE = false;
-const ART_BUILD = '93b6520d5a40';        // doi moi lan nung lai art -> cache cu tu het han
+const ART_BUILD = '55482a54c2fb';        // doi moi lan nung lai art -> cache cu tu het han
 const artDung = () => ART_ON || ART_FORCE;
 /* Che do art: den sang & phang, day suong mu ra xa (suong mu lam khoi o xa xam xit).
    Tat art: tra lai y nguyen den cu. */
@@ -2546,6 +2547,27 @@ const TYPES = {
   // SharkTarget.cs: 4 mặt bên có VÙNG CẮN — đạn trúng là bị nuốt, hộp KHÔNG biến mất, chỉ nhận 10% lực đẩy.
   // Mặt trên/dưới + rìa ngoài vùng cắn: dội như hộp đặc. Là TARGET thường (khác hố đen) ⇒ phải rơi xuống nước.
   250:{name:'Shark (cá mập)', shape:'box',col:'#4f6f8f',mass:5,  lab:'🦈', shark:true},
+  // ── 🫙 HŨ MÀU MỚI — id 260-290 (sheet Object ID 07/10/2026, "In Queue" = Unity OBS CHƯA đăng ký) ──────
+  // Model/texture = hũ Valley Smash (Jar_Cylinder). mass 3 tạm bằng hũ OBS — chưa có số thật.
+  260:{name:'Jar green 1', shape:'jar',col:'#59c619',mass:3,  lab:'🍏'},
+  261:{name:'Jar green 2', shape:'jar',col:'#59c619',mass:3,  lab:'🍏'},
+  262:{name:'Jar green 3', shape:'jar',col:'#59c619',mass:3,  lab:'🍏'},
+  263:{name:'Jar green 4', shape:'jar',col:'#59c619',mass:3,  lab:'🍏'},
+  264:{name:'Jar green 5', shape:'jar',col:'#50b316',mass:3,  lab:'🍏'},
+  265:{name:'Jar green 6', shape:'jar',col:'#6fde2e',mass:3,  lab:'🍏'},
+  270:{name:'Jar orange 1', shape:'jar',col:'#f38201',mass:3,  lab:'🍊'},
+  271:{name:'Jar orange 2', shape:'jar',col:'#f38201',mass:3,  lab:'🍊'},
+  272:{name:'Jar orange 3', shape:'jar',col:'#f38201',mass:3,  lab:'🍊'},
+  273:{name:'Jar orange 4', shape:'jar',col:'#f38201',mass:3,  lab:'🍊'},
+  274:{name:'Jar orange 5', shape:'jar',col:'#f38201',mass:3,  lab:'🍊'},
+  275:{name:'Jar orange 6', shape:'jar',col:'#f38201',mass:3,  lab:'🍊'},
+  280:{name:'Jar pink 1', shape:'jar',col:'#fde5f1',mass:3,  lab:'🌸'},
+  281:{name:'Jar pink 2', shape:'jar',col:'#f699c8',mass:3,  lab:'🌸'},
+  282:{name:'Jar pink 3', shape:'jar',col:'#eb4a9e',mass:3,  lab:'🌸'},
+  283:{name:'Jar pink 4', shape:'jar',col:'#c81e77',mass:3,  lab:'🌸'},
+  284:{name:'Jar pink 5', shape:'jar',col:'#d02980',mass:3,  lab:'🌸'},
+  285:{name:'Jar pink 6', shape:'jar',col:'#d53287',mass:3,  lab:'🌸'},
+  290:{name:'Jar yellow', shape:'jar',col:'#fbc92a',mass:3,  lab:'🍋'},
   // ── 🏰 LÂU ĐÀI id 300-307: ĐÃ GỠ 24/08/2026 (user: "phần lâu đài này xoá đi, tôi không cần nữa").
   //   Gỡ khỏi TYPES + bảng màu. MAXLEN/AXLEN vẫn GIỮ (xem bên dưới) để level cũ lỡ có khối lâu đài
   //   thì panel "Soát lỗi game" không CHẶN Export — y như cách xử id 122-129 hồi 12/08.
@@ -2573,7 +2595,7 @@ const TYPES = {
   //   → mã trong editor dời sang 900. File xuất KHÔNG đổi: crates[].type vẫn ghi 190 (CRATE_EXPORT_T).
   900:{name:'Hòm (Crate)',shape:'box',col:'#c8862f',mass:0,lab:'📦',crate:true},
 };
-const PAL={'pal-can':[1,2,3,4,5,6,7,8,9],'pal-box':[41,42],'pal-stone':[21,22],'pal-ice':[61,62],'pal-jar':[11,12,13,14,15,16],'pal-chum':[100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121],'pal-mut':[190,191,192,193,194],'pal-sp':[31],'pal-new':[130,140,150,160,170,180,900],'pal-bstone':[200,201],'pal-drum':[210,211,212,213,214,215],'pal-wood2':[220,221],'pal-nuke':[240],'pal-shark':[250],'pal-plank':[901]};
+const PAL={'pal-can':[1,2,3,4,5,6,7,8,9],'pal-box':[41,42],'pal-stone':[21,22],'pal-ice':[61,62],'pal-jar':[11,12,13,14,15,16],'pal-chum':[100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121],'pal-mut':[190,191,192,193,194],'pal-sp':[31],'pal-new':[130,140,150,160,170,180,900],'pal-bstone':[200,201],'pal-drum':[210,211,212,213,214,215],'pal-wood2':[220,221],'pal-nuke':[240],'pal-shark':[250],'pal-jar2':[260,261,262,263,264,265,270,271,272,273,274,275,280,281,282,283,284,285,290],'pal-plank':[901]};
 /* ============================================================
    PREFAB VARIANT CÓ THẬT TRONG GAME  →  cỡ dài tối đa mỗi id
    (verify `ObjectDataTest.asset` 2026-08-10; đọc kèm TargetController.cs:160-190)
@@ -2594,7 +2616,8 @@ for(let id=100;id<=129;id++)MAXLEN[id]=3;                       // chum creative
 [2,8,9,31,130,150,160,240,250].forEach(id=>MAXLEN[id]=1);           // CHỈ 1×1×1: nón (2/8/9), hố đen, TNT, Bullet/Rocket Jar, ☢ Nuclear bomb
 // ☢ 240: asset 28/09/2026 chỉ gán prefab gốc (prefab2..5 đều trống) ⇒ 1×1×1 là SỐ THẬT, không đoán.
 [190,191,192,193,194].forEach(id=>MAXLEN[id]=3);                // MỨT: verify asset 17/08/2026 — có prefab 2x/2y/2z + 3x/3y/3z, KHÔNG có 4-5 ⇒ cap 3 (đã xác nhận, không còn giả định)
-[200,201,210,211,212,213,214,215,220,221,230].forEach(id=>MAXLEN[id]=5);   // 230 = OilDrum_Box xanh lá, asset đủ prefab2..5
+[200,201,210,211,212,213,214,215,220,221,230].forEach(id=>MAXLEN[id]=5);
+[260,261,262,263,264,265,270,271,272,273,274,275,280,281,282,283,284,285,290].forEach(id=>MAXLEN[id]=5);   // 🫙 hũ màu mới: model VS Jar_Cylinder đủ prefab2..5; CHƯA đăng ký bên Unity OBS (như 214/215 hồi trước)   // 230 = OilDrum_Box xanh lá, asset đủ prefab2..5
 //    // Black Stone + Oil drum + Gỗ mới: dài tới 5 trên cả 3 trục. ✅ soát asset 26/08: 200/201/210-213/220/221 đã đăng ký, đủ prefab2..5 cả x/y/z. 214/215 CHƯA đăng ký (user tạo id trước) — VẪN phải có mặt ở bảng này, không thì objIssue coi là "chưa đăng ký" và CHẶN Export.
 // 🪏 Thanh gỗ 901 CỐ Ý KHÔNG có trong MAXLEN: nó ra planks[], không qua prefab variant nên không có trần.
 /* 🏰 Lâu đài 300-307 ĐÃ GỠ khỏi TYPES 24/08 nhưng GIỮ trong MAXLEN/AXLEN: level cũ lỡ còn khối lâu đài
@@ -2674,7 +2697,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 30/09 15:37', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 07/10 11:05', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -2726,7 +2749,7 @@ const GAMES={
     /* nhóm nào rỗng thì buildPalette ẩn luôn cả khối .grp */
     pal:{'pal-can':[1,2,3],'pal-box':[41,42],'pal-stone':[21,22],'pal-ice':[61,62],
          'pal-jar':[11,12,13,14,15,220,221,222,223,224,225,226,227,229,230,231,232,233,235,236,237,238],'pal-chum':[],'pal-mut':[],'pal-sp':[],
-         'pal-new':[],'pal-bstone':[],'pal-drum':[],'pal-wood2':[],'pal-nuke':[],'pal-shark':[],'pal-plank':[]},
+         'pal-new':[],'pal-bstone':[],'pal-drum':[],'pal-wood2':[],'pal-nuke':[],'pal-shark':[],'pal-jar2':[],'pal-plank':[]},
     gt:{'pal-stone':['Đá (Stone) 5.14','id 21/22 = Da_Box / Da_Cylinder — texture Rock_* riêng của Valley Smash. mass asset 5.14 (remote config có thể ghi đè).'],
         'pal-ice':['Băng (Ice) 3.3','id 61/62 = Bang_Box / Bang_Cylinder. mass asset 3.3 (remote config có thể ghi đè).'],
         'pal-can':['Lon cá (texture mới) 1.16','id 1 trụ · 2 nón · 3 vuông — prefab HopCa_Cylinder / Xo_Cone / HopCa_Box, mesh mới BS_FishCan-* trong 001.MATTerial/OBS2/3_Metal. Nón (id 2) CHỈ dùng được cỡ 1×1×1.'],
