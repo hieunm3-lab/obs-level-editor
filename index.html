@@ -638,7 +638,7 @@
       <div id="sizebar" class="off" title="Cỡ khối game nhận cho loại đang cầm — bấm để đặt cỡ cây cọ.&#10;Cọ vẽ theo MẶT ĐANG XEM (dày 1 theo trục sâu): muốn thanh dài theo trục sâu thì đổi mặt nhìn (Trước/Trên/Bên)."></div>
       <div id="issueDock" class="ok">
         <div id="brRotLine" role="status" title="Cây cọ (khối SẮP đặt) đang xoay — mọi khối vẽ tiếp theo, kể cả đổi loại khối, đều nằm theo hướng này. Xoay bằng ←→ ↑↓ (Xem 3D + ✏️ Vẽ). Nạp level mới thì tự về thẳng."><span class="brIco">↻</span><span class="brTx"><div class="brT1">Cây cọ đang xoay</div><div class="brT2" id="brRotTxt"></div></span><button class="tb" id="brRotReset" title="Đặt cây cọ về thẳng (giống Shift phải trong 3D)">Về thẳng<kbd>Shift phải</kbd></button></div>
-        <div id="ovLine" style="display:none"><span id="ovTxt"></span><button class="tb" id="ovToggle" title="Bật/tắt viền cam nét đứt đánh dấu khối đâm nhau (cả 2D lẫn 3D). Vẫn đếm và vẫn chặn đặt chồng như thường — chỉ ẩn phần vẽ.">👁 viền</button></div>
+        <div id="ovLine" style="display:none"><span id="ovTxt"></span><button class="tb off" id="ovToggle" title="Bật/tắt viền cam nét đứt đánh dấu khối đâm nhau (cả 2D lẫn 3D). Vẫn đếm và vẫn chặn đặt chồng như thường — chỉ ẩn phần vẽ. Mặc định TẮT (08/10).">🚫 viền</button></div>
         <div class="field" id="valPanel">
           <label id="valHead" title="Game bỏ qua khối có cỡ sai luật hoặc chưa có prefab variant — vào chơi khối biến mất mà không báo gì">🚫 Soát lỗi game (khối sẽ biến mất)</label>
           <div id="valList"></div>
@@ -662,7 +662,8 @@
         <div class="fld"><input type="number" id="objY" step="0.5" title="ĐỘ CAO tâm khối (py). Khối cao 1 ô đặt sát mặt bàn thì py = 0.5."><span class="cap">Cao Y</span></div>
         <div class="fld"><input type="number" id="objZ" step="0.5" title="Tâm khối theo trục Z (chiều sâu)."><span class="cap">Sâu Z</span></div>
       </div>
-      <div style="font-size:11px;color:var(--dim);margin:6px 0 6px">🔄 XOAY 90° quanh trục (phím x/y/z) — <b style="color:var(--move)">nhiều khối = xoay cả cụm quanh tâm chung</b>:</div>
+      <div style="font-size:11px;color:var(--dim);margin:6px 0 4px">🔄 XOAY 90° quanh trục (phím x/y/z) — <b id="rotModeTx" style="color:var(--move)">nhiều khối = xoay cả cụm quanh tâm chung</b>:</div>
+      <label class="chk" id="rotEachWrap" style="margin:0 0 6px;display:none" title="TẮT (mặc định): cả cụm xoay như MỘT khối cứng quanh tâm chung — khối đổi chỗ theo cụm.&#10;BẬT: từng khối xoay quanh TÂM RIÊNG của nó, đứng nguyên vị trí — giống bấm xoay từng khối một.&#10;Áp cho nút ⟲⟳, phím x/y/z và ô góc X°/Y°/Z°. Mở lại trang là về TẮT."><input type="checkbox" id="rotEach"> Xoay từng khối tại chỗ</label>
       <div class="nudge" style="grid-template-columns:1.4fr 1fr 1fr;gap:5px">
         <span style="align-self:center;font-size:12px;color:#ff6b6b;font-weight:700" title="ngang trái↔phải">↔ X</span><button data-r="x-90" title="X −90 (Shift+x)">⟲</button><button data-r="x90" title="X +90 (x)">⟳</button>
         <span style="align-self:center;font-size:12px;color:#8ae65c;font-weight:700" title="đứng, xoay tại chỗ">↕ Y</span><button data-r="y-90" title="Y −90 (Shift+y)">⟲</button><button data-r="y90" title="Y +90 (y)">⟳</button>
@@ -2716,7 +2717,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 08/10 11:13', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 08/10 14:26', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -3043,7 +3044,7 @@ function anyOverlap(px,py,pz,sx,sy,sz,ignore){ return objects.some(o=>overlap(o,
 // khối CHỒNG NHAU (AABB giao thật, cùng bàn) → cảnh báo; game freeze-until-hit chịu được nhưng dễ gây nhầm khi xoá/xuất
 let overlapObjs=new Set();
 /* ===== QOL2-3009: trạng thái dùng chung, khai báo SỚM (draw() chạy lúc khởi động, trước khối JS cuối file) ===== */
-let ovShow=true;                                   // B3: bật/tắt viền cam khối đâm nhau (cả 2D lẫn 3D)
+let ovShow=false;                                   // B3: bật/tắt viền cam khối đâm nhau (cả 2D lẫn 3D)
 /* B2 ✒️ VẾT NÉT: mỗi ô nét NÀY vừa đặt (xanh) / vừa xoá (đỏ). Giữ BẢN SAO — khối vừa xoá thì không còn để trỏ tới.
    Buông chuột là dọn sạch: vết chỉ sống trong MỘT nét. */
 let strokeMarks=[];
@@ -4212,8 +4213,12 @@ function selPivot(){ let a={x:1e9,y:1e9,z:1e9}, b={x:-1e9,y:-1e9,z:-1e9};
   for(const o of selObjs) for(const k of ['x','y','z']){
     a[k]=Math.min(a[k],o[PK[k]]-o[SK[k]]/2); b[k]=Math.max(b[k],o[PK[k]]+o[SK[k]]/2); }
   return {x:(a.x+b.x)/2,y:(a.y+b.y)/2,z:(a.z+b.z)/2}; }
+function rotEachOn(){ const c=document.getElementById('rotEach'); return !!(c&&c.checked); }   // ☑ xoay từng khối tại chỗ (08/10)
 function rotGroup(ax,deg){ if(!selObjs.length||!deg)return;
   const q=axisQuat(ax,deg);
+  if(rotEachOn()&&selObjs.length>1){                                 // ☑ TỪNG KHỐI quanh tâm RIÊNG, không dời chỗ
+    for(const o of selObjs) o.rot=qnorm(qmul(q,getRot(o)));      // = HỆT bấm xoay riêng từng khối (chọn 1 khối cũng quay q trong hệ bàn)
+    return; }
   if(!multiTbl()){ const p=selPivot();                             // 1 bàn: GIỮ NGUYÊN cách cũ (local = đúng, khớp canvas 2D)
     for(const o of selObjs){
       const v=qrotv(q,{x:o.px-p.x,y:o.py-p.y,z:o.pz-p.z});         // vị trí quay quanh tâm chung
@@ -4245,6 +4250,16 @@ $('selBox').addEventListener('click',e=>{const r=e.target.dataset.r;if(!r||!selO
   else rotGroup(r[0],+r.slice(1));
   warnUnderDeck(); refreshRotDeg(); draw();updateStats();sync3D();});
 
+/* ☑ XOAY TỪNG KHỐI TẠI CHỖ (08/10): ô tích chỉ hiện khi chọn ≥ 2 khối; nhãn chế độ đổi theo ô tích. */
+function rotEachUI(){ const w=$('rotEachWrap'), t=$('rotModeTx'); if(!w||!t)return;
+  const nhieu=selObjs.length>1, on=rotEachOn();
+  const d=nhieu?'':'none'; if(w.style.display!==d)w.style.display=d;
+  const tx=on?'nhiều khối = TỪNG khối xoay tại chỗ':'nhiều khối = xoay cả cụm quanh tâm chung';
+  if(t.textContent!==tx){ t.textContent=tx; t.style.color=on?'#ffc24a':''; } }
+$('rotEach').addEventListener('change',()=>{ rotEachUI();
+  hint($('rotEach').checked?'☑ Xoay từng khối TẠI CHỖ — mỗi khối quay quanh tâm riêng, không dời vị trí.'
+                           :'Xoay CẢ CỤM như một khối cứng quanh tâm chung (mặc định).'); });
+
 /* ---------- 📐 PANEL KHỐI ĐANG CHỌN: gõ VỊ TRÍ / GÓC / CỠ (QOL-2909, port từ bản Desktop) ----------
    Ô số ĐỌC từ khối CHÍNH (selObj); khi SỬA thì tính lượng chênh rồi áp cho CẢ CỤM (như nút dời / xoay 90°).
    ⚡ draw() gọi hàm này mỗi khung, nên nó CHỈ ghi DOM khi "chữ ký" (khối, vị trí, cỡ, xoay, ô đang focus)
@@ -4270,6 +4285,7 @@ function refreshObjBox(force){
     const pi=$('obj'+A); if(pi&&ae!==pi)pi.value=+(+o[PK[ax]]).toFixed(4);
     const ri=$('objR'+A); if(ri&&ae!==ri)ri.value=eu[ax];
     const si=$('objS'+A); if(si&&ae!==si)si.value=o[SK[ax]]; }
+  rotEachUI();
   const lb=$('rotLab');
   if(lb)lb.textContent = selObjs.length>1 ? (selObjs.length+' khối (số là của khối chính, sửa áp cho cả cụm)')
        : (isIdent(q) ? 'thẳng' : 'đã xoay ('+eu.x+'°,'+eu.y+'°,'+eu.z+'°)');
@@ -5516,7 +5532,7 @@ window.addEventListener('keydown',e=>{
   if(!CM&&!e.altKey&&(e.key==='g'||e.key==='G')){ e.preventDefault(); doMerge(); return; }
   if(!selObjs.length)return;                          // phím tắt cho khối/nhóm đang chọn
   const V=VIEWS[view],k=e.key,kl=k.toLowerCase(); let did=true;
-  if(kl==='x'||kl==='y'||kl==='z'){pushHistory();rotGroup(kl,e.shiftKey?-90:90);warnUnderDeck();refreshRotDeg();}   // x/y/z = xoay CẢ CỤM quanh tâm chung
+  if(kl==='x'||kl==='y'||kl==='z'){pushHistory();rotGroup(kl,e.shiftKey?-90:90);warnUnderDeck();refreshRotDeg();}   // x/y/z = xoay CẢ CỤM quanh tâm chung (☑ #rotEach: từng khối tại chỗ)
   else if(k==='Delete'||k==='Backspace'){pushHistory();if(typeof delSelObjs==='function'&&typeof multiTbl==='function'&&multiTbl()){delSelObjs();}else for(const o of selObjs.slice()){const i=objects.indexOf(o);if(i>=0)objects.splice(i,1);releaseIfCrate(o);}clearSel();}
   else if(k==='ArrowUp'){pushHistory();for(const o of selObjs)o[PK[V.v]]+=snapStep;}
   else if(k==='ArrowDown'){pushHistory();for(const o of selObjs)o[PK[V.v]]-=snapStep;}
