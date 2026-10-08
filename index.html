@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<link rel="preload" href="art.js?v=fdfc5eb2d95a" as="script">
+<link rel="preload" href="art.js?v=f6422442fd70" as="script">
 <link rel="preload" href="three.min.js?v=r128" as="script">
 
 <meta charset="UTF-8">
@@ -377,6 +377,20 @@
   #ovLine #ovTxt{flex:1 1 auto;min-width:0}
   #ovLine .tb{padding:2px 8px;font-size:11px;margin:0;flex:0 0 auto;border-radius:7px}
   #ovLine .tb.off{opacity:.55}
+  /* 🔄 CAY CO DANG XOAY (08/10): cung ho #ovLine — kinh toi, vien manh, vach mau trai; mau ho phach */
+  #brRotLine{display:none;align-items:center;gap:9px;background:rgba(14,16,22,.94);border:1px solid rgba(255,194,74,.42);
+    border-left:3px solid #ffc24a;border-radius:10px;padding:5px 6px 5px 9px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+    box-sizing:border-box;width:max-content;max-width:min(520px,calc(100vw - 40px));font-size:11.5px;line-height:1.35;color:#e9edf5}
+  #brRotLine.on{display:flex}
+  #brRotLine .brIco{flex:0 0 auto;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;
+    background:rgba(255,194,74,.14);color:#ffc24a;font-size:13px;font-weight:800}
+  #brRotLine .brTx{flex:1 1 auto;min-width:0}
+  #brRotLine .brT1{font-weight:700;color:#ffd27a}
+  #brRotLine .brT2{color:#aab3c5;font-size:11px}                    /* KHÔNG cắt chữ: viên tự nở theo nội dung (luật không rút gọn để vừa khung) */
+  #brRotLine .brT2 b{color:#e9edf5;font-weight:700}
+  #brRotLine .tb{padding:3px 9px;font-size:11px;margin:0;flex:0 0 auto;border-radius:7px;font-weight:700}
+  body:not(.v3d) #brRotLine kbd{display:none}                       /* Shift phải chỉ ăn trong 3D */
+  #brRotLine kbd{font-family:inherit;font-size:10px;font-weight:600;line-height:1;padding:2px 4px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;color:#aab3c5;margin-left:3px}
   /* 30/09 (user: "thanh cuon vua to vua xau"): THANH CUON MANH 8px, ranh trong suot, con truot bo tron hop tong toi.
      Chromium/Edge/Safari: ::-webkit-scrollbar. Firefox khong co pseudo do -> dung chuan scrollbar-width/color (@supports).
      Luu y: phan tu nao dat `scrollbar-width` thi Chromium 121+ bo qua ::-webkit-scrollbar -> ep ve auto o duoi. */
@@ -624,6 +638,7 @@
            theo mặt đang xem) ở bảng phải; "Chiều sâu Z" + "≡ cả sâu Z" vẫn nguyên. Chỉ hiện lúc ✏️ Vẽ. -->
       <div id="sizebar" class="off" title="Cỡ khối game nhận cho loại đang cầm — bấm để đặt cỡ cây cọ.&#10;Cọ vẽ theo MẶT ĐANG XEM (dày 1 theo trục sâu): muốn thanh dài theo trục sâu thì đổi mặt nhìn (Trước/Trên/Bên)."></div>
       <div id="issueDock" class="ok">
+        <div id="brRotLine" role="status" title="Cây cọ (khối SẮP đặt) đang xoay — mọi khối vẽ tiếp theo, kể cả đổi loại khối, đều nằm theo hướng này. Xoay bằng ←→ ↑↓ (Xem 3D + ✏️ Vẽ). Nạp level mới thì tự về thẳng."><span class="brIco">↻</span><span class="brTx"><div class="brT1">Cây cọ đang xoay</div><div class="brT2" id="brRotTxt"></div></span><button class="tb" id="brRotReset" title="Đặt cây cọ về thẳng (giống Shift phải trong 3D)">Về thẳng<kbd>Shift phải</kbd></button></div>
         <div id="ovLine" style="display:none"><span id="ovTxt"></span><button class="tb" id="ovToggle" title="Bật/tắt viền cam nét đứt đánh dấu khối đâm nhau (cả 2D lẫn 3D). Vẫn đếm và vẫn chặn đặt chồng như thường — chỉ ẩn phần vẽ.">👁 viền</button></div>
         <div class="field" id="valPanel">
           <label id="valHead" title="Game bỏ qua khối có cỡ sai luật hoặc chưa có prefab variant — vào chơi khối biến mất mà không báo gì">🚫 Soát lỗi game (khối sẽ biến mất)</label>
@@ -918,7 +933,7 @@
 </script>
 <script>
 </script>
-<script src="art.js?v=fdfc5eb2d95a"></script>
+<script src="art.js?v=f6422442fd70"></script>
 <script>
 
 /* ===================== ART THAT CUA GAME (them o ban v3) =====================
@@ -932,7 +947,7 @@ let three_artLights = null, three_baseLights = null, ART_MAXANISO = 4;
 /* Bat tam thoi khi SINH ICON: cho phep lay texture/mesh that ngay ca luc nguoi dung
    da tat art cho khung 3D. Icon thi luc nao cung dung anh that cho de nhin. */
 let ART_FORCE = false;
-const ART_BUILD = 'fdfc5eb2d95a';        // doi moi lan nung lai art -> cache cu tu het han
+const ART_BUILD = 'f75ce9c3362c';        // doi moi lan nung lai art -> cache cu tu het han
 const artDung = () => ART_ON || ART_FORCE;
 /* Che do art: den sang & phang, day suong mu ra xa (suong mu lam khoi o xa xam xit).
    Tat art: tra lai y nguyen den cu. */
@@ -2704,7 +2719,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 07/10 15:00', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 08/10 09:56', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -3898,7 +3913,7 @@ function setView(v,byUser){view=v;['vFront','vTop','vSide'].forEach(id=>$(id).cl
   $('allZwrap').style.display=VIEWS[v].d==='z'?'flex':'none';clearSel();updateDepthLab();updateAxHint();fitView();
   if(byUser)camFace(v); syncFog();}   // bấm Trước/Trên/Bên (hoặc phím 4/5/6) → khung 3D xoay theo luôn
 $('vFront').onclick=()=>setView('front',true);$('vTop').onclick=()=>setView('top',true);$('vSide').onclick=()=>setView('side',true);
-function setTool(t){tool=t;$('tPaint').classList.toggle('on',t==='paint');$('tErase').classList.toggle('on',t==='erase');$('tMove').classList.toggle('on',t==='move');
+function setTool(t){tool=t;if(typeof brushRotUI==='function')brushRotUI();$('tPaint').classList.toggle('on',t==='paint');$('tErase').classList.toggle('on',t==='erase');$('tMove').classList.toggle('on',t==='move');
   cv.style.cursor=t==='move'?'grab':'crosshair';if(t!=='move'){clearSel();}
   if(typeof ghost3!=='undefined'&&ghost3)ghost3.visible=false;
   const z=zAll()?' · "cả sâu Z" đang BẬT → áp cho cả cột theo chiều sâu':'';
@@ -5744,6 +5759,7 @@ function loadLevel(json,idxFromName){try{
   tables=s0.tables; cur=0; objects=tables[0].objs; blockers=s0.blockers; curBlk=blockers.length?0:-1;   // tới đây mới COMMIT
   fIndex.value=(idxFromName!=null?idxFromName:(L.levelIndex||1));fMove.value=L.moveCount||20;setDiff(L.difficulty||0);   // ưu tiên số từ TÊN FILE (Level{N}.json)
   sel={x:0,y:0,z:0};clearSel();
+  try{ if(brushRot) brushRotVeThang(); }catch(e){}   // 🔄 08/10: level MỚI ⇒ cây cọ về thẳng (đổi loại khối thì GIỮ — user chốt)
   renderStgBar();renderTblBar();pushMeta();renderBlkBar();pullBlkMeta();history=[];redo=[];setView('front');updateStats();warn('');sync3D();
   const nObj=tables.reduce((s,t)=>s+t.objs.length,0), rot=tables.some(t=>t.yaw), dyn=tables.some(t=>t.motion&&(t.motion.doRot||t.motion.movH||t.motion.movV));
   hint('Đã nạp Level '+fIndex.value+' — '+(stages.length>1?stages.length+' STAGE (đang xem Stage 1), ':'')
@@ -6522,6 +6538,7 @@ window.addEventListener('keydown',e=>{
   brushRot=qnorm(qmul(axisQuat(ax,deg), brushRot||IDENT));
   if(Math.abs(brushRot.w)>0.9999)brushRot=null;         // về thẳng → bỏ quaternion rác
   const lb=$('axRot'); if(lb)lb.textContent=brushRotLabel();
+  brushRotUI();
   if(hover3){ hover3.o=applyBrushRot(hover3.o); showGhost(hover3,false); }
   hint('Cây cọ xoay '+deg+'° quanh '+ax.toUpperCase()+' — khối ĐẶT TIẾP THEO nằm theo hướng này'
       +(brushRotLabel()?' ('+brushRotLabel()+')':' (đã về thẳng)')+'. ←→ quanh Y · ↑↓ quanh X.');
@@ -6538,6 +6555,7 @@ window.addEventListener('keydown',e=>{
   if(tool==='paint'){
     if(!brushRot){ hint('Cây cọ đang thẳng sẵn rồi.'); return; }
     brushRot=null; const lb=$('axRot'); if(lb)lb.textContent='';
+    brushRotUI();
     if(hover3){ delete hover3.o.rot; showGhost(hover3,false); }
     hint('Đã đặt lại hướng CÂY CỌ về thẳng (Shift phải). ←→ ↑↓ để xoay lại.');
     return; }
@@ -6641,6 +6659,30 @@ let brushRot=null;
 /* (BRUSH_AX/brushRotDeg cũ đã bỏ: nay xoay được quanh CẢ X lẫn Y nên góc không quy về 1 trục được;
    nhãn hướng dùng brushRotLabel() — xem handler 4 phím mũi tên.) */
 function applyBrushRot(o){ if(brushRot)o.rot={x:brushRot.x,y:brushRot.y,z:brushRot.z,w:brushRot.w}; return o; }
+/* 🔄 VIÊN CẢNH BÁO "CÂY CỌ ĐANG XOAY" (08/10) — hiện khi đang ✏️ Vẽ (2D lẫn 3D) mà cây cọ không thẳng.
+   Gọi ở MỌI chỗ đổi brushRot + setTool + loadLevel. Chỉ ghi DOM khi trạng thái đổi (_brRotKey). */
+var _brRotKey='';
+function brushRotMoTa(){ if(!brushRot)return '';
+  const up=qrotv(brushRot,{x:0,y:1,z:0}), fr=qrotv(brushRot,{x:0,y:0,z:1});
+  const tr=v=>{ let ax='x',b=-1; for(const k of ['x','y','z']){ const a=Math.abs(v[k]); if(a>b){b=a;ax=k;} } return [ax,v[ax]>=0?1:-1]; };
+  const ten={x:['phải (+X)','trái (−X)'],y:['lên (+Y)','xuống (−Y)'],z:['ra xa (+Z)','về phía pháo (−Z)']};
+  const [ua,us]=tr(up);
+  if(ua==='y'&&us>0){ const g=Math.round(Math.atan2(fr.x,fr.z)*180/Math.PI);
+    return 'Khối đặt <b>đứng</b>, quay '+(Math.abs(g)===180?'<b>180°</b>':'<b>'+Math.abs(g)+'°</b> '+(g>0?'sang phải':'sang trái'))+' quanh trục đứng'; }
+  if(ua==='y') return 'Khối đặt <b>lộn ngược</b> — đỉnh chúc xuống';
+  return 'Khối đặt <b>nằm ngang</b> — đỉnh hướng '+ten[ua][us>0?0:1]; }
+function brushRotUI(){ let br=null;
+  try{ br=brushRot; }catch(e){ return; }               // gọi sớm lúc khởi động (setTool) khi `let brushRot` chưa chạy tới ⇒ TDZ
+  const on=!!br&&tool==='paint', k=on?[br.x,br.y,br.z,br.w].map(v=>v.toFixed(3)).join(','):'';
+  if(k===_brRotKey)return; _brRotKey=k;
+  const el=$('brRotLine'); if(!el)return;
+  el.classList.toggle('on',on);
+  if(on){ const t=$('brRotTxt'); if(t)t.innerHTML=brushRotMoTa(); } }
+function brushRotVeThang(){
+  if(!brushRot)return; brushRot=null; const lb=$('axRot'); if(lb)lb.textContent='';
+  if(typeof hover3!=='undefined'&&hover3){ delete hover3.o.rot; showGhost(hover3,false); }
+  brushRotUI(); }
+(function(){ const b=$('brRotReset'); if(b)b.addEventListener('click',()=>{ brushRotVeThang(); hint('Đã đặt CÂY CỌ về thẳng.'); }); })();
 /* Cỡ theo TRỤC THẾ GIỚI khi khối đã xoay — không có cái này thì cọ 2×1×1 xoay 90° vẫn bị soi chồng
    theo cỡ CHƯA xoay (chặn oan chỗ trống / cho lọt chỗ đè).
    ⭐ 22/09 — GÓC LẺ: bản cũ CHỐT theo trục local gần nhất ("tool chỉ xoay bội số 90°"), nên khối
