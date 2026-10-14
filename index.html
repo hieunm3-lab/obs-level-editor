@@ -739,6 +739,24 @@
       </div>
       <div id="deckHint" style="display:none;font-size:10px;color:#ffcf5a;margin-top:2px">Dịch bàn tự do: <b>Tâm X · Tâm Z</b> — khối giữ NGUYÊN chỗ đã xếp, chỉ nền bàn trượt.</div>
     </div>
+    <div class="field" id="twirlBox" style="display:none;border:1px solid #c9874a;border-radius:8px;padding:9px;background:rgba(201,135,74,.08);margin:2px 0 9px">
+      <label style="color:#e0a46a">🌀 Bàn vòng xoắn</label>
+      <div class="helptx" style="font-size:9.5px;color:var(--dim);margin:0 0 6px;line-height:1.45">Bàn này KHÔNG xếp khối tay: game rải danh sách khối dưới đây dọc đường xoắn ốc đi lên, từ dưới lên trên. Size: dọc đường · cao · ngang đường. Xem kết quả ở 3D.</div>
+      <div class="row" style="gap:6px;margin-bottom:6px">
+        <div class="fld"><input type="number" id="twTurns" step="0.25" min="0.1" style="padding:4px 6px"><span class="cap">Số vòng</span></div>
+        <div class="fld"><input type="number" id="twHeight" step="0.5" min="0.1" style="padding:4px 6px"><span class="cap">Cao</span></div>
+        <div class="fld"><input type="number" id="twRB" step="0.25" min="0.1" title="Bán kính ở đáy" style="padding:4px 6px"><span class="cap">R dưới</span></div>
+        <div class="fld"><input type="number" id="twRT" step="0.25" min="0.1" title="Bán kính ở đỉnh" style="padding:4px 6px"><span class="cap">R trên</span></div>
+      </div>
+      <div class="row" style="gap:6px;margin-bottom:6px">
+        <div class="fld"><select id="twFill" style="padding:5px 4px"><option value="0">Đúng list</option><option value="1">Lặp cho đầy</option></select><span class="cap">Kiểu xếp</span></div>
+        <div class="fld"><input type="number" id="twGap" step="0.05" min="0" title="Khoảng hở giữa 2 khối liên tiếp dọc đường" style="padding:4px 6px"><span class="cap">Khe hở</span></div>
+        <div class="fld"><input type="number" id="twYaw" step="15" title="Xoay RIÊNG vòng xoắn quanh trục Y (độ, cùng chiều Góc Yaw của bàn) — 0 = điểm đầu ở phía trước, bè đứng yên" style="padding:4px 6px"><span class="cap">Xoay°</span></div>
+      </div>
+      <div id="twList"></div>
+      <button id="twAdd" class="tbtab add" title="Thêm 1 khối (loại = cọ đang chọn) vào cuối danh sách">＋ thêm khối</button>
+      <div id="twInfo" style="font-size:10px;color:var(--dim);margin-top:5px"></div>
+    </div>
     <div class="field" id="ringBox" style="border:1px solid var(--accent2);border-radius:8px;padding:9px;background:rgba(72,209,255,.06);margin:2px 0 9px">
         <label style="color:var(--accent2)">🌀 Xếp bè theo vòng / xoắn</label>
         <div class="helptx" style="font-size:9.5px;color:var(--dim);margin:0 0 6px;line-height:1.45">Nhân bàn ĐANG SỬA thành nhiều bè giống hệt nhau, rải đều trên một vòng tròn quanh pháo — mỗi bè chỉ khác GÓC. Cộng thêm bán kính mỗi bè thì thành xoắn ốc.</div>
@@ -3607,6 +3625,8 @@ function draw(){
   // bật 👁 nhìn xuyên thì thành khung mờ để còn xếp được đồ bên trong.
   for(const o of objects){ if(!isCrate(o))continue;
     const d0=C(o,V.d)-S(o,V.d)/2,d1=C(o,V.d)+S(o,V.d)/2; drawCrate(o,V,curD>=d0-1e-6&&curD<=d1+1e-6); }
+  if(curT()&&curT().twirl){ ctx.save(); ctx.fillStyle='#e0a46a'; ctx.font='bold 14px Segoe UI'; ctx.textAlign='center';
+    ctx.fillText('🌀 BÀN VÒNG XOẮN — khối sửa ở panel bên phải, xem ở 3D',cv.clientWidth/2,40); ctx.restore(); }
   // CẢNH BÁO CHỒNG KHỐI: viền cam nét đứt trên khối chồng nhau (ở lớp đang xem)
   if(ovShow&&overlapObjs.size){ctx.save();ctx.strokeStyle='#ff7a1a';ctx.lineWidth=2;ctx.setLineDash([4,3]);
     for(const o of overlapObjs){const d0=fC(o,V.d)-axSize(o,V.d)/2,d1=fC(o,V.d)+axSize(o,V.d)/2; if(!(curD>=d0-1e-6&&curD<=d1+1e-6))continue;
@@ -3956,6 +3976,7 @@ cv.addEventListener('mousedown',e=>{
   lastMouse.x=e.clientX; lastMouse.y=e.clientY;
   if(e.button===2||e.button===1){dragPan={x:e.clientX,y:e.clientY};return;}
   if(e.button!==0)return;
+  if(curT()&&curT().twirl){ hint('🌀 Bàn vòng xoắn: thêm/sửa khối ở panel "Bàn vòng xoắn" bên phải, xem kết quả ở 3D.'); return; }
   startAutoScroll();                                  // kéo tới mép khung = khung tự trôi (xếp cao/rộng vô hạn)
   const wp=mouseWorld(mx,my),V=VIEWS[view];
   // armStroke = chỉ CHỤP trạng thái; bước undo chỉ được ghi khi có khối thật sự thêm/mất (xem commitStroke)
@@ -4341,6 +4362,7 @@ function dupSelAsTables(tis){
       yaw:src.yaw||0, scl:{x:src.scl.x,y:src.scl.y,z:src.scl.z},
       motion:JSON.parse(JSON.stringify(src.motion||staticMotion())),
       dimAuto:src.dimAuto, dim:src.dim?{x:src.dim.x,y:src.dim.y,z:src.dim.z}:null, fromFile:false,
+      twirl:src.twirl?JSON.parse(JSON.stringify(src.twirl)):null,
       ctrAuto:ctrOn(src), deckX:+src.deckX||0, deckZ:+src.deckZ||0, deckX0:+src.deckX0||0, deckZ0:+src.deckZ0||0,
       objs:remapCrates(src.objs.map(o=>{ const n={type:o.type,sx:o.sx,sy:o.sy,sz:o.sz,px:o.px,py:o.py,pz:o.pz,
           rot:o.rot?{x:o.rot.x,y:o.rot.y,z:o.rot.z,w:o.rot.w}:undefined};
@@ -4848,7 +4870,8 @@ function mkTable(id,pos,opts){opts=opts||{};return{id,pos:{x:pos.x||0,y:pos.y!=n
   // (=> khối đứng yên trong thế giới). Nạp file lệch tâm: mốc=0 ⇒ xuất lại y HỆT file gốc.
   ctrAuto:opts.ctrAuto!==false, deckX:+opts.deckX||0, deckZ:+opts.deckZ||0,
   deckX0:+opts.deckX0||0, deckZ0:+opts.deckZ0||0,
-  fromFile:!!opts.fromFile,objs:opts.objs||[]};}
+  fromFile:!!opts.fromFile,objs:opts.objs||[],
+  twirl:opts.twirl||null};}   // 🌀 bàn vòng xoắn (null = bàn thường) — xem khối BÀN VÒNG XOẮN
 function ctrOn(t){ return !t || t.ctrAuto!==false; }
 function curT(){return tables[cur]||null;}
 function setObjs(arr){objects=arr;if(curT())curT().objs=arr;}
@@ -4876,17 +4899,20 @@ function pullMeta(){ const t=curT(); if(!t)return;
   t.ctrAuto=$('ctrAuto').checked; t.deckX=+(+$('deckX').value||0); t.deckZ=+(+$('deckZ').value||0);
   t.pos.x=+(+$('tblX').value||0); t.pos.z=+(+$('tblZ').value||0); t.yaw=+(+$('tblYaw').value||0);
   // ô Cao Y trống → giữ nguyên giá trị cũ (đừng nuốt thành 0: 0 là độ cao HỢP LỆ, không phải "chưa nhập")
-  { const v=$('tblY').value; if(v!=='') t.pos.y=+v||0; } }
+  { const v=$('tblY').value; if(v!=='') t.pos.y=+v||0; }
+  twirlPull(t); }
 function pushMeta(){ const t=curT(); if(!t)return;
   setTableMotionUI(t.motion); $('dimAuto').checked=t.dimAuto!==false;
   $('tblX').value=t.pos.x; $('tblZ').value=t.pos.z; $('tblYaw').value=t.yaw||0; $('tblY').value=t.pos.y!=null?t.pos.y:TBL_Y0;
   $('ctrAuto').checked=ctrOn(t); $('deckX').value=+t.deckX||0; $('deckZ').value=+t.deckZ||0; updateDeckFields();
-  updateDimFields(); if(!$('dimAuto').checked&&t.dim){$('dimX').value=t.dim.x;$('dimZ').value=t.dim.y;$('dimCZ').value=t.dim.z;} }
+  updateDimFields(); if(!$('dimAuto').checked&&t.dim){$('dimX').value=t.dim.x;$('dimZ').value=t.dim.y;$('dimCZ').value=t.dim.z;}
+  twirlPanelSync(); }
 function renderTblBar(){ const bar=$('tblBar'); if(!bar)return; bar.innerHTML='';
-  tables.forEach((t,i)=>{const b=document.createElement('button');b.className='tbtab'+(i===cur?' on':'');b.textContent='Bàn '+t.id+((t.yaw||0)?` ${t.yaw>0?'+':''}${t.yaw}°`:'');
-    b.title=(t.src?'Nhập từ '+t.src+' — ':'')+t.objs.length+' khối · X='+fmt(t.pos.x)+' Z='+fmt(t.pos.z);   // src = file nguồn khi nhập bàn từ level khác
+  tables.forEach((t,i)=>{const b=document.createElement('button');b.className='tbtab'+(i===cur?' on':'');b.textContent=(t.twirl?'🌀':'')+'Bàn '+t.id+((t.yaw||0)?` ${t.yaw>0?'+':''}${t.yaw}°`:'');
+    b.title=(t.src?'Nhập từ '+t.src+' — ':'')+(t.twirl?t.twirl.objects.length+' khối trong list xoắn':t.objs.length+' khối')+' · X='+fmt(t.pos.x)+' Z='+fmt(t.pos.z);   // src = file nguồn khi nhập bàn từ level khác
     b.onclick=()=>selectTbl(i);bar.appendChild(b);});
   const add=document.createElement('button');add.className='tbtab add';add.textContent='＋';add.title='Thêm bàn trống';add.onclick=addTbl;bar.appendChild(add);
+  const addTw=document.createElement('button');addTw.className='tbtab add';addTw.textContent='＋🌀';addTw.title='Thêm BÀN VÒNG XOẮN (khối rải dọc đường xoắn ốc)';addTw.onclick=addTwirlTbl;bar.appendChild(addTw);
   const dup=document.createElement('button');dup.className='tbtab';dup.style.color='var(--accent2)';dup.textContent='⧉';dup.title='Nhân bản bàn hiện tại (giữ nguyên khối đã xếp)';dup.onclick=dupTbl;bar.appendChild(dup);
   if(tables.length>1){const del=document.createElement('button');del.className='tbtab del';del.textContent='🗑';del.title='Xoá bàn hiện tại';del.onclick=delTbl;bar.appendChild(del);}
   }
@@ -4903,12 +4929,117 @@ function dupTbl(){ pushHistory(); pullMeta(); const src=curT(); if(!src)return;
     yaw:src.yaw||0, scl:{x:src.scl.x,y:src.scl.y,z:src.scl.z},
     motion:JSON.parse(JSON.stringify(src.motion||staticMotion())),
     dimAuto:src.dimAuto, dim:src.dim?{x:src.dim.x,y:src.dim.y,z:src.dim.z}:null, fromFile:false,
+    twirl:src.twirl?JSON.parse(JSON.stringify(src.twirl)):null,
     ctrAuto:ctrOn(src), deckX:+src.deckX||0, deckZ:+src.deckZ||0, deckX0:+src.deckX0||0, deckZ0:+src.deckZ0||0,
     objs:remapCrates(src.objs.map(o=>{ const n={type:o.type,sx:o.sx,sy:o.sy,sz:o.sz,px:o.px,py:o.py,pz:o.pz,rot:o.rot?{x:o.rot.x,y:o.rot.y,z:o.rot.z,w:o.rot.w}:undefined};
       if(isCrate(o)){n.cid=o.cid;n.ov=o.ov;n.cs=o.cs;n.ks=o.ks;n.mo=o.mo;} if(o.inC)n.inC=o.inC; if(o.md)n.md=o.md; return n; })) });
   tables.push(nt); cur=tables.length-1; objects=curT().objs; clearSel();
   pushMeta(); renderTblBar(); setView('front'); updateStats(); sync3D();
   hint('Đã nhân bản Bàn '+src.id+' → Bàn '+id+' (khối y hệt) tại X='+fmt(nt.pos.x)+'. Chỉnh Vị trí/góc nếu muốn.'); }
+/* ============ 🌀 BÀN VÒNG XOẮN (TableData.twirl trong game) ============
+   Bàn KHÔNG có khối tự xếp: khối nằm trong t.twirl.objects và game tự rải dọc một đường xoắn ốc đi lên
+   (Assets/_BaseCode/Modules/Gameplay/Scripts/Twirl/TwirlTrack.cs). Hình học ở đây PHẢI khớp TwirlTrack:
+   · trục xoắn = tâm bàn (local 0,0), yaw=0 thì điểm đầu phía trước (-z), yaw xoay riêng vòng xoắn (chiều như yaw bàn),
+     xoắn ngược chiều kim đồng hồ nhìn từ trên;
+   · mặt trên đường đi từ y = TW_T lên TW_T + height, bán kính nội suy radiusBottom → radiusTop;
+   · khối nối đuôi: mỗi khối chiếm size.x dọc đường, cách nhau (và cách 2 đầu) `gap`; size.y theo pháp tuyến mặt đường.
+   TW_W / TW_T / TW_LIFT = mặc định của prefab TwirlTrack — đổi prefab thì đổi cả đây (chỉ ảnh hưởng preview + dim tự động). */
+const TW_W=1.4, TW_T=0.25, TW_LIFT=0.01, TW_MAX=300;
+function twDef(){ return {turns:2,height:5,radiusBottom:2.5,radiusTop:1.5,yaw:0,fill:1,gap:0.1,objects:[{type:1,sx:1,sy:1,sz:1}]}; }
+/* JSON game → nội bộ editor (khối giữ kiểu {type,sx,sy,sz,md} như khối thường). turns/height ≤ 0 = bàn thường. */
+function twirlIn(tw){ if(!tw||!(+tw.turns>0)||!(+tw.height>0))return null;
+  return {turns:+tw.turns,height:+tw.height,radiusBottom:+tw.radiusBottom||0,radiusTop:+tw.radiusTop||0,yaw:+tw.yaw||0,fill:+tw.fill?1:0,gap:+tw.gap||0,
+    objects:(tw.objects||[]).map(o=>{ if(o&&o.type!=null&&!TYPES[o.type]&&typeof typeTam==='function')typeTam(o.type);
+      const s=o.size||{}, n={type:+o.type,sx:+s.x||1,sy:+s.y||1,sz:+s.z||1};
+      if(o.metadata!=null&&o.metadata!=='')n.md=String(o.metadata); return n; })}; }
+function twirlOut(tw){ return {turns:tw.turns,height:tw.height,radiusBottom:tw.radiusBottom,radiusTop:tw.radiusTop,yaw:+tw.yaw||0,fill:tw.fill,gap:tw.gap,
+  objects:tw.objects.map(o=>{ const e={type:o.type,size:{x:o.sx,y:o.sy,z:o.sz}}; if(o.md)e.metadata=o.md; return e; })}; }
+/* Bè vuông ôm trọn vòng xoắn (bán kính lớn nhất + bề ngang đường) — dùng khi "Kích thước bàn tự ôm" bật. */
+function twirlDim(t){ const tw=t.twirl, s=+(2*Math.max(tw.radiusBottom,tw.radiusTop)+TW_W+0.2).toFixed(2); return {x:s,y:s,z:0}; }
+function twP(tw,u){ const a=(-90-(+tw.yaw||0)+u*tw.turns*360)*Math.PI/180,   // yaw Unity +θ ⇒ góc a−θ (khớp TwirlTrack)
+  r=tw.radiusBottom+(tw.radiusTop-tw.radiusBottom)*u;
+  return {x:Math.cos(a)*r, y:TW_T+u*tw.height, z:Math.sin(a)*r}; }
+/* Bảng độ dài cung (tích phân số) để đặt khối theo khoảng cách dọc đường như Spline.Travel của Dreamteck. */
+function twTable(tw){ const n=Math.max(64,Math.ceil(tw.turns*160)), u=[0], L=[0]; let p=twP(tw,0);
+  for(let i=1;i<=n;i++){ const q=twP(tw,i/n); L.push(L[i-1]+Math.hypot(q.x-p.x,q.y-p.y,q.z-p.z)); u.push(i/n); p=q; }
+  return {u,L,len:L[n]}; }
+function twUAt(tb,d){ const L=tb.L; let lo=0,hi=L.length-1; while(hi-lo>1){ const m=(lo+hi)>>1; if(L[m]<d)lo=m; else hi=m; }
+  const k=(L[hi]-L[lo])>1e-9?(d-L[lo])/(L[hi]-L[lo]):0; return tb.u[lo]+(tb.u[hi]-tb.u[lo])*k; }
+const twNorm=v=>{ const l=Math.hypot(v.x,v.y,v.z)||1; return {x:v.x/l,y:v.y/l,z:v.z/l}; };
+const twCross=(a,b)=>({x:a.y*b.z-a.z*b.y, y:a.z*b.x-a.x*b.z, z:a.x*b.y-a.y*b.x});
+/* Khung mặt đường tại u: F = chiều đi, U = pháp tuyến mặt (dốc theo chiều đi, không nghiêng vào tâm), R = bề ngang.
+   Y hệt LookRotation(F, up) của Unity mà Dreamteck dùng cho sample.rotation. */
+function twFrame(tw,u){ const e=1e-4, a=twP(tw,Math.max(0,u-e)), b=twP(tw,Math.min(1,u+e));
+  const F=twNorm({x:b.x-a.x,y:b.y-a.y,z:b.z-a.z}), R=twNorm(twCross({x:0,y:1,z:0},F)), U=twCross(F,R);
+  return {P:twP(tw,u),F,R,U}; }
+/* Ma trận 3 cột (X,Y,Z) → quaternion (thuật toán chuẩn, khỏi phụ thuộc THREE để dùng được cả ngoài 3D). */
+function twQuat(X,Y,Z){ const m00=X.x,m10=X.y,m20=X.z,m01=Y.x,m11=Y.y,m21=Y.z,m02=Z.x,m12=Z.y,m22=Z.z, tr=m00+m11+m22; let q;
+  if(tr>0){ const s=Math.sqrt(tr+1)*2; q={w:s/4,x:(m21-m12)/s,y:(m02-m20)/s,z:(m10-m01)/s}; }
+  else if(m00>m11&&m00>m22){ const s=Math.sqrt(1+m00-m11-m22)*2; q={w:(m21-m12)/s,x:s/4,y:(m01+m10)/s,z:(m02+m20)/s}; }
+  else if(m11>m22){ const s=Math.sqrt(1+m11-m00-m22)*2; q={w:(m02-m20)/s,x:(m01+m10)/s,y:s/4,z:(m12+m21)/s}; }
+  else { const s=Math.sqrt(1+m22-m00-m11)*2; q={w:(m10-m01)/s,x:(m02+m20)/s,y:(m12+m21)/s,z:s/4}; }
+  return q; }
+/* Khối ẢO đặt trên đường (toạ độ local bàn) — y hệt TwirlTrack.ComputePlacements. tw:1 = không chọn/sửa được trong 3D. */
+function twirlObjs(t){ const tw=t.twirl, res=[]; if(!tw||!tw.objects.length)return res;
+  const tb=twTable(tw), gap=Math.max(0,tw.gap); let cur=gap, i=0;
+  while(res.length<TW_MAX){ if(i>=tw.objects.length){ if(!tw.fill)break; i=0; }
+    const o=tw.objects[i], along=Math.max(0.01,o.sx);
+    if(cur+along>tb.len-gap)break;
+    const f=twFrame(tw,twUAt(tb,cur+along/2)), h=o.sy/2+TW_LIFT;
+    // trục x khối = chiều đi F, y = pháp tuyến U, z = -R (Quaternion.Euler(0,-90,0) bên game)
+    const v={type:o.type,sx:o.sx,sy:o.sy,sz:o.sz,px:f.P.x+f.U.x*h,py:f.P.y+f.U.y*h,pz:f.P.z+f.U.z*h,
+      rot:twQuat(f.F,f.U,{x:-f.R.x,y:-f.R.y,z:-f.R.z}),tw:1};
+    if(o.md)v.md=o.md; res.push(v); cur+=along+gap; i++; }
+  return res; }
+/* Mesh đường xoắn cho 3D: hộp dẹp chạy dọc đường (mặt trên tại spline), không bắt tia chuột. */
+function twirlTrack3D(t){ const tw=t.twirl, tb=twTable(tw), n=Math.max(24,Math.ceil(tb.len/0.15)), pos=[], idx=[];
+  for(let i=0;i<=n;i++){ const f=twFrame(tw,twUAt(tb,tb.len*i/n)), hw=TW_W/2;
+    const c=[[-hw,0],[hw,0],[hw,-TW_T],[-hw,-TW_T]].map(([r,u])=>[f.P.x+f.R.x*r+f.U.x*u,f.P.y+f.R.y*r+f.U.y*u,f.P.z+f.R.z*r+f.U.z*u]);
+    for(let k=0;k<4;k++){ pos.push(...c[k],...c[(k+1)%4]); } }   // 8 đỉnh/lát: mỗi mặt có cặp đỉnh riêng → mặt phẳng không bị làm mượt
+  for(let i=0;i<n;i++) for(let k=0;k<4;k++){ const a=i*8+k*2, b=a+8; idx.push(a,b,a+1, a+1,b,b+1); }
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx); g.computeVertexNormals();
+  three.tmp.push(g);
+  const m=new THREE.Mesh(g,matFor(three.deckMat,'twirl',()=>new THREE.MeshStandardMaterial({color:0x9a6a3c,roughness:.85,side:THREE.DoubleSide})));
+  m.raycast=()=>{}; return m; }
+/* ---- panel ---- */
+const TW_IDS=['twTurns','twHeight','twRB','twRT','twYaw','twFill','twGap'];
+function twTypeOpts(sel){ return Object.keys(TYPES).filter(id=>+id!==CRATE_T&&!TYPES[id].plank&&(typeof gameHasT!=='function'||gameHasT(id)||+id===+sel))
+  .map(id=>'<option value="'+id+'"'+(+id===+sel?' selected':'')+'>'+TYPES[id].name+' ('+id+')</option>').join(''); }
+/* game chỉ nhận size tối đa 1 trục ≠1, số nguyên 1..5 (TargetController.TryGetSizeAxis) */
+function twSizeOk(o){ const a=[o.sx,o.sy,o.sz]; return a.every(v=>Number.isInteger(v)&&v>=1&&v<=5)&&a.filter(v=>v!==1).length<=1; }
+function twirlPull(t){ if(!t||!t.twirl)return; const tw=t.twirl, num=(id,d)=>{ const v=+$(id).value; return isFinite(v)?v:d; };
+  tw.turns=Math.max(0.1,num('twTurns',tw.turns)); tw.height=Math.max(0.1,num('twHeight',tw.height));
+  tw.radiusBottom=Math.max(0.1,num('twRB',tw.radiusBottom)); tw.radiusTop=Math.max(0.1,num('twRT',tw.radiusTop));
+  tw.yaw=num('twYaw',tw.yaw||0); tw.fill=+$('twFill').value?1:0; tw.gap=Math.max(0,num('twGap',tw.gap)); }
+function twirlPanelSync(){ const t=curT(), box=$('twirlBox'); if(!box)return;
+  box.style.display=(t&&t.twirl)?'':'none'; if(!t||!t.twirl)return;
+  const tw=t.twirl; $('twTurns').value=tw.turns; $('twHeight').value=tw.height; $('twRB').value=tw.radiusBottom; $('twRT').value=tw.radiusTop;
+  $('twYaw').value=+tw.yaw||0; $('twFill').value=tw.fill?1:0; $('twGap').value=tw.gap; twirlListRender(); }
+function twirlListRender(){ const t=curT(); if(!t||!t.twirl)return; const tw=t.twirl;
+  $('twList').innerHTML=tw.objects.map((o,i)=>'<div class="row twrow" data-i="'+i+'" style="gap:4px;margin:0 0 4px;align-items:center">'
+    +'<span style="width:16px;font-size:10px;color:var(--dim)">'+(i+1)+'</span>'
+    +'<select data-k="type" style="flex:1;min-width:0;padding:3px 2px">'+twTypeOpts(o.type)+'</select>'
+    +['sx','sy','sz'].map(k=>'<input type="number" data-k="'+k+'" min="1" max="5" step="1" value="'+o[k]+'" title="'+({sx:'Dọc đường',sy:'Cao',sz:'Ngang đường'})[k]+'" style="width:34px;padding:3px 2px'+(twSizeOk(o)?'':';border-color:var(--danger)')+'">').join('')
+    +'<button data-k="del" class="tbtab del" title="Xoá khối này" style="padding:1px 5px">✕</button></div>').join('')
+    ||'<div style="font-size:10px;color:var(--danger)">Chưa có khối nào — bấm ＋.</div>';
+  const pl=twirlObjs(t), len=twTable(tw).len, bad=tw.objects.filter(o=>!twSizeOk(o)).length;
+  $('twInfo').innerHTML='Đường dài <b>'+fmt(+len.toFixed(2))+'</b> · đặt được <b>'+pl.length+'</b> khối'
+    +(!tw.fill&&pl.length<tw.objects.length?' <span style="color:var(--danger)">⚠ thiếu chỗ cho '+(tw.objects.length-pl.length)+' khối cuối</span>':'')
+    +(bad?' <span style="color:var(--danger)">⚠ '+bad+' khối size sai (tối đa 1 trục ≠1, 1..5)</span>':''); }
+function twirlCommit(){ draw(); updateStats(); sync3D(); twirlListRender(); renderTblBar(); }
+function addTwirlTbl(){ pushHistory(); pullMeta(); const id=(tables.length?Math.max(...tables.map(t=>t.id)):-1)+1;
+  tables.push(mkTable(id,{x:tables.length*3,y:2.9,z:0},{twirl:twDef()})); cur=tables.length-1; objects=curT().objs; clearSel();
+  pushMeta(); renderTblBar(); setView('front'); updateStats(); sync3D(); hint('🌀 Đã thêm Bàn vòng xoắn '+id+' — chỉnh vòng xoắn + danh sách khối ở panel bên phải, xem kết quả ở 3D.'); }
+TW_IDS.forEach(id=>{ const el=$(id); if(!el)return;
+  el.addEventListener('focus',armMeta); el.addEventListener('pointerdown',armMeta);
+  el.addEventListener('change',()=>{ twirlPull(curT()); commitMeta(); twirlCommit(); }); });
+$('twList').addEventListener('change',e=>{ const t=curT(), row=e.target.closest('.twrow'); if(!t||!t.twirl||!row)return;
+  const o=t.twirl.objects[+row.dataset.i], k=e.target.dataset.k; if(!o||!k)return;
+  pushHistory(); if(k==='type')o.type=+e.target.value; else o[k]=Math.max(1,Math.min(5,Math.round(+e.target.value||1))); twirlCommit(); });
+$('twList').addEventListener('click',e=>{ const t=curT(), row=e.target.closest('.twrow'); if(!t||!t.twirl||!row||e.target.dataset.k!=='del')return;
+  pushHistory(); t.twirl.objects.splice(+row.dataset.i,1); twirlCommit(); });
+$('twAdd').onclick=()=>{ const t=curT(); if(!t||!t.twirl)return; pushHistory();
+  const ty=(TYPES[brush]&&+brush!==CRATE_T&&!TYPES[brush].plank)?+brush:1; t.twirl.objects.push({type:ty,sx:1,sy:1,sz:1}); twirlCommit(); };
 ['tblX','tblZ','tblY','tblYaw'].forEach(id=>$(id).addEventListener('change',()=>{pullMeta();renderTblBar();draw();sync3D();}));
 
 /* ============================================================
@@ -4967,6 +5098,7 @@ function ringGo(){ pushHistory();   // undo duoc ca lan xep vong
     { yaw:+ang.toFixed(3), scl:{x:src.scl.x,y:src.scl.y,z:src.scl.z},
       motion:JSON.parse(JSON.stringify(src.motion||staticMotion())),
       dimAuto:src.dimAuto, dim:src.dim?{x:src.dim.x,y:src.dim.y,z:src.dim.z}:null, fromFile:false,
+      twirl:src.twirl?JSON.parse(JSON.stringify(src.twirl)):null,
       ctrAuto:ctrOn(src), deckX:+src.deckX||0, deckZ:+src.deckZ||0,
       deckX0:+src.deckX0||0, deckZ0:+src.deckZ0||0, objs:clone() });
   let id=(tables.length?Math.max(...tables.map(t=>t.id)):-1)+1;
@@ -5555,7 +5687,12 @@ function tblBounds(objs){ if(!objs.length)return null; let a=1e9,b=-1e9,c=1e9,d=
 function buildStage(tbls,blks){
   const allObjs=[], outTables=[], outCrates=[], outPlanks=[];
   const cidSet=new Set(); for(const t of tbls) for(const o of t.objs) if(isCrate(o)&&+o.cid)cidSet.add(+o.cid);   // chốt an toàn: crateId trỏ tới hòm không tồn tại thì BỎ (đồ khoá vĩnh viễn = màn hỏng)
-  for(const t of tbls){ const bnd=tblBounds(t.objs);
+  for(const t of tbls){
+    // 🌀 BÀN VÒNG XOẮN: không có objects[] riêng — khối đi trong table.twirl, trục xoắn = tâm bè (dim.z luôn 0).
+    if(t.twirl){ const dm=(t.dimAuto||!t.dim)?twirlDim(t):{x:+(+t.dim.x).toFixed(4),y:+(+t.dim.y).toFixed(4),z:0};
+      outTables.push(Object.assign({id:t.id,pos:{x:+t.pos.x,y:t.pos.y,z:+t.pos.z},rot:eulerYToQuat(t.yaw||0),scl:t.scl||{x:1,y:1,z:1},dim:dm},
+        t.motion||staticMotion(),{twirl:twirlOut(t.twirl)})); continue; }
+    const bnd=tblBounds(t.objs);
     // NỀN BÀN (deck) KHÔNG có toạ độ tâm-X riêng trong `dim` → tâm-X deck LUÔN = table.pos.x.
     // Vì vậy PHẢI đưa tâm-X cụm vật về local 0 để deck bao quanh vật; `pos.x` = đúng vị trí bàn user nhập.
     // Bàn TĨNH: trục Z giữ tâm ở `dim.z` (không dời). Bàn XOAY quanh Y (doRot): game pivot tại table.pos
@@ -5686,7 +5823,7 @@ async function dirHoiDe(ten){
   return confirm(ten+' ĐÃ CÓ trong 📌 '+lvDir.name+' mà level đang mở '+(lvSrcName?('được nạp từ '+lvSrcName):'không nạp từ file này (dán JSON / level mới)')+'.\n\nGHI ĐÈ lên '+ten+'?'); }
 // mở lại tool: lấy lại thư mục đã gắn lần trước (quyền thì đợi cú bấm đầu tiên mới xin lại được)
 if(DIR_OK()) _idbGet().then(h=>{ if(h){ lvDir=h; dirNhan(); } }).catch(()=>{});
-$('btnExport').onclick=async(ev)=>{pullMeta();if(!tables.some(t=>t.objs.length)){warn('Chưa có khối nào.');return;}
+$('btnExport').onclick=async(ev)=>{pullMeta();if(!tables.some(t=>t.objs.length||(t.twirl&&t.twirl.objects.length))){warn('Chưa có khối nào.');return;}
   if(typeof issueGate==='function'&&!issueGate('tải file'))return;
   const nukeW=()=>{ const nw=nukeWarnAll(); if(nw.length) warn(nw.join(' · ')); };   // ☢ cảnh báo mềm, KHÔNG chặn tải
   const ten='Level'+(+fIndex.value)+'.json', txt=JSON.stringify(buildJSON());
@@ -5738,7 +5875,7 @@ function parseStage(st){
   const newTbls=srcTbls.map(tt=>mkTable(tt.id||0,{x:tt.pos.x,y:tt.pos.y,z:tt.pos.z},{
     yaw:quatToYawDeg(tt.rot), scl:tt.scl||{x:1,y:1,z:1},
     motion:{doRot:!!tt.doRot,rotSpd:tt.rotSpd||0,movH:!!tt.movH,movHMin:tt.movHMin||0,movHMax:tt.movHMax||0,dirH:tt.dirH||0,movSpdH:tt.movSpdH||0,movV:!!tt.movV,movVMin:tt.movVMin||0,movVMax:tt.movVMax||0,dirV:tt.dirV||0,movSpdV:tt.movSpdV||0},
-    dimAuto:false, dim:tt.dim?{x:tt.dim.x,y:tt.dim.y,z:tt.dim.z}:null, fromFile:true,
+    dimAuto:false, dim:tt.dim?{x:tt.dim.x,y:tt.dim.y,z:tt.dim.z}:null, fromFile:true, twirl:twirlIn(tt.twirl),
     objs: st.objects.filter(o=>TYPES[o.type]&&(o.tableId||0)===(tt.id||0)).map(mapObj) }));
   const known=new Set(newTbls.map(t=>t.id));                      // khối tableId lạ → dồn vào bàn đầu
   const orphan=st.objects.filter(o=>TYPES[o.type]&&!known.has(o.tableId||0)).map(mapObj);
@@ -5806,7 +5943,7 @@ function importTables(items){                       // items=[{name,L}] đã s�
   const per=Math.max(1,Math.round(+$('impPer').value||3)), dx=+$('impDX').value||8, dz=+$('impDZ').value||10;
   pullMeta(); pushHistory();
   // level đang mở còn trống (1 bàn chưa vẽ gì) → THAY luôn, không để lại bè rỗng giữa màn
-  const fresh = tables.length===1 && !tables[0].objs.length && !blockers.length;
+  const fresh = tables.length===1 && !tables[0].objs.length && !tables[0].twirl && !blockers.length;
   let nextId = fresh?0:Math.max(...tables.map(t=>+t.id||0))+1;
   let cidN = nextCid();
   // xếp lưới: hàng mới bắt đầu SAU bàn xa nhất hiện có (không đè lên phần đã dựng)
@@ -5816,7 +5953,7 @@ function importTables(items){                       // items=[{name,L}] đã s�
     const L=it.L, st=(L&&L.stages&&L.stages.length)?L.stages[0]:null;
     if(!st){ skipped.push(it.name+': không có stage'); continue; }
     let ps; try{ ps=parseStage(st); }catch(err){ skipped.push(it.name+': '+err.message); continue; }
-    let src=ps.tables.filter(t=>t.objs.length);
+    let src=ps.tables.filter(t=>t.objs.length||t.twirl);
     if(!src.length){ skipped.push(it.name+': bàn rỗng'); continue; }
     if(which==='first')src=[src[0]];
     let d0=null;                                     // blocker là toạ độ THẾ GIỚI → dời theo đúng delta của bàn đầu file
@@ -6320,7 +6457,8 @@ function build3D(refit){
     // ⭐ Độ cao bè: lấy CHÊNH so với mốc 2.9 để bàn mặc định vẫn nằm đúng y=0 như cũ.
     const tgY=(t.pos.y!=null?+t.pos.y:TBL_Y0)-TBL_Y0;
     const tg=new THREE.Group(); tg.position.set(t.pos.x,tgY,t.pos.z); tg.rotation.y=(t.yaw||0)*Math.PI/180; grp.add(tg);
-    const b=tblBounds(t.objs);
+    const tw=t.twirl?twirlObjs(t):null;                          // 🌀 khối ảo dọc đường xoắn (local bàn, tâm = gốc)
+    const b=tw?null:tblBounds(t.objs);
     // Bàn XOAY (yaw tĩnh hoặc doRot) → cụm khối phải căn tâm về gốc tg (=table.pos) để xoay CHÍNH GIỮA
     // (khớp buildJSON). Bàn tĩnh giữ nguyên offset như cũ (không hồi quy).
     const yawed = Math.abs(t.yaw||0)>0.5 || (t.motion&&t.motion.doRot);
@@ -6328,8 +6466,8 @@ function build3D(refit){
     const freeT=!ctrOn(t), dckX=freeT?(+t.deckX||0):(b?b.xc:0), dckZ=freeT?(+t.deckZ||0):null;
     const cxo = yawed?dckX:0, czo = yawed?(freeT?(+t.deckZ||0):(b?b.zc:0)):0;
     // deck = ĐÚNG dim khi export & khớp deck 2D (KHÔNG padding +1.2 → không "lòi ra"): rộng=dim.x, sâu=dim.y, tâm-Z=dim.z, tâm-X=tâm cụm vật
-    const dm=(t.dimAuto||!t.dim)?(b?{x:b.w,y:b.dep,z:b.zc}:{x:4,y:4,z:0}):{x:+t.dim.x,y:+t.dim.y,z:+t.dim.z};
-    if(dckZ!=null)dm.z=dckZ;
+    const dm=(t.dimAuto||!t.dim)?(tw?twirlDim(t):b?{x:b.w,y:b.dep,z:b.zc}:{x:4,y:4,z:0}):{x:+t.dim.x,y:+t.dim.y,z:tw?0:+t.dim.z};
+    if(dckZ!=null&&!tw)dm.z=dckZ;
     // 🛶 BE THAT: cac khuc cui dung dung nhu Raft.SetupRaft cua game.
     const dkX3=yawed?0:dckX, dkZ3=yawed?0:dm.z;
     // ⛰️ Valley Smash: BAN TUYET (vsTable) thay khuc cui; chua nap xong vs_art.js / mesh thi tam ve be OBS
@@ -6344,7 +6482,8 @@ function build3D(refit){
       : matFor(three.deckMat,ti===cur?1:0,()=>new THREE.MeshStandardMaterial({color:ti===cur?0x3a4680:0x262b45,roughness:.9})));
     deck.position.set(dkX3,-0.22,dkZ3); deck.userData={deck:true,ti}; tg.add(deck);
     if(raft3){ raft3.position.set(dkX3,0,dkZ3); tg.add(raft3); }
-    for(const o of t.objs){const ty=TYPES[o.type];
+    if(tw) tg.add(twirlTrack3D(t));
+    for(const o of (tw||t.objs)){const ty=TYPES[o.type];
       // ART bat: hu/chum dung tiet dien quay (bung phinh) thay vi hinh tru
       const shp=ty.shape==='box'?'box':(ty.shape==='cone'?'cone':(ty.shape==='jar'?'jar':'cyl')), geo=three.g[shp];
       // container mang VỊ TRÍ + XOAY (quaternion) của khối; mesh/edges/marker là con → xoay theo
@@ -6405,14 +6544,15 @@ function build3D(refit){
         const head=new THREE.Mesh(three.head,three.headMat); head.position.set(0,hy+0.03,0);head.raycast=()=>{};oc.add(head);
         const tail=new THREE.Mesh(three.tail,three.tailMat); tail.position.set(0,-hy-0.03,0);tail.raycast=()=>{};oc.add(tail);}}
     if(typeof qol2Tbl3D==='function')qol2Tbl3D(t,ti,tg,cxo,czo);   // QOL2: khoá tầng (mờ) · viền cam · vết nét
-    const rad=b?Math.max(b.w,b.dep):2;                          // gộp biên thế giới (thô, cho camera)
-    gx0=Math.min(gx0,t.pos.x-rad);gx1=Math.max(gx1,t.pos.x+rad);gz0=Math.min(gz0,t.pos.z-rad);gz1=Math.max(gz1,t.pos.z+rad);gy=Math.max(gy,b?b.maxy:1);
+    const rad=b?Math.max(b.w,b.dep):(tw?dm.x:2);               // gộp biên thế giới (thô, cho camera)
+    gx0=Math.min(gx0,t.pos.x-rad);gx1=Math.max(gx1,t.pos.x+rad);gz0=Math.min(gz0,t.pos.z-rad);gz1=Math.max(gz1,t.pos.z+rad);gy=Math.max(gy,b?b.maxy:(tw?TW_T+t.twirl.height+1:1));
     // ĐƯỜNG ĐI CỦA LEVEL (cho thanh kéo "gần pháo ↔ xa pháo"): tâm mỗi bè trong toạ độ DATA.
     // Level nhiều bè không xếp thẳng hàng mà lượn theo cả X, nên đi dọc Z phải kéo theo X thì bè mới ở giữa khung.
-    pathPts.push({ti,id:t.id,x:t.pos.x+(b?b.xc:0),z:t.pos.z+(b?b.zc:0),y:b?b.maxy:1,n:t.objs.length});
+    pathPts.push({ti,id:t.id,x:t.pos.x+(b?b.xc:0),z:t.pos.z+(b?b.zc:0),y:b?b.maxy:(tw?TW_T+t.twirl.height+1:1),n:tw?tw.length:t.objs.length});
     if(b){ // biên SÁT (cho preview nhỏ căn khung chặt); bàn xoay → dùng bán kính bao
       const yaw=Math.abs(t.yaw||0)>0.5, hx=yaw?rad/2:b.w/2, hz=yaw?rad/2:b.dep/2, cx=t.pos.x+(yaw?0:b.xc), cz=t.pos.z+(yaw?0:b.zc);
       tx0=Math.min(tx0,cx-hx);tx1=Math.max(tx1,cx+hx);tz0=Math.min(tz0,cz-hz);tz1=Math.max(tz1,cz+hz);ty=Math.max(ty,b.maxy); }
+    else if(tw){ const h=dm.x/2; tx0=Math.min(tx0,t.pos.x-h);tx1=Math.max(tx1,t.pos.x+h);tz0=Math.min(tz0,t.pos.z-h);tz1=Math.max(tz1,t.pos.z+h);ty=Math.max(ty,TW_T+t.twirl.height+1); }
   });
   // BLOCKER: scene 3D dùng X/Z = ĐÚNG world (bàn đã đặt tại t.pos.x/z), chỉ Y quy đổi vì scene lấy mặt bàn làm y=0
   const fr=blkFrame();
@@ -6640,7 +6780,8 @@ function ray3(canvas,cam,e){ if(!three)return null;
   const rc=new THREE.Raycaster(); rc.setFromCamera(v,cam);
   for(const h of rc.intersectObjects(three.grp.children,true)){
     let n=h.object; while(n&&!(n.userData&&(n.userData.obj||n.userData.deck)))n=n.parent;
-    if(n){ if(yLockOn&&n.userData.obj&&!onYLayer(n.userData.obj))continue;   // QOL2 C1: tầng khác → tia đi xuyên
+    if(n){ if(n.userData.obj&&n.userData.obj.tw)continue;          // 🌀 khối ảo trên đường xoắn: chỉ để xem
+      if(yLockOn&&n.userData.obj&&!onYLayer(n.userData.obj))continue;   // QOL2 C1: tầng khác → tia đi xuyên
       return {p:h.point,ud:n.userData}; } }
   return null; }
 const tgOf=ti=>three.grp.children[ti];
@@ -6652,7 +6793,7 @@ function faceOf(o,lp){ const d={x:lp.x-o.px,y:lp.y-o.py,z:lp.z-o.pz}, s={x:o.sx/
 function brushSize(){ const V=VIEWS[view], s={x:1,y:1,z:1};   // cỡ lấy từ ô "Cỡ khối" theo mặt 2D đang chọn
   s[V.h]=Math.max(1,+bw.value||1); s[V.v]=Math.max(1,+bh.value||1); return s; }
 /* vị trí khối mới (toạ độ LOCAL của bàn bị trúng) */
-function target3(ud,wp){ const tg=tgOf(ud.ti); if(!tg)return null;
+function target3(ud,wp){ const tg=tgOf(ud.ti); if(!tg||(tables[ud.ti]&&tables[ud.ti].twirl))return null;   // 🌀 bàn xoắn: khối sửa ở panel
   const lp=tg.worldToLocal(wp.clone()), sz=brushSize();
   if(ud.deck) return {ti:ud.ti, ax:'y', dir:1, o:applyBrushRot({type:brush,px:snapV(lp.x),py:sz.y/2,pz:snapV(lp.z),sx:sz.x,sy:sz.y,sz:sz.z})};
   const o=ud.obj, f=faceOf(o,lp), n={type:brush,px:o.px,py:o.py,pz:o.pz,sx:sz.x,sy:sz.y,sz:sz.z};
