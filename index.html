@@ -603,7 +603,8 @@
       <div class="sep"></div>
       <!-- nhóm tệp để icon trần + tooltip: có thêm dải lật level thì thanh vẫn đủ chỗ, không bị đẩy khuất -->
       <!-- 📌 gắn thư mục levels: gắn rồi thì "Tải về" đổi thành "Ghi đè", ghi thẳng LevelN.json vào đó -->
-      <button class="tb" id="btnDir" title="📌 Gắn thư mục levels (vd ...\levels\prod-13\) — gắn rồi thì &quot;Tải về&quot; ghi đè thẳng LevelN.json, khỏi chép tay (Chrome/Edge)">📌</button>
+      <button class="tb" id="btnDir" title="📌 Gắn thư mục GỐC project Unity rồi chọn ver ở ô bên cạnh (json + .bytes tự ghi) — hoặc thư mục levels (vd ...\levels\prod-13\) — gắn rồi thì &quot;Tải về&quot; ghi đè thẳng LevelN.json, khỏi chép tay (Chrome/Edge)">📌</button>
+      <select id="verSel" style="display:none;max-width:84px" title="ver đang ghi: 💾 Ghi đè = Levels/&lt;ver&gt;/LevelN.json + Resources/Levels/&lt;ver&gt;/LevelN.bytes · đọc thẳng thư mục nên ver mới tự hiện · 📁 Nạp thư mục ver_N thì tự chuyển theo"></select>
       <button class="tb primary" id="btnExport" title="Tải Level{N}.json về máy — chép vào ...\levels\prod-13\">⬇️ Tải về</button>
       <button class="tb" id="btnCopy" title="📋 Copy toàn bộ JSON của level vào clipboard">📋</button>
       <label class="tb file tbig" title="📂 Nạp 1 file Level*.json">📂<span class="tblab">Nạp file</span><input type="file" id="fileIn" accept=".json,application/json" style="display:none"></label>
@@ -2717,7 +2718,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 14/10 16:45', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 14/10 17:26', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -5639,19 +5640,20 @@ function dirNhan(){ const b=$('btnDir'), x=$('btnExport');
   b.classList.toggle('primary',on);
   b.textContent = '📌';   // icon trần: thanh 2 hết chỗ (chữ làm tràn 108px ở 1280) — tên thư mục nằm ở title + nút 💾
   b.title = on ? '📌 Đang ghi đè thẳng vào thư mục "'+lvDir.name+'" — bấm để GỠ, về kiểu tải file thường'
-               : '📌 Gắn thư mục levels (vd ...\\levels\\prod-13\\) — gắn rồi thì "Tải về" ghi đè thẳng LevelN.json, khỏi chép tay (Chrome/Edge)';
+               : '📌 Gắn thư mục GỐC project Unity rồi chọn ver ở ô bên cạnh (json + .bytes tự ghi) — hoặc thư mục levels (vd ...\\levels\\prod-13\\) — gắn rồi thì "Tải về" ghi đè thẳng LevelN.json, khỏi chép tay (Chrome/Edge)';
   if(x){ x.textContent = on ? '💾 Ghi đè' : '⬇️ Tải về';
     x.title = on ? 'GHI ĐÈ Level{N}.json thẳng vào 📌 '+lvDir.name+' · Shift+bấm = tải file thường' : 'Tải Level{N}.json về máy — chép vào ...\\levels\\prod-13\\'; } }
 $('btnDir').onclick=async(ev)=>{
-  if(ev&&ev.altKey){ const t=byRoot&&byRoot.name; byRoot=null; byTuChoi=false; byKhoa=null; try{ await _idbK('bytes',null); await _idbK('khoa',null); }catch(e){}
+  if(ev&&ev.altKey){ const t=byRoot&&byRoot.name; byRoot=null; byTuChoi=false; byKhoa=null; if(byDuAn){ byDuAn=false; lvDir=null; verAn(); dirNhan(); try{ await _idbSet(null); await _idbK('ver',null); }catch(e){} } try{ await _idbK('bytes',null); await _idbK('khoa',null); }catch(e){}
     hint(t?'🔐 Đã gỡ thư mục gốc bytes "'+t+'" — lần 💾 Ghi đè tới sẽ hỏi chọn lại.':'🔐 Chưa gắn thư mục gốc bytes — lần 💾 Ghi đè tới sẽ hỏi.'); return; }
   if(!DIR_OK()){ warn('Trình duyệt này không ghi thẳng vào thư mục được — dùng Chrome hoặc Edge.'); return; }
-  if(lvDir){ const ten=lvDir.name; lvDir=null; dirNhan();
+  if(lvDir){ const ten=lvDir.name; lvDir=null; dirNhan(); if(byDuAn){ byDuAn=false; verAn(); try{ await _idbK('ver',null); }catch(e){} }
     try{ await _idbSet(null); }catch(e){}
     hint('Đã gỡ thư mục "'+ten+'" — "Tải về" quay lại kiểu tải file thường.'); return; }
   try{
     const h=await window.showDirectoryPicker({id:'obsLevels',mode:'readwrite'});
     if(!await dirQuyen(h,true)){ warn('Chưa cấp quyền GHI cho thư mục — vẫn dùng kiểu tải file thường.'); return; }
+    if(await ganDuAn(h)) return;                     // BYTES-1410c: gốc project / Assets / LevelDatas ⇒ chọn ver ở ô bên cạnh
     lvDir=h; dirNhan();
     try{ await _idbSet(h); }catch(e){}              // không cất được thì phiên này vẫn chạy, chỉ là mở lại phải gắn lần nữa
     hint('📌 Đã gắn "'+h.name+'" — từ giờ bấm 💾 Ghi đè là ghi thẳng LevelN.json vào đó.');
@@ -5772,7 +5774,49 @@ async function byGanTheo(h){
     if(e&&e.name==='AbortError'){ byTuChoi=true; hint(dau+' — chỉ ghi json (bỏ qua .bytes phiên này; gỡ rồi gắn lại 📌 để bật)'); return; }
     if(e&&e.name==='SecurityError'){ hint(dau+' — lần 💾 Ghi đè đầu sẽ hỏi chọn gốc project cho .bytes'); return; }
     warn(dau+' · ⚠ bytes: '+((e&&e.message)||e)); } }
+/* BYTES-1410c (hướng 1, user 14/10): 📌 gắn thư mục GỐC project Unity (hoặc Assets / LevelDatas) MỘT LẦN ⇒ chọn ver ở ô #verSel.
+   json Levels/ver_N + bytes Resources/Levels/ver_N đều nằm DƯỚI gốc ⇒ tool tự lấy, không hỏi thêm thư mục nào (trình duyệt
+   không cho đi NGƯỢC lên cha của thư mục đã gắn). lvDir vẫn là thư mục json ver_N ⇒ mọi tính năng 📌 cũ chạy y nguyên.
+   Ô ver đọc thẳng ổ đĩa mỗi lần mở ⇒ ver / level mới tự hiện. Gắn thẳng thư mục json ver_N: như cũ (BYTES-1410b). */
+let byDuAn=false;
+const VER_RE=/^ver_\d+$/i;
+async function dsVer(L){ const a=[]; for await(const [n,h] of L.entries()) if(h.kind==='directory'&&VER_RE.test(n)) a.push(n);
+  return a.sort((x,y)=>(+y.slice(4))-(+x.slice(4))); }
+async function timLevelsJson(r){
+  if(!r||/^resources$/i.test(r.name)) return null;            // Resources/Levels là thư mục BYTES, không phải json
+  for(const p of [['Levels'],['LevelDatas','Levels'],['Configs','LevelDatas','Levels'],['Gameplay','Configs','LevelDatas','Levels'],
+      ['Modules','Gameplay','Configs','LevelDatas','Levels'],['_BaseCode','Modules','Gameplay','Configs','LevelDatas','Levels'],
+      ['Assets','_BaseCode','Modules','Gameplay','Configs','LevelDatas','Levels']]){
+    let h=r; for(const s of p){ h=await _con(h,s); if(!h) break; }
+    if(h&&(await dsVer(h)).length) return h; }
+  return null; }
+function verAn(){ const s=$('verSel'); if(s){ s.style.display='none'; s.innerHTML=''; } }
+async function verNap(L,v){ const s=$('verSel'); if(!s) return;
+  const vs=await dsVer(L||await timLevelsJson(byRoot)), html=vs.map(n=>'<option'+(n===v?' selected':'')+'>'+n+'</option>').join('');
+  if(s.innerHTML!==html) s.innerHTML=html; s.value=v; s.style.display=''; }
+async function chonVer(v,L){
+  if(!byRoot||!VER_RE.test(v||'')) return;
+  if(!await dirQuyen(byRoot,true)){ warn('Chưa cấp quyền GHI cho thư mục gốc "'+byRoot.name+'".'); return; }
+  L=L||await timLevelsJson(byRoot); const h=L&&await _con(L,v);
+  if(!h){ warn('Không thấy Levels/'+v+' trong "'+byRoot.name+'".'); return; }
+  lvDir=h; dirNhan(); try{ await _idbSet(h); await _idbK('ver',v); }catch(e){}
+  await verNap(L,v);
+  const d=await timThuMucBytes(), K=d&&await layKhoa();
+  hint('📌 '+byRoot.name+' · '+v+' — 💾 Ghi đè = Levels/'+v+'/LevelN.json'
+    +(d&&K?' + 🔐 Resources/Levels/'+v+'/LevelN.bytes':d?' · ⚠ chưa có khoá EncryptionKeys.cs nên chưa ghi .bytes':' · ⚠ không thấy Resources/Levels/'+v)); }
+async function ganDuAn(r){                                  // r = thư mục vừa chọn ở 📌 · false = không phải gốc project ⇒ kiểu cũ
+  const L=await timLevelsJson(r); if(!L) return false;
+  byRoot=r; byTuChoi=false; byDuAn=true; try{ await _idbK('bytes',r); }catch(e){}
+  const vs=await dsVer(L); let v=null; try{ v=await _idbK('ver'); }catch(e){}
+  if(!vs.includes(v)) v=(typeof lgDirName!=='undefined'&&vs.includes(lgDirName))?lgDirName:vs[0];
+  await chonVer(v,L); return true; }
+/* 📁 Nạp thư mục ver_N khi đang ở chế độ gốc project ⇒ ô ver tự chuyển theo, khỏi ghi nhầm ver */
+function verTheoDuyet(n){ if(byDuAn&&lvDir&&VER_RE.test(n||'')&&n!==lvDir.name) chonVer(n).catch(e=>warn('Đổi ver hỏng: '+((e&&e.message)||e))); }
+if($('verSel')){ const s=$('verSel');
+  s.onchange=()=>{ if(byDuAn) chonVer(s.value).catch(e=>warn('Đổi ver hỏng: '+((e&&e.message)||e))); };
+  s.onfocus=()=>{ if(byDuAn&&byRoot&&lvDir) byRoot.queryPermission({mode:'readwrite'}).then(p=>{ if(p==='granted') return verNap(null,lvDir.name); }).catch(()=>{}); }; }
 if(DIR_OK()) _idbK('bytes').then(h=>{ if(h) byRoot=h; }).catch(()=>{});
+if(DIR_OK()) _idbK('ver').then(v=>{ if(v&&VER_RE.test(v)){ byDuAn=true; const s=$('verSel'); if(s){ s.innerHTML='<option>'+v+'</option>'; s.style.display=''; } } }).catch(()=>{});
 // mở lại tool: lấy lại thư mục đã gắn lần trước (quyền thì đợi cú bấm đầu tiên mới xin lại được)
 if(DIR_OK()) _idbGet().then(h=>{ if(h){ lvDir=h; dirNhan(); } }).catch(()=>{});
 $('btnExport').onclick=async(ev)=>{pullMeta();if(!tables.some(t=>t.objs.length)){warn('Chưa có khối nào.');return;}
@@ -5781,6 +5825,7 @@ $('btnExport').onclick=async(ev)=>{pullMeta();if(!tables.some(t=>t.objs.length))
   const ten='Level'+(+fIndex.value)+'.json', txt=JSON.stringify(buildJSON());
   const taiThuong=!!(ev&&ev.shiftKey);                     // Shift+bấm = LUÔN tải file thường (QOL-2909)
   if(lvDir&&!taiThuong){ try{
+      if(byDuAn&&byRoot) await dirQuyen(byRoot,true);   // gốc project: xin quyền 1 lần cho cả json + bytes
       if(!await dirHoiDe(ten)){ hint('Đã huỷ — chưa ghi '+ten+'. (Shift+bấm Tải về = tải file thường)'); return; }
       if(await dirGhi(ten,txt)){ dirDaGhi.add(ten); lvSrcName=ten; const kb=await ghiBytes(ten,txt);
         hint('💾 Đã GHI ĐÈ '+ten+' trong 📌 '+lvDir.name+(kb?' · '+kb:'')+' — khỏi chép tay.');
@@ -6014,7 +6059,7 @@ $('dirIn').onchange=e=>{
   folderFiles=picked.map(f=>({file:f,name:f.name,idx:lvIdxOf(f.name)}));
   $('lvSel').innerHTML=folderFiles.map((it,i)=>'<option value="'+i+'">'+(i+1)+'. '+escHTML(it.name)+'</option>').join('');
   const root=(picked[0].webkitRelativePath||'').split('/')[0];
-  lgDirName=root||''; lgScanTok++; lgClose();                           // QOL2 C2: thư mục mới ⇒ dừng quét cũ, đóng bảng
+  lgDirName=root||''; lgScanTok++; lgClose(); if(typeof verTheoDuyet==='function') verTheoDuyet(root);                           // QOL2 C2: thư mục mới ⇒ dừng quét cũ, đóng bảng
   folderPos=-1; folderDirty=false; renderFolderNav();
   hint('Đã nạp thư mục'+(root?' "'+root+'"':'')+' — '+folderFiles.length+' file .json.');
   folderShow(0);
