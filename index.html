@@ -2718,7 +2718,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 14/10 17:26', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 14/10 17:54', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -5815,6 +5815,27 @@ function verTheoDuyet(n){ if(byDuAn&&lvDir&&VER_RE.test(n||'')&&n!==lvDir.name) 
 if($('verSel')){ const s=$('verSel');
   s.onchange=()=>{ if(byDuAn) chonVer(s.value).catch(e=>warn('Đổi ver hỏng: '+((e&&e.message)||e))); };
   s.onfocus=()=>{ if(byDuAn&&byRoot&&lvDir) byRoot.queryPermission({mode:'readwrite'}).then(p=>{ if(p==='granted') return verNap(null,lvDir.name); }).catch(()=>{}); }; }
+/* BYTES-1410d: bảng thư viện (🗑 xoá / ✏️ đổi số / ⧉ nhân bản / ＋ tạo mới) ⇒ .bytes đi theo json trong Resources/Levels/<ver>.
+   Đổi số: mã hoá LẠI (levelIndex đổi) + .bytes.meta chuyển tên ⇒ GIỮ GUID. Chỉ chạy khi đã có gốc bytes — không mở hộp chọn
+   ở đây; chưa gắn gốc project thì im lặng như cũ. Trả về chuỗi nối vào hint. */
+async function lgBytes(mode,cu,moi,text){
+  const tb=n=>n.replace(/\.json$/i,'.bytes');
+  if(!byRoot||!lvDir) return '';
+  try{
+    if(!await dirQuyen(byRoot,true)) return ' · ⚠ .bytes chưa đi theo (chưa cấp quyền "'+byRoot.name+'")';
+    const d=await timThuMucBytes(); if(!d) return ' · ⚠ không thấy Resources/Levels/'+lvDir.name+' — .bytes chưa đi theo';
+    const xoa=async n=>{ try{ await d.removeEntry(n); return true; }catch(_){ return false; } };
+    if(mode==='del'){ const co=await xoa(tb(cu)); await xoa(tb(cu)+'.meta'); return co?' · 🔐 xoá kèm '+tb(cu):''; }
+    const K=await layKhoa(); if(!K) return ' · ⚠ chưa có khoá EncryptionKeys.cs — '+tb(moi)+' chưa ghi';
+    const fh=await d.getFileHandle(tb(moi),{create:true}), w=await fh.createWritable();
+    await w.write(await maHoaLevel(text,K)); await w.close();
+    if(mode==='ren'){
+      try{ const t=await (await (await d.getFileHandle(tb(cu)+'.meta')).getFile()).text();     // .meta đi theo ⇒ GIỮ GUID
+        const w2=await (await d.getFileHandle(tb(moi)+'.meta',{create:true})).createWritable(); await w2.write(t); await w2.close();
+        await xoa(tb(cu)+'.meta'); }catch(_){}
+      const co=await xoa(tb(cu)); return ' · 🔐 '+(co?tb(cu)+' → ':'+ ')+tb(moi)+(co?' (.meta đi theo)':''); }
+    return ' · 🔐 + '+tb(moi);
+  }catch(e){ return ' · ⚠ .bytes lỗi: '+((e&&e.message)||e); } }
 if(DIR_OK()) _idbK('bytes').then(h=>{ if(h) byRoot=h; }).catch(()=>{});
 if(DIR_OK()) _idbK('ver').then(v=>{ if(v&&VER_RE.test(v)){ byDuAn=true; const s=$('verSel'); if(s){ s.innerHTML='<option>'+v+'</option>'; s.style.display=''; } } }).catch(()=>{});
 // mở lại tool: lấy lại thư mục đã gắn lần trước (quyền thì đợi cú bấm đầu tiên mới xin lại được)
@@ -7958,7 +7979,7 @@ async function lgCommit(){
           folderShow(k); } }
       else if(E.i<folderPos)folderPos--;
       renderFolderNav(); lgRender();
-      hint('🗑 Đã xoá '+it.name+' (kèm .meta)'+(it.idx!=null?' — Level '+it.idx+' giờ là chỗ THIẾU trong thư mục.':'.')); return; }
+      const kb=await lgBytes('del',it.name); hint('🗑 Đã xoá '+it.name+' (kèm .meta)'+kb+(it.idx!=null?' — Level '+it.idx+' giờ là chỗ THIẾU trong thư mục.':'.')); return; }
     const n=chk.n, name='Level'+n+'.json';
     if(await lgExists(name))return fail(name+' đã có trong thư mục — không ghi đè.');
     const text=lgSetIndexText(await lgRead(it),n), h=await lgWrite(name,text);
@@ -7972,11 +7993,11 @@ async function lgCommit(){
       lgSort(); folderPos=openIt?folderFiles.indexOf(openIt):-1; lgSelRebuild();
       if(wasOpen){ fIndex.value=n; lvSrcName=name; }
       lgEdit=null; lgBusy=false; renderFolderNav(); lgRender();
-      hint('✏️ Đã đổi '+old+' → '+name+' (.meta đi theo, giữ GUID)'+(oldIdx!=null?' — Level '+oldIdx+' giờ là chỗ THIẾU.':'.')); return; }
+      const kb=await lgBytes('ren',old,name,text); hint('✏️ Đã đổi '+old+' → '+name+' (.meta đi theo, giữ GUID)'+kb+(oldIdx!=null?' — Level '+oldIdx+' giờ là chỗ THIẾU.':'.')); return; }
     const nit={name,handle:h,idx:n,diff:it.diff}; folderFiles.push(nit); lgSort();
     folderPos=openIt?folderFiles.indexOf(openIt):-1; lgSelRebuild();
     lgEdit=null; lgBusy=false; renderFolderNav(); lgClose(); folderShow(folderFiles.indexOf(nit));
-    hint('⧉ Đã nhân bản '+it.name+' → '+name+'.');
+    const kb=await lgBytes('dup',it.name,name,text); hint('⧉ Đã nhân bản '+it.name+' → '+name+kb+'.');
   }catch(err){ fail('Không thao tác được: '+(err&&err.message||err)); }
   finally{ lgBusy=false; } }
 async function lgNewLevel(){
@@ -7987,11 +8008,11 @@ async function lgNewLevel(){
     if(!(await lgPerm()))return;
     if(await lgExists(name)){ warn(name+' đã có trong thư mục — không ghi đè.'); return; }
     loadLevel({levelIndex:n,moveCount:20,difficulty:0,stages:[{objects:[],tables:[],blockers:[]}]},n);   // 1 bàn trống, move 20, Dễ
-    const h=await lgWrite(name,JSON.stringify(buildJSON()));
+    const txtMoi=JSON.stringify(buildJSON()), h=await lgWrite(name,txtMoi);
     const nit={name,handle:h,idx:n,diff:0}; folderFiles.push(nit); lgSort(); lgSelRebuild();
     folderPos=folderFiles.indexOf(nit); folderDirty=false; lvSrcName=name;
     lgClose(); renderFolderNav(); updateStats();
-    hint('＋ Đã tạo '+name+' (trắng) trong thư mục và mở ra — vẽ xong bấm 💾 Ghi đè.');
+    const kb=await lgBytes('new',null,name,txtMoi); hint('＋ Đã tạo '+name+' (trắng)'+kb+' trong thư mục và mở ra — vẽ xong bấm 💾 Ghi đè.');
   }catch(err){ warn('Không tạo được '+name+': '+(err&&err.message||err)); }
   finally{ lgBusy=false; } }
 (function(){ const _rfn=renderFolderNav;                        // bảng đang mở thì vẽ lại theo (● chưa lưu, level đang mở)
