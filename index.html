@@ -605,6 +605,7 @@
       <!-- 📌 gắn thư mục levels: gắn rồi thì "Tải về" đổi thành "Ghi đè", ghi thẳng LevelN.json vào đó -->
       <button class="tb" id="btnDir" title="📌 Gắn thư mục GỐC project Unity rồi chọn ver ở ô bên cạnh (json + .bytes tự ghi) — hoặc thư mục levels (vd ...\levels\prod-13\) — gắn rồi thì &quot;Tải về&quot; ghi đè thẳng LevelN.json, khỏi chép tay (Chrome/Edge)">📌</button>
       <select id="verSel" style="display:none;max-width:84px" title="ver đang ghi: 💾 Ghi đè = Levels/&lt;ver&gt;/LevelN.json + Resources/Levels/&lt;ver&gt;/LevelN.bytes · đọc thẳng thư mục nên ver mới tự hiện · 📁 Nạp thư mục ver_N thì tự chuyển theo"></select>
+      <button class="tb" id="btnNapGhim" style="display:none" title="🔄 Nạp nhanh thư mục 📌 đang ghi đè vào thanh duyệt (đọc lại từ ổ — level mới tự có)">🔄</button>
       <button class="tb primary" id="btnExport" title="Tải Level{N}.json về máy — chép vào ...\levels\prod-13\">⬇️ Tải về</button>
       <button class="tb" id="btnCopy" title="📋 Copy toàn bộ JSON của level vào clipboard">📋</button>
       <label class="tb file tbig" title="📂 Nạp 1 file Level*.json">📂<span class="tblab">Nạp file</span><input type="file" id="fileIn" accept=".json,application/json" style="display:none"></label>
@@ -2718,7 +2719,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 14/10 17:54', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 14/10 18:11', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -5636,6 +5637,7 @@ async function dirQuyen(h,hoi){ if(!h) return false; if(!h.queryPermission) retu
   return hoi ? (await h.requestPermission(o))==='granted' : false; }
 function dirNhan(){ const b=$('btnDir'), x=$('btnExport');
   if(!b) return;
+  { const n=$('btnNapGhim'); if(n){ n.style.display=lvDir?'':'none'; if(lvDir) n.title='🔄 Nạp nhanh thư mục 📌 "'+lvDir.name+'" vào thanh duyệt (đọc lại từ ổ — level mới tự có)'; } }
   const on=!!lvDir;
   b.classList.toggle('primary',on);
   b.textContent = '📌';   // icon trần: thanh 2 hết chỗ (chữ làm tràn 108px ở 1280) — tên thư mục nằm ở title + nút 💾
@@ -5658,6 +5660,7 @@ $('btnDir').onclick=async(ev)=>{
     try{ await _idbSet(h); }catch(e){}              // không cất được thì phiên này vẫn chạy, chỉ là mở lại phải gắn lần nữa
     hint('📌 Đã gắn "'+h.name+'" — từ giờ bấm 💾 Ghi đè là ghi thẳng LevelN.json vào đó.');
     await byGanTheo(h);                              // BYTES-1410b: gắn luôn thư mục bytes theo tên thư mục json
+    await napTuGhim(h);                              // BYTES-1410e: tự nạp thư mục 📌 vào thanh duyệt
   }catch(e){ if(e&&e.name!=='AbortError') warn('Không gắn được thư mục: '+(e.message||e)); }
 };
 /* Ghi 1 file vào thư mục đã gắn. createWritable() mở ra là CẮT SẠCH nội dung cũ ⇒ ghi đè thật,
@@ -5794,7 +5797,7 @@ function verAn(){ const s=$('verSel'); if(s){ s.style.display='none'; s.innerHTM
 async function verNap(L,v){ const s=$('verSel'); if(!s) return;
   const vs=await dsVer(L||await timLevelsJson(byRoot)), html=vs.map(n=>'<option'+(n===v?' selected':'')+'>'+n+'</option>').join('');
   if(s.innerHTML!==html) s.innerHTML=html; s.value=v; s.style.display=''; }
-async function chonVer(v,L){
+async function chonVer(v,L,nap=true){
   if(!byRoot||!VER_RE.test(v||'')) return;
   if(!await dirQuyen(byRoot,true)){ warn('Chưa cấp quyền GHI cho thư mục gốc "'+byRoot.name+'".'); return; }
   L=L||await timLevelsJson(byRoot); const h=L&&await _con(L,v);
@@ -5803,7 +5806,8 @@ async function chonVer(v,L){
   await verNap(L,v);
   const d=await timThuMucBytes(), K=d&&await layKhoa();
   hint('📌 '+byRoot.name+' · '+v+' — 💾 Ghi đè = Levels/'+v+'/LevelN.json'
-    +(d&&K?' + 🔐 Resources/Levels/'+v+'/LevelN.bytes':d?' · ⚠ chưa có khoá EncryptionKeys.cs nên chưa ghi .bytes':' · ⚠ không thấy Resources/Levels/'+v)); }
+    +(d&&K?' + 🔐 Resources/Levels/'+v+'/LevelN.bytes':d?' · ⚠ chưa có khoá EncryptionKeys.cs nên chưa ghi .bytes':' · ⚠ không thấy Resources/Levels/'+v));
+  if(nap) await napTuGhim(h); }
 async function ganDuAn(r){                                  // r = thư mục vừa chọn ở 📌 · false = không phải gốc project ⇒ kiểu cũ
   const L=await timLevelsJson(r); if(!L) return false;
   byRoot=r; byTuChoi=false; byDuAn=true; try{ await _idbK('bytes',r); }catch(e){}
@@ -5811,7 +5815,7 @@ async function ganDuAn(r){                                  // r = thư mục v�
   if(!vs.includes(v)) v=(typeof lgDirName!=='undefined'&&vs.includes(lgDirName))?lgDirName:vs[0];
   await chonVer(v,L); return true; }
 /* 📁 Nạp thư mục ver_N khi đang ở chế độ gốc project ⇒ ô ver tự chuyển theo, khỏi ghi nhầm ver */
-function verTheoDuyet(n){ if(byDuAn&&lvDir&&VER_RE.test(n||'')&&n!==lvDir.name) chonVer(n).catch(e=>warn('Đổi ver hỏng: '+((e&&e.message)||e))); }
+function verTheoDuyet(n){ if(byDuAn&&lvDir&&VER_RE.test(n||'')&&n!==lvDir.name) chonVer(n,null,false).catch(e=>warn('Đổi ver hỏng: '+((e&&e.message)||e))); }
 if($('verSel')){ const s=$('verSel');
   s.onchange=()=>{ if(byDuAn) chonVer(s.value).catch(e=>warn('Đổi ver hỏng: '+((e&&e.message)||e))); };
   s.onfocus=()=>{ if(byDuAn&&byRoot&&lvDir) byRoot.queryPermission({mode:'readwrite'}).then(p=>{ if(p==='granted') return verNap(null,lvDir.name); }).catch(()=>{}); }; }
@@ -5836,6 +5840,27 @@ async function lgBytes(mode,cu,moi,text){
       const co=await xoa(tb(cu)); return ' · 🔐 '+(co?tb(cu)+' → ':'+ ')+tb(moi)+(co?' (.meta đi theo)':''); }
     return ' · 🔐 + '+tb(moi);
   }catch(e){ return ' · ⚠ .bytes lỗi: '+((e&&e.message)||e); } }
+/* BYTES-1410e: gắn 📌 / chọn ver ⇒ TỰ NẠP thư mục json đó vào thanh duyệt (như 📁 Nạp thư mục nhưng đọc qua TAY CẦM ⇒ luôn
+   bản mới nhất trên ổ; lgDirName = tên 📌 ⇒ bảng thư viện sửa được ngay). Nút 🔄 cạnh 📌 = nạp nhanh lại (sau F5 / có level mới).
+   Level đang mở có sửa chưa lưu ⇒ hỏi trước; Huỷ = không nạp (📌 / ver vẫn đổi như đã chọn). */
+const coSuaChuaLuu=()=>folderDirty&&(folderFiles.length>0||tables.some(t=>t.objs.length));
+async function napTuGhim(h){
+  if(!h||!h.entries) return false;
+  if(coSuaChuaLuu()&&!confirm('Level đang mở có sửa CHƯA LƯU.\nNạp thư mục 📌 "'+h.name+'" sẽ MẤT thay đổi. Tiếp tục?')) return false;
+  if(!await dirQuyen(h,true)){ warn('Chưa cấp quyền cho thư mục 📌 "'+h.name+'".'); return false; }
+  const ds=[]; for await(const [n,f] of h.entries()) if(f.kind==='file'&&/\.json$/i.test(n)) ds.push({name:n,handle:f,idx:lvIdxOf(n)});
+  const msg=$('hint').textContent;
+  if(!ds.length){ hint(msg+' · 📂 "'+h.name+'" chưa có file .json nào.'); return false; }
+  const giu=lvSrcName;
+  folderFiles=ds; lgSort(); lgSelRebuild();
+  lgDirName=h.name; lgScanTok++; lgClose();
+  folderPos=-1; folderDirty=false; renderFolderNav();
+  const k=Math.max(0,folderFiles.findIndex(it=>it.name===giu));
+  folderShow(k);
+  for(let i=0;i<200&&folderBusy;i++) await new Promise(r=>setTimeout(r,25));
+  hint(msg+' · 📂 đã nạp '+folderFiles.length+' level của "'+h.name+'"'+(folderPos>=0?' — đang mở '+folderFiles[folderPos].name:''));
+  return true; }
+if($('btnNapGhim')) $('btnNapGhim').onclick=()=>{ if(lvDir) napTuGhim(lvDir).catch(e=>warn('Nạp thư mục 📌 hỏng: '+((e&&e.message)||e))); };
 if(DIR_OK()) _idbK('bytes').then(h=>{ if(h) byRoot=h; }).catch(()=>{});
 if(DIR_OK()) _idbK('ver').then(v=>{ if(v&&VER_RE.test(v)){ byDuAn=true; const s=$('verSel'); if(s){ s.innerHTML='<option>'+v+'</option>'; s.style.display=''; } } }).catch(()=>{});
 // mở lại tool: lấy lại thư mục đã gắn lần trước (quyền thì đợi cú bấm đầu tiên mới xin lại được)
