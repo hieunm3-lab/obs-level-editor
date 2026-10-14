@@ -2717,7 +2717,7 @@ const GT_BASE    = {};        // tiêu đề nhóm gốc, chụp lần đầu ch
 const CHUM_PAL=[]; for(let i=100;i<=121;i++)CHUM_PAL.push(i);
 
 const GAMES={
-  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 08/10 14:26', crate:true },
+  obs:{ title:'🧱 Block Shoot', sub:'Level Editor 2D · prod-13 · art 14/10 16:45', crate:true },
   /* ⛰️ VALLEY SMASH — bộ 14 id do USER CHỐT ngày 08/09/2026 (đúng bằng bộ mà
      1000 level ver_1 đang dùng thật). Ngoài 14 id này ra KHÔNG có gì khác:
      không chum, không TNT/Magma/Oil drum/Black Stone, không hố đen, không hòm,
@@ -5642,7 +5642,9 @@ function dirNhan(){ const b=$('btnDir'), x=$('btnExport');
                : '📌 Gắn thư mục levels (vd ...\\levels\\prod-13\\) — gắn rồi thì "Tải về" ghi đè thẳng LevelN.json, khỏi chép tay (Chrome/Edge)';
   if(x){ x.textContent = on ? '💾 Ghi đè' : '⬇️ Tải về';
     x.title = on ? 'GHI ĐÈ Level{N}.json thẳng vào 📌 '+lvDir.name+' · Shift+bấm = tải file thường' : 'Tải Level{N}.json về máy — chép vào ...\\levels\\prod-13\\'; } }
-$('btnDir').onclick=async()=>{
+$('btnDir').onclick=async(ev)=>{
+  if(ev&&ev.altKey){ const t=byRoot&&byRoot.name; byRoot=null; byTuChoi=false; byKhoa=null; try{ await _idbK('bytes',null); await _idbK('khoa',null); }catch(e){}
+    hint(t?'🔐 Đã gỡ thư mục gốc bytes "'+t+'" — lần 💾 Ghi đè tới sẽ hỏi chọn lại.':'🔐 Chưa gắn thư mục gốc bytes — lần 💾 Ghi đè tới sẽ hỏi.'); return; }
   if(!DIR_OK()){ warn('Trình duyệt này không ghi thẳng vào thư mục được — dùng Chrome hoặc Edge.'); return; }
   if(lvDir){ const ten=lvDir.name; lvDir=null; dirNhan();
     try{ await _idbSet(null); }catch(e){}
@@ -5653,6 +5655,7 @@ $('btnDir').onclick=async()=>{
     lvDir=h; dirNhan();
     try{ await _idbSet(h); }catch(e){}              // không cất được thì phiên này vẫn chạy, chỉ là mở lại phải gắn lần nữa
     hint('📌 Đã gắn "'+h.name+'" — từ giờ bấm 💾 Ghi đè là ghi thẳng LevelN.json vào đó.');
+    await byGanTheo(h);                              // BYTES-1410b: gắn luôn thư mục bytes theo tên thư mục json
   }catch(e){ if(e&&e.name!=='AbortError') warn('Không gắn được thư mục: '+(e.message||e)); }
 };
 /* Ghi 1 file vào thư mục đã gắn. createWritable() mở ra là CẮT SẠCH nội dung cũ ⇒ ghi đè thật,
@@ -5684,6 +5687,92 @@ async function dirHoiDe(ten){
   let co=false; try{ await lvDir.getFileHandle(ten); co=true; }catch(e){ co=false; }
   if(!co)return true;
   return confirm(ten+' ĐÃ CÓ trong 📌 '+lvDir.name+' mà level đang mở '+(lvSrcName?('được nạp từ '+lvSrcName):'không nạp từ file này (dán JSON / level mới)')+'.\n\nGHI ĐÈ lên '+ten+'?'); }
+/* 🔐 BYTES-1310: GHI ĐÈ LevelN.json xong thì TỰ mã hoá LevelN.bytes vào thư mục Resources tương ứng
+   (…/LevelDatas/Resources/Levels/<tên thư mục 📌>/) — khỏi chạy "Encrypt Level Jsons" (nó mã hoá lại CẢ 11k file
+   rồi Refresh ⇒ Unity import lại hết, rất lag). Mã hoá y hệt LevelDataCodec.EncryptJson:
+   UTF-8 → deflate raw → AES-256-CBC (PKCS7). "⬇️ Tải về" thường / Shift+bấm: GIỮ NGUYÊN như cũ, không đụng bytes.
+   · Thư mục gốc để dò bytes gắn MỘT LẦN (hỏi ở lần Ghi đè đầu tiên): chọn gốc project block-shoot, Assets, LevelDatas,
+     Resources/Levels hoặc chính thư mục bytes — tool tự dò; không bao giờ ghi nhầm vào thư mục json (isSameEntry).
+   · 🔑 KHOÁ AES KHÔNG nằm trong tool (bản Pages là PUBLIC): đọc lúc chạy từ Assets/_BaseCode/Modules/Encrypting/
+     EncryptionKeys.cs của project Unity trên máy (dò từ thư mục gốc bytes; không thấy thì hỏi chọn file đó MỘT LẦN —
+     chỉ nhớ handle file trong IndexedDB của máy, KHÔNG lưu khoá).
+   · Alt+bấm 📌 = gỡ thư mục gốc bytes + file khoá (để gắn lại). */
+let byRoot=null, byTuChoi=false, byKhoa=null;   // byTuChoi: phiên này đã bấm Huỷ ⇒ không hỏi lại mỗi lần ghi
+function _idbK(k,v){ return _idb().then(db=>new Promise((ok,no)=>{ const t=db.transaction('h',v===undefined?'readonly':'readwrite'),st=t.objectStore('h');
+  let q=null; if(v===undefined) q=st.get(k); else if(v) st.put(v,k); else st.delete(k);
+  t.oncomplete=()=>ok(q?q.result||null:null); t.onerror=()=>no(t.error); })); }
+async function maHoaLevel(txt,K){
+  const raw=await new Response(new Blob([new TextEncoder().encode(txt)]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer();
+  const te=new TextEncoder(), key=await crypto.subtle.importKey('raw',te.encode(K.k),{name:'AES-CBC'},false,['encrypt']);
+  return new Uint8Array(await crypto.subtle.encrypt({name:'AES-CBC',iv:te.encode(K.iv)},key,raw)); }
+async function _con(h,ten){ try{ return await h.getDirectoryHandle(ten); }catch(e){ return null; } }
+function khoaTuCs(s){ const k=(s.match(/AESKey\s*=\s*"([^"]*)"/)||[])[1], iv=(s.match(/AESIV\s*=\s*"([^"]*)"/)||[])[1];
+  return (k&&iv&&k.length===32&&iv.length===16)?{k,iv}:null; }
+async function _docKhoa(fh){ try{ return khoaTuCs(await (await fh.getFile()).text()); }catch(e){ return null; } }
+async function layKhoa(){
+  if(byKhoa) return byKhoa;
+  for(const p of [['Assets','_BaseCode','Modules','Encrypting'],['_BaseCode','Modules','Encrypting'],['Modules','Encrypting'],['Encrypting'],[]]){
+    let h=byRoot; for(const seg of p){ h=await _con(h,seg); if(!h) break; } if(!h) continue;
+    let f=null; try{ f=await h.getFileHandle('EncryptionKeys.cs'); }catch(e){}
+    if(f&&(byKhoa=await _docKhoa(f))) return byKhoa; }
+  let f=null; try{ f=await _idbK('khoa'); }catch(e){}
+  if(f&&f.queryPermission){ const o={mode:'read'};
+    if(await f.queryPermission(o)!=='granted'&&await f.requestPermission(o)!=='granted') f=null; }
+  if(f&&(byKhoa=await _docKhoa(f))) return byKhoa;
+  if(!window.showOpenFilePicker||!confirm('🔑 Không thấy EncryptionKeys.cs trong "'+byRoot.name+'".\n\nChọn MỘT LẦN file Assets/_BaseCode/Modules/Encrypting/EncryptionKeys.cs trong project Unity (khoá chỉ đọc trên máy, không nằm trong tool).')) return null;
+  [f]=await window.showOpenFilePicker({id:'obsKhoa',startIn:byRoot,types:[{description:'EncryptionKeys.cs',accept:{'text/plain':['.cs']}}]});
+  if(!(byKhoa=await _docKhoa(f))) return null;
+  try{ await _idbK('khoa',f); }catch(e){}
+  return byKhoa; }
+async function timThuMucBytes(){
+  if(!byRoot||!lvDir) return null; const v=lvDir.name;
+  const P=[[],[v],['Levels',v],['Resources','Levels',v],['LevelDatas','Resources','Levels',v],
+    ['_BaseCode','Modules','Gameplay','Configs','LevelDatas','Resources','Levels',v],
+    ['Assets','_BaseCode','Modules','Gameplay','Configs','LevelDatas','Resources','Levels',v]];
+  for(const p of P){ let h=byRoot; for(const seg of p){ h=await _con(h,seg); if(!h) break; }
+    if(!h||(p.length===0&&h.name!==v)) continue;
+    if(lvDir.isSameEntry&&await lvDir.isSameEntry(h)) continue;
+    return h; }
+  return null; }
+async function ghiBytes(ten,txt){
+  const tb=ten.replace(/\.json$/i,'.bytes');
+  try{
+    if(!byRoot){ if(byTuChoi) return '';
+      if(!confirm('🔐 Tự mã hoá '+tb+' vào Resources/Levels/'+lvDir.name+' mỗi lần Ghi đè?\n\nChọn MỘT LẦN thư mục GỐC project Unity (block-shoot) — tool tự tìm đúng thư mục bytes và file khoá EncryptionKeys.cs.\nHuỷ = chỉ ghi json như cũ (phiên này không hỏi lại).')){ byTuChoi=true; return ''; }
+      byRoot=await window.showDirectoryPicker({id:'obsBytes',mode:'readwrite',startIn:lvDir});
+      try{ await _idbK('bytes',byRoot); }catch(e){} }
+    if(!await dirQuyen(byRoot,true)) return '⚠ chưa cấp quyền ghi thư mục bytes "'+byRoot.name+'"';
+    const d=await timThuMucBytes();
+    if(!d) return '⚠ không thấy Resources/Levels/'+lvDir.name+' trong "'+byRoot.name+'" — Alt+bấm 📌 để chọn lại';
+    const K=await layKhoa();
+    if(!K) return '⚠ chưa có khoá (EncryptionKeys.cs) — chưa ghi '+tb+' · Alt+bấm 📌 rồi chọn gốc project block-shoot';
+    const b=await maHoaLevel(txt,K), fh=await d.getFileHandle(tb,{create:true}), w=await fh.createWritable();
+    await w.write(b); await w.close();
+    return '🔐 + '+tb+' (Resources/Levels/'+d.name+')';
+  }catch(e){
+    if(e&&e.name==='AbortError'){ byTuChoi=true; return ''; }
+    if(e&&e.name==='SecurityError') return '⚠ bấm 💾 Ghi đè lần nữa để chọn thư mục bytes';
+    return '⚠ bytes lỗi: '+((e&&e.message)||e); } }
+/* BYTES-1410b: gắn 📌 json xong ⇒ CHỦ ĐỘNG gắn thư mục bytes theo TÊN thư mục json (Resources/Levels/<tên 📌>).
+   Gốc project nhớ rồi ⇒ tự dò, không hỏi gì. Chưa có ⇒ mở chọn gốc project NGAY lúc gắn 📌 (1 lần duy nhất —
+   trình duyệt không cho đi ngược lên thư mục cha của 📌) + đọc trước file khoá. Lỗi/Huỷ ⇒ 💾 Ghi đè vẫn ghi json như cũ. */
+async function byGanTheo(h){
+  const dau='📌 Đã gắn "'+h.name+'"';
+  try{
+    if(!byRoot){ hint(dau+' · 🔐 chọn MỘT LẦN thư mục gốc project Unity (block-shoot) — từ đó .bytes tự ghi theo tên thư mục json');
+      byRoot=await window.showDirectoryPicker({id:'obsBytes',mode:'readwrite',startIn:h});
+      try{ await _idbK('bytes',byRoot); }catch(e){} }
+    byTuChoi=false;
+    if(!await dirQuyen(byRoot,true)){ hint(dau+' · ⚠ chưa cấp quyền ghi thư mục bytes — lần 💾 Ghi đè sẽ xin lại'); return; }
+    const d=await timThuMucBytes();
+    if(!d){ warn(dau+' · ⚠ không thấy Resources/Levels/'+h.name+' trong "'+byRoot.name+'" — 💾 Ghi đè chỉ ghi json (Alt+bấm 📌 để chọn lại gốc project)'); return; }
+    const K=await layKhoa();
+    hint(dau+' — 💾 Ghi đè = LevelN.json'+(K?' + 🔐 LevelN.bytes vào Resources/Levels/'+d.name:' · ⚠ chưa có khoá EncryptionKeys.cs nên chưa ghi .bytes'));
+  }catch(e){
+    if(e&&e.name==='AbortError'){ byTuChoi=true; hint(dau+' — chỉ ghi json (bỏ qua .bytes phiên này; gỡ rồi gắn lại 📌 để bật)'); return; }
+    if(e&&e.name==='SecurityError'){ hint(dau+' — lần 💾 Ghi đè đầu sẽ hỏi chọn gốc project cho .bytes'); return; }
+    warn(dau+' · ⚠ bytes: '+((e&&e.message)||e)); } }
+if(DIR_OK()) _idbK('bytes').then(h=>{ if(h) byRoot=h; }).catch(()=>{});
 // mở lại tool: lấy lại thư mục đã gắn lần trước (quyền thì đợi cú bấm đầu tiên mới xin lại được)
 if(DIR_OK()) _idbGet().then(h=>{ if(h){ lvDir=h; dirNhan(); } }).catch(()=>{});
 $('btnExport').onclick=async(ev)=>{pullMeta();if(!tables.some(t=>t.objs.length)){warn('Chưa có khối nào.');return;}
@@ -5693,8 +5782,9 @@ $('btnExport').onclick=async(ev)=>{pullMeta();if(!tables.some(t=>t.objs.length))
   const taiThuong=!!(ev&&ev.shiftKey);                     // Shift+bấm = LUÔN tải file thường (QOL-2909)
   if(lvDir&&!taiThuong){ try{
       if(!await dirHoiDe(ten)){ hint('Đã huỷ — chưa ghi '+ten+'. (Shift+bấm Tải về = tải file thường)'); return; }
-      if(await dirGhi(ten,txt)){ dirDaGhi.add(ten); lvSrcName=ten; hint('💾 Đã GHI ĐÈ '+ten+' trong 📌 '+lvDir.name+' — khỏi chép tay.');
-        toastLuu('Đã ghi đè '+ten,'📌 '+lvDir.name); folderSauGhi(ten,txt); folderDaLuu(); nukeW(); return; }
+      if(await dirGhi(ten,txt)){ dirDaGhi.add(ten); lvSrcName=ten; const kb=await ghiBytes(ten,txt);
+        hint('💾 Đã GHI ĐÈ '+ten+' trong 📌 '+lvDir.name+(kb?' · '+kb:'')+' — khỏi chép tay.');
+        toastLuu('Đã ghi đè '+ten+(kb&&kb[0]==='🔐'?' + .bytes':''),'📌 '+lvDir.name+(kb?' · '+kb:'')); folderSauGhi(ten,txt); folderDaLuu(); nukeW(); return; }
       warn('Thư mục 📌 '+lvDir.name+' chưa được cấp quyền ghi — tải file kiểu thường.');
     }catch(e){ warn('Ghi thẳng hỏng ('+((e&&e.message)||e)+') — tải file kiểu thường.'); } }
   const blob=new Blob([txt],{type:'application/json'});const a=document.createElement('a');
