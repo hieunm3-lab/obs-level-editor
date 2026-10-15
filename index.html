@@ -4057,7 +4057,8 @@ function boxFree(h0,h1,v0,v1,V,objs){
     if(hc-hs<h1-1e-6&&h0<hc+hs-1e-6&&vc-vs<v1-1e-6&&v0<vc+vs-1e-6)return false; }
   return true; }
 function commitBand(){ const V=VIEWS[view],h0=Math.min(band.h0,band.h1),h1=Math.max(band.h0,band.h1),v0=Math.min(band.v0,band.v1),v1=Math.max(band.v0,band.v1);
-  const hit=objects.filter(o=>{const oh=fC(o,V.h),ov=fC(o,V.v),sh=axSize(o,V.h)/2,sv=axSize(o,V.v)/2; return oh+sh>=h0&&oh-sh<=h1&&ov+sv>=v0&&ov-sv<=v1;});
+  // BAND-1510: quét vùng chỉ lấy LỚP SÂU đang mở; tick "cả sâu Z" (mặt Trước) mới lấy xuyên mọi lớp
+  const hit=(zAll()?objects:layerObjs()).filter(o=>{const oh=fC(o,V.h),ov=fC(o,V.v),sh=axSize(o,V.h)/2,sv=axSize(o,V.v)/2; return oh+sh>=h0&&oh-sh<=h1&&ov+sv>=v0&&ov-sv<=v1;});
   setSel(band.add?Array.from(new Set(selObjs.concat(hit))):hit);
   if(selObjs.length){$('selBox').style.display='block';try{$('selBox').scrollIntoView({block:'nearest'});}catch(e){}}
   hint(selObjs.length?selObjs.length+' khối được chọn — kéo dời cả nhóm · x/y/z xoay · Del xoá.':'Không có khối trong vùng.'); }
