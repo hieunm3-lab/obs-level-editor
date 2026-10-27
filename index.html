@@ -5582,7 +5582,12 @@ function buildStage(tbls,blks){
     const zc = rotating ? dkZ : 0;                    // bàn xoay: pivot = tâm deck ⇒ phải căn cả Z
     // bù lại table.pos đúng phần deck ĐÃ DỜI KHỎI MỐC → khối không xê dịch trong thế giới.
     // Chưa dời (deck = mốc) ⇒ bù 0 ⇒ y hệt hành vi cũ / y hệt file gốc.
-    const tposx = +((+t.pos.x)+(free?(dkX-(+t.deckX0||0)):0)).toFixed(4);
+    // DECKX-2710: bàn TĨNH — editor vẽ nền bàn tại pos.x+dkX và khối tại pos.x+px, nên table.pos.x
+    //   PHẢI = pos.x+dkX thì game (nền tại table.pos.x, khối tại table.pos.x+local) mới y hệt cái đang vẽ.
+    //   Cách cũ trừ thêm deckX0 (tự do) / không cộng tâm cụm (tự căn giữa) ⇒ cả bè trôi một đoạn bằng tâm cụm
+    //   khối (L90 ver_27 S2: bè 2 trôi +1,45). Nạp file lệch tâm rồi xuất ngay: dkX=0 ⇒ y hệt file cũ.
+    const tposx = rotating ? +((+t.pos.x)+(free?(dkX-(+t.deckX0||0)):0)).toFixed(4)
+                           : +((+t.pos.x)+dkX).toFixed(4);
     const tposz = +((+t.pos.z)+((free&&rotating)?(dkZ-(+t.deckZ0||0)):0)).toFixed(4);
     for(const o of t.objs){ const q=getRot(o);
       const pos={x:+(o.px-xc).toFixed(4),y:+o.py.toFixed(4),z:+(o.pz-zc).toFixed(4)};
